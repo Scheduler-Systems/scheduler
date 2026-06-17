@@ -35,7 +35,7 @@ class MergeGuardTests(unittest.TestCase):
         with mock.patch.object(go, "request_approval", return_value="reject"), \
              mock.patch.object(go, "is_approved", return_value=False):
             with self.assertRaises(go.GitHubWriteBlocked):
-                ops.merge_pr("Scheduler-Systems/qa-agent-platform", 1)
+                ops.merge_pr("gal-run/agent-workforce", 1)
 
 
 class ReportOnlyTests(unittest.TestCase):

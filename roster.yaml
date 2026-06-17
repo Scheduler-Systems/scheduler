@@ -16,7 +16,9 @@ policy:
   global_kill_switch_env: AGENTS_DISABLED  # set this env var truthy to stop ALL agents immediately
 
   # Hiring source = the open roles from the workspace audit (the "job board").
-  job_board: docs/audit/catalog.json    # 81 processes = unstaffed roles to hire into
+  # NOTE: the catalog is not shipped in the OSS tree — supply your own at this path (or via
+  # the JOB_BOARD_PATH env var) to populate open roles; absent it, the board is empty.
+  job_board: docs/audit/catalog.json    # ~81 processes = unstaffed roles to hire into
 
   # Hire (deploy a new agent) and fire (decommission one) are CONSEQUENTIAL:
   # the HR-manager PROPOSES, a human APPROVES. No silent hiring/firing.

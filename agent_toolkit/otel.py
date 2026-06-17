@@ -41,12 +41,12 @@ def get_tracer():
 
         provider = TracerProvider(
             resource=Resource.create(
-                {"service.name": os.environ.get("OTEL_SERVICE_NAME", "qa-agent-platform")}
+                {"service.name": os.environ.get("OTEL_SERVICE_NAME", "agent-workforce")}
             )
         )
         provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
         trace.set_tracer_provider(provider)
-        _TRACER = trace.get_tracer("qa-agent-platform")
+        _TRACER = trace.get_tracer("agent-workforce")
     except Exception:
         _TRACER = _NoopTracer()  # fail-safe
     return _TRACER

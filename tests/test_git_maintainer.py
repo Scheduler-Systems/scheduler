@@ -12,7 +12,7 @@ from agent_toolkit import github_ops as go
 from agent_toolkit.policy import ModelWorkBlocked
 from graphs.qa import git_maintainer as gm
 
-REPO = "Scheduler-Systems/qa-agent-platform"
+REPO = "gal-run/agent-workforce"
 
 
 def _fake_client(default_branch="main", sha="deadbeefcafe", merged_ats=()):

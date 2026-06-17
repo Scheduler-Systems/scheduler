@@ -30,7 +30,7 @@ REPO_ROLE = {
     "Scheduler-Systems/scheduler-web": "web_automation_engineer",
     "Scheduler-Systems/scheduler-android": "android_automation_engineer",
     "Scheduler-Systems/scheduler-ios": "ios_automation_engineer",
-    "Scheduler-Systems/qa-agent-platform": "qa_lead_aggregator",
+    "gal-run/agent-workforce": "qa_lead_aggregator",
     "Scheduler-Systems/workspace-governance": "qa_lead_aggregator",
 }
 

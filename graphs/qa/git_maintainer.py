@@ -23,7 +23,7 @@ from agent_toolkit import span, governance_capture, assert_not_model_work
 from agent_toolkit.github_ops import GitHubOps, ALLOWED_REPOS, _PROTECTED_BRANCHES
 
 # The maintainer's own home — where the human-facing digest is filed.
-DIGEST_REPO = "Scheduler-Systems/qa-agent-platform"
+DIGEST_REPO = "gal-run/agent-workforce"
 
 
 class State(TypedDict, total=False):

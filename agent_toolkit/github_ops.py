@@ -45,7 +45,7 @@ ALLOWED_REPOS: frozenset[str] = frozenset(
         "Scheduler-Systems/scheduler-ios",
         "Scheduler-Systems/scheduler-android",
         # No-prod-deploy repos — safe targets for the first proof + agent self-maintenance
-        "Scheduler-Systems/qa-agent-platform",
+        "gal-run/agent-workforce",
         "Scheduler-Systems/workspace-governance",
     }
 )

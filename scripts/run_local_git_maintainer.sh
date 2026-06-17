@@ -5,13 +5,13 @@
 # local filesystem), traced to the SAME LangSmith project as the deployed fleet.
 #
 # Config via env (all optional; sensible defaults):
-#   GIT_MAINTAINER_REPO   path to the qa-agent-platform checkout (default: derived)
+#   GIT_MAINTAINER_REPO   path to the agent-workforce checkout (default: derived)
 #   GIT_MAINTAINER_ENV    env file with LANGSMITH_API_KEY etc. (default: $REPO/.env)
 #   WORKSPACE_ROOT        workspace to scan (default: the enterprise workspace)
 #   GIT_MAINTAINER_DRY_RUN=1   report only, delete nothing
 set -euo pipefail
 
-REPO="${GIT_MAINTAINER_REPO:-/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform}"
+REPO="${GIT_MAINTAINER_REPO:-$HOME/agent-workforce}"
 ENV_FILE="${GIT_MAINTAINER_ENV:-$REPO/.env}"
 PY="$REPO/.venv/bin/python"
 export WORKSPACE_ROOT="${WORKSPACE_ROOT:-/Users/scheduler-systems/Documents/scheduler-systems-ltd}"

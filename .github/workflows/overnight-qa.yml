@@ -24,7 +24,7 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: Scheduler-Systems
-          repositories: scheduler-web,scheduler-api,qa-agent-platform
+          repositories: scheduler-web,scheduler-api
 
       - name: Watch main CI + open regression issues (idempotent)
         env:
@@ -39,7 +39,7 @@ jobs:
               EXISTING=$(gh issue list -R "$REPO" --state open --search "$TITLE in:title" --json number -q '.[0].number' 2>/dev/null || echo "")
               if [ -z "$EXISTING" ]; then
                 gh issue create -R "$REPO" --title "$TITLE" \
-                  --body "Overnight QA watcher: the latest \`main\` CI run concluded **failure**. Please review. (Filed by qa-agent-platform overnight-qa, #18. Read-only watcher — no changes made.)" \
+                  --body "Overnight QA watcher: the latest \`main\` CI run concluded **failure**. Please review. (Filed by agent-workforce overnight-qa, #18. Read-only watcher — no changes made.)" \
                   2>/dev/null && echo "::warning::opened regression issue on $REPO" || echo "::error::could not open issue on $REPO"
               else
                 echo "::notice::regression issue already open on $REPO (#$EXISTING) — skipping"

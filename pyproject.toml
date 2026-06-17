@@ -1,5 +1,5 @@
 [project]
-name = "qa-agent-platform"
+name = "agent-workforce"
 version = "0.1.0"
 description = "Deployed LangGraph agents automating Scheduler QA (+ Marketing fast-follow)"
 requires-python = ">=3.12"
