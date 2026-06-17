@@ -14,7 +14,7 @@ set -euo pipefail
 REPO="${GIT_MAINTAINER_REPO:-$HOME/agent-workforce}"
 ENV_FILE="${GIT_MAINTAINER_ENV:-$REPO/.env}"
 PY="$REPO/.venv/bin/python"
-export WORKSPACE_ROOT="${WORKSPACE_ROOT:-/Users/scheduler-systems/Documents/scheduler-systems-ltd}"
+export WORKSPACE_ROOT="${WORKSPACE_ROOT:-/Users/YOUR_USERNAME/workspace}"
 export LANGSMITH_TRACING="${LANGSMITH_TRACING:-true}"
 
 # Load LangSmith (and any other) credentials without echoing them.

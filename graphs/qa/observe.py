@@ -17,7 +17,7 @@ import os
 import subprocess
 
 # Workspace root that contains the Scheduler-Systems org checkouts. Overridable for tests.
-_DEFAULT_ORG_ROOT = "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems"
+_DEFAULT_ORG_ROOT = "/Users/YOUR_USERNAME/workspace/Scheduler-Systems"
 
 # Test-setup files we look for, per platform flavour. Read-only.
 _RECON_FILES = (

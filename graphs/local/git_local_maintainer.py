@@ -37,7 +37,7 @@ from langgraph.graph import StateGraph, START, END
 
 from agent_toolkit import span, governance_capture
 
-DEFAULT_ROOT = "/Users/scheduler-systems/Documents/scheduler-systems-ltd"
+DEFAULT_ROOT = "/Users/YOUR_USERNAME/workspace"
 
 # Buckets never touched: dependency checkouts, archived/fork material, and — hard
 # rule — the ML-model repo. (Matches the workspace's own hygiene conventions.)
