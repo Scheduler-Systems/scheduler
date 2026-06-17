@@ -15,8 +15,16 @@ seam so you can wire your own provider.
 ```
 services/api/      Go HTTP API (tenant auth, schedules, employees, WhatsApp webhook)
 apps/web/          Next.js web app (Firebase auth/Firestore; billing STUBBED)
+apps/android/      Native Android client (Kotlin/Compose)
+apps/ios/          Native iOS client (Swift/SwiftUI)
 packages/core/     Billing-free scheduling engine (no-dependency Node)
 ```
+
+- API — [`services/api/api-boundaries.md`](services/api/api-boundaries.md) ·
+  env: [`services/api/.env.example`](services/api/.env.example)
+- Web — [`apps/web/README.md`](apps/web/README.md)
+- Android — [`apps/android/README.md`](apps/android/README.md)
+- iOS — [`apps/ios/README.md`](apps/ios/README.md)
 
 ## BYO billing
 

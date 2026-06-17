@@ -22,9 +22,11 @@ Flutter web still serves `your-firebase-project-id.web.app` until DNS cutover.
 ```bash
 cd apps/web
 cp .env.local.example .env.local
-# Fill in NEXT_PUBLIC_FIREBASE_API_KEY — grab from GCP Secret Manager:
-#   gcloud secrets versions access latest --secret=FIREBASE_WEB_API_KEY \
-#     --project=your-firebase-project-id
+# Fill in NEXT_PUBLIC_FIREBASE_API_KEY from your own Firebase web app config
+# (Firebase Console -> Project settings -> your web app). If you keep it in a
+# secret manager, fetch it from there — e.g. with gcloud:
+#   gcloud secrets versions access latest --secret=YOUR_FIREBASE_API_KEY_SECRET \
+#     --project=YOUR_GCP_PROJECT_ID
 
 npm install
 npm run dev           # → http://localhost:3000
@@ -88,22 +90,25 @@ Full coverage in `lib/schedule-builder.test.ts`.
 - **Project:** `your-firebase-project-id` (shared with Flutter mobile app)
 - **Config:** `lib/firebase.ts` — lazy browser-only init; pulls
   `NEXT_PUBLIC_FIREBASE_API_KEY` from build env.
-- **Static export gotcha:** the API key must be baked in at build time via
-  the `FIREBASE_WEB_API_KEY` GitHub secret — missing key ⇒ `auth/invalid-api-key`
-  infinite loop ⇒ Chrome shows "This page couldn't load" while `curl` returns
-  200. See `reference_nextjs_web_firebase_secret.md` in the project memory.
+- **Static export gotcha:** the API key must be baked in at build time via a
+  build-env secret (e.g. a `FIREBASE_WEB_API_KEY` GitHub Actions secret) —
+  missing key ⇒ `auth/invalid-api-key` infinite loop ⇒ Chrome shows "This page
+  couldn't load" while `curl` returns 200. Make sure your deploy pipeline injects
+  `NEXT_PUBLIC_FIREBASE_API_KEY` into the build step.
 
 ## Deployment
 
-Firebase Hosting site `scheduler-web-next` (live at
-[scheduler-web-next.web.app](https://scheduler-web-next.web.app)).
+Deploys to a Firebase Hosting site of your choosing. The shipped CI does
+`next build` (static export → `./out/`) and `firebase deploy --only hosting`.
 
-Every push to `main` that touches `apps/web/**` triggers
-`.github/workflows/apps-web-deploy.yml` → `next build` (static export) →
-`firebase-tools deploy --only hosting:web-next`.
+- **PR / push to `main`:** `.github/workflows/ci.yml` runs typecheck, lint,
+  test, and build for `apps/web/**` (no deploy).
+- **Release:** `apps/web/.github/workflows/release.yml` (tag push `v*`) builds
+  and deploys to Firebase Hosting using your own GCP/Firebase credentials
+  (`GCP_WORKLOAD_IDENTITY_PROVIDER` / `GCP_SERVICE_ACCOUNT` secrets and the
+  `FIREBASE_PROJECT` env). Point these at your own project.
 
-Production DNS (`scheduler-systems.com`) still points at the legacy Flutter web
-site — cutover is tracked in [#1728](https://github.com/Scheduler-Systems/Scheduler/issues/1728).
+Set your hosting target and project in the release workflow before enabling it.
 
 ## Source layout
 
@@ -152,6 +157,6 @@ lib/
 - Lint: `npm run lint`
 - Build sanity: `npm run build`
 
-All three run on every PR via `apps-web-deploy.yml`.
+All three run on every PR via the root `.github/workflows/ci.yml` (web job).
 
 E2E / Playwright is planned but not yet wired; see #1728 Phase 5.
