@@ -1,0 +1,15 @@
+node_modules
+test
+.git
+.gitignore
+.eslintrc*
+eslint.config.*
+*.md
+docs
+.firebase
+*.log
+.env
+.env.local
+Makefile
+firebase.json
+functions

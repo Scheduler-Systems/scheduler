@@ -1,0 +1,15 @@
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Build outputs
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.xcarchive
+
+# Bundler
+vendor/bundle

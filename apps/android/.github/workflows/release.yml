@@ -1,0 +1,259 @@
+# =============================================================================
+# ANDROID RELEASE WORKFLOW
+# =============================================================================
+#
+# TAG-GATED DEPLOYMENT - Releases only happen on explicit tag push
+#
+# Triggers:
+#   - Tag push v*: Deploy to production tracks
+#   - workflow_dispatch: Manual deployment with environment selection
+#
+# =============================================================================
+
+name: Android Release
+
+run-name: "Android Release (${{ github.ref_name }})"
+
+on:
+  push:
+    tags: ['v[0-9]*']
+    
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - prod
+        default: 'prod'
+      track:
+        description: 'Play Store track'
+        required: true
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+        default: 'internal'
+      deploy:
+        description: 'Deploy after build'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  setup:
+    name: Setup
+    runs-on:
+      group: ci-standard
+      labels: [ci-standard-runc]
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      track: ${{ steps.track.outputs.track }}
+      lane: ${{ steps.track.outputs.lane }}
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#v}"
+          else
+            VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1 | tr -d '[:space:]')
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Determine track
+        id: track
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TRACK="production"
+            LANE="production_release"
+          else
+            TRACK="${{ inputs.track || 'internal' }}"
+            LANE="production_${TRACK}"
+          fi
+          echo "track=$TRACK" >> $GITHUB_OUTPUT
+          echo "lane=$LANE" >> $GITHUB_OUTPUT
+          echo "Track: $TRACK, Lane: $LANE"
+
+  build-and-deploy:
+    name: Build & Deploy Android
+    needs: setup
+    runs-on: ci-android-runc-x64
+    timeout-minutes: 90
+    
+    env:
+      FLAVOR: prod
+      GRADLE_OPTS: >-
+        -Dorg.gradle.jvmargs=-Xmx4g
+        -Dorg.gradle.daemon=false
+        -Dorg.gradle.workers.max=2
+        -Dorg.gradle.caching=true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Verify Flutter
+        run: flutter --version
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: fastlane
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+          token_format: 'access_token'
+          access_token_lifetime: '3600s'
+
+      - name: Configure Android SDK
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-/opt/android-sdk}"
+          if [ -d "$SDK_ROOT" ]; then
+            echo "Using Android SDK at $SDK_ROOT"
+          else
+            echo "ANDROID_HOME not set, SDK may need installation"
+          fi
+          echo "ANDROID_HOME=$SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> $GITHUB_ENV
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-flutter-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Generate Firebase config
+        env:
+          GCP_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          FLAVOR_DIR="android/app/src/${{ env.FLAVOR }}"
+          mkdir -p "$FLAVOR_DIR"
+          
+          if [ -f "$FLAVOR_DIR/google-services.json" ]; then
+            echo "Firebase config exists"
+          else
+            echo "Downloading Firebase config..."
+            curl -s -H "Authorization: Bearer $GCP_ACCESS_TOKEN" \
+              "https://firebase.googleapis.com/v1beta1/projects/${{ secrets.FIREBASE_PROJECT }}/androidApps/${{ secrets.FIREBASE_ANDROID_APP_ID }}/config" \
+              -o "$FLAVOR_DIR/google-services.json" || echo "Firebase config download failed, may exist in repo"
+          fi
+
+      - name: Build Android App Bundle
+        env:
+          CLOUDSDK_AUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          flutter build appbundle --release --flavor ${{ env.FLAVOR }} \
+            --dart-define=FIREBASE_ANDROID_API_KEY=${{ secrets.FIREBASE_ANDROID_API_KEY }}
+
+      - name: Deploy to Play Store
+        if: github.event_name == 'push' || inputs.deploy == true
+        env:
+          GCP_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH: ${{ steps.auth.outputs.credentials_file_path }}
+        run: |
+          cd fastlane
+          bundle exec fastlane android ${{ needs.setup.outputs.lane }}
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-release-${{ needs.setup.outputs.version }}
+          path: |
+            build/app/outputs/bundle/**/release/*.aab
+            build/app/outputs/apk/**/*.apk
+          retention-days: 30
+
+  create-release:
+    name: Create GitHub Release
+    needs: [setup, build-and-deploy]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on:
+      group: ci-standard
+      labels: [ci-standard-runc]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ needs.setup.outputs.version }}
+          name: Scheduler Android v${{ needs.setup.outputs.version }}
+          generate_release_notes: true
+          files: |
+            build/app/outputs/bundle/**/release/*.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  summary:
+    name: Summary
+    needs: [setup, build-and-deploy, create-release]
+    if: always()
+    runs-on:
+      group: ci-standard
+      labels: [ci-standard-runc]
+
+    steps:
+      - name: Generate summary
+        env:
+          VERSION: ${{ needs.setup.outputs.version }}
+          TRACK: ${{ needs.setup.outputs.track }}
+        run: |
+          {
+            echo "## Android Release v${VERSION}"
+            echo ""
+            echo "| Step | Status |"
+            echo "|------|--------|"
+            echo "| Build | ${{ needs.build-and-deploy.result == 'success' && '✅' || '❌' }} |"
+            echo "| Deploy ($TRACK) | ${{ needs.build-and-deploy.result == 'success' && '✅' || '⏭️' }} |"
+            echo "| GitHub Release | ${{ needs.create-release.result == 'success' && '✅' || needs.create-release.result == 'skipped' && '⏭️' || '❌' }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

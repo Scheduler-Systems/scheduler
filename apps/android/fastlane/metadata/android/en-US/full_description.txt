@@ -1,0 +1,28 @@
+Scheduler is the fast way to build employee shift schedules and staff rotas — made for businesses that run on shifts.
+
+Build your weekly rota in one click, assign shifts to your team, organize stations and employees, and keep everyone in sync across Android, iPhone, and web.
+
+BUILT FOR SHIFT-WORK TEAMS:
+• Restaurants, cafes & hospitality
+• Retail & stores
+• Healthcare, clinics & care homes
+• Security & facilities
+• Warehouses & logistics
+• Any team that works in shifts
+
+KEY FEATURES:
+• One-click roster builder — generate a weekly schedule fast
+• Assign employees to shifts and stations
+• Shift, station, and employee management
+• Built-in team chat to coordinate coverage
+• Publish schedules so your whole team sees them
+• Export schedules to CSV
+• Real-time sync across Android, iOS, and web
+• Secure cloud backup of your schedules
+
+PLANS THAT SCALE WITH YOUR TEAM:
+• Essential and Pro plans, priced by team size
+• Choose monthly or annual billing
+• Larger teams and more stations on higher plans
+
+Stop wrestling with spreadsheets and group chats. Build your staff schedule in Scheduler and get your whole team on the same shift, every week.

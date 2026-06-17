@@ -1,0 +1,4 @@
+# Appfile - Fastlane app configuration
+# See https://docs.fastlane.tools
+
+package_name(ENV['ANDROID_PACKAGE_NAME'] || "com.example.scheduler")

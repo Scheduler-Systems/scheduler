@@ -1,0 +1,11 @@
+{
+  "tenantId": "tenant_security_demo",
+  "scheduleId": "schedule_security_weekly",
+  "name": "Security Weekly Roster",
+  "managerMode": {"label": "review drafts and approvals"},
+  "workerMode": {"label": "view shifts and submit availability"},
+  "shifts": [
+    {"day": "Friday", "startTime": "06:00", "endTime": "14:00", "assignedWorker": "Guard One"},
+    {"day": "Saturday", "startTime": "06:00", "endTime": "14:00", "assignedWorker": "Unassigned"}
+  ]
+}

@@ -1,0 +1,207 @@
+# =============================================================================
+# SCHEDULER ANDROID FASTLANE CONFIGURATION
+# =============================================================================
+#
+# Purpose: Android app deployment automation
+# Features: Play Store uploads, Firebase App Distribution
+#
+# USAGE:
+#   Firebase (dev):     fastlane distribute_dev
+#   Play Store:         fastlane production_internal|alpha|beta|release
+#
+# =============================================================================
+
+default_platform(:android)
+
+require_relative 'lib/constants'
+
+platform :android do
+
+  desc "Build Android app for production"
+  lane :build_prod do
+    build_android(env: :production, build_type: "release")
+  end
+
+  desc "Distribute Android app to Firebase App Distribution"
+  lane :distribute_dev do
+    build_android(env: :dev, build_type: "release")
+    distribute_firebase(env: :dev)
+  end
+
+  desc "Upload Android to Google Play internal testing"
+  lane :production_internal do
+    build_prod
+    upload_google_play(env: :production, track: "internal")
+  end
+
+  desc "Upload Android to Google Play alpha testing"
+  lane :production_alpha do
+    build_prod
+    upload_google_play(env: :production, track: "alpha")
+  end
+
+  desc "Upload Android to Google Play beta testing"
+  lane :production_beta do
+    build_prod
+    upload_google_play(env: :production, track: "beta")
+  end
+
+  desc "Upload Android to Google Play production (public release)"
+  lane :production_release do
+    build_prod
+    upload_google_play(env: :production, track: "production", promote_from_track: "internal")
+  end
+
+  private_lane :build_android do |options|
+    env = options[:env]
+    build_type = options[:build_type] || "release"
+    flavor = env == :production ? "prod" : "dev"
+
+    UI.message "Building Android app for #{env} environment..."
+
+    if env == :dev || env == :development
+      build_file = File.join(PROJECT_ROOT, "build", "app", "outputs", "flutter-apk", "app-#{flavor}-release.apk")
+    else
+      build_file = File.join(PROJECT_ROOT, "build", "app", "outputs", "bundle", "#{flavor}Release", "app-#{flavor}-release.aab")
+    end
+
+    if File.exist?(build_file)
+      UI.success "Using existing build artifact: #{File.basename(build_file)}"
+      next
+    end
+
+    build_flag = env == :dev ? "--apk" : "--aab"
+
+    Dir.chdir(PROJECT_ROOT) do
+      if build_flag == "--apk"
+        sh("flutter build apk --release --flavor #{flavor}")
+      else
+        sh("flutter build appbundle --release --flavor #{flavor}")
+      end
+    end
+
+    UI.success "Android build completed for #{env}"
+  end
+
+  private_lane :distribute_firebase do |options|
+    env = options[:env]
+    flavor = env == :production ? "prod" : "dev"
+
+    apk_path = File.join(PROJECT_ROOT, "build", "app", "outputs", "flutter-apk", "app-#{flavor}-release.apk")
+
+    unless File.exist?(apk_path)
+      UI.user_error!("APK not found at #{apk_path}")
+    end
+
+    UI.message "Distributing to Firebase App Distribution..."
+
+    firebase_app_distribution(
+      app: ENV['FIREBASE_APP_ID'],
+      apk_path: apk_path,
+      groups: "testers",
+      release_notes: generate_release_notes
+    )
+
+    UI.success "Firebase distribution completed"
+  end
+
+  private_lane :upload_google_play do |options|
+    env = options[:env]
+    track = options[:track]
+    promote_from_track = options[:promote_from_track]
+    flavor = env == :production ? "prod" : "dev"
+
+    aab_path = File.join(PROJECT_ROOT, "build", "app", "outputs", "bundle", "#{flavor}Release", "app-#{flavor}-release.aab")
+
+    unless File.exist?(aab_path)
+      UI.user_error!("AAB not found at #{aab_path}")
+    end
+
+    UI.message "Uploading to Google Play Console (#{track} track)..."
+
+    version_name, build_number = parse_version_info
+
+    supply_options = {
+      json_key: ENV['GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH'] || File.expand_path("~/.fastlane/google_play_service_account.json"),
+      package_name: ANDROID_PACKAGE_NAME,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    }
+
+    begin
+      existing_version_codes = google_play_track_version_codes(
+        json_key: supply_options[:json_key],
+        package_name: supply_options[:package_name],
+        track: track
+      ).map(&:to_i)
+    rescue => e
+      UI.important "Failed to read Google Play track: #{e.message}"
+      existing_version_codes = []
+    end
+
+    if existing_version_codes.include?(build_number.to_i)
+      UI.important "Version code #{build_number} already exists on track #{track}; skipping upload."
+      next
+    end
+
+    if promote_from_track
+      begin
+        UI.message "Promoting version #{build_number} from #{promote_from_track} to #{track}..."
+        supply(
+          **supply_options,
+          track: promote_from_track,
+          track_promote_to: track,
+          track_promote_release_status: "completed",
+          version_code: build_number.to_i,
+          rollout: track == "production" ? "0.1" : nil
+        )
+        next
+      rescue => e
+        UI.important "Promotion failed: #{e.message}, falling back to direct upload"
+      end
+    end
+
+    supply(
+      **supply_options,
+      track: track,
+      aab: aab_path,
+      release_status: "completed",
+      rollout: track == "production" ? "0.1" : "1.0"
+    )
+
+    UI.success "Google Play upload completed (#{track} track)"
+  end
+
+  def parse_version_info
+    pubspec = File.read(File.join(PROJECT_ROOT, "pubspec.yaml"))
+    version_line = pubspec.match(/version:\s*(.+)/)[1]
+    version_name, build_number = version_line.strip.split('+')
+    [version_name, build_number || "1"]
+  end
+
+  def generate_release_notes
+    changelog_path = File.join(Dir.pwd, "metadata", "android", "changelogs", "#{Time.now.to_i}.txt")
+    if File.exist?(changelog_path)
+      File.read(changelog_path)
+    else
+      "Release build #{Time.now.strftime('%Y-%m-%d %H:%M')}"
+    end
+  end
+
+end
+
+error do |lane, exception, options|
+  UI.error "Lane #{lane} failed: #{exception.message}"
+end
+
+before_all do |lane, options|
+  UI.message "Starting lane: #{lane}"
+  ENV['FASTLANE_SKIP_UPDATE_CHECK'] = '1'
+  ENV['FASTLANE_HIDE_GITHUB_ISSUES'] = '1'
+end
+
+after_all do |lane, options|
+  UI.success "Lane #{lane} completed successfully!"
+end

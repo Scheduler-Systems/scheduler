@@ -1,0 +1,32 @@
+name: gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer
+
+      - name: Validate iOS native shell
+        run: |
+          test -f README.md
+          test -f Sources/SchedulerApp/SchedulerApp.swift
+          test -f Sources/SchedulerApp/ScheduleModels.swift
+          test -f fixtures/mock-schedule.json
+          ruby -rjson -e 'JSON.parse(File.read("fixtures/mock-schedule.json"))'
+          grep -R "managerMode" Sources fixtures
+          grep -R "workerMode" Sources fixtures
+          ! grep -R "Flutter\\|io.flutter" Sources fixtures
+
+      - name: Build
+        run: swift build
+
+      - name: Test
+        run: swift test

@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   Flutter design-parity tokens (issue #26).
+   The Next.js rebuild had only re-mapped the primary purple; every other
+   Flutter palette color was unused, so the app collapsed to mono-purple+gray.
+   Here we re-theme the Tailwind color families that components already use to
+   the exact FlutterFlow LightModeTheme values, so existing utility classes
+   (bg-purple-600, text-teal-600, bg-pink-500, border-gray-200 …) render the
+   real brand palette app-wide without touching every component — PLUS the
+   additive named tokens (bg-brand, text-secondary, border-line, bg-surface,
+   text-error) introduced alongside the Flutter home work, so both styles work.
+
+   FlutterFlow LightModeTheme (lib/flutter_flow/flutter_flow_theme.dart):
+     primary   #6A0DAD   secondary #39D2C0 (teal)   tertiary #EE8B60 (orange)
+     alternate #FF5963   pink #F551C9   curvedBg #F2E1FF
+     primaryText #101213 secondaryText #57636C
+     primaryBackground #FFFFFF secondaryBackground #F5F5F5  lineColor #E0E3E7
+     success #04A24C  warning #FCDC0C  error #E21C3D  info #0E3876
+   ========================================================================= */
+@theme {
+  /* Primary — brand purple */
+  --color-purple-500: #7d1fc0;
+  --color-purple-600: #6a0dad;
+  --color-purple-700: #56068f;
+
+  /* Secondary — teal #39D2C0 */
+  --color-teal-400: #5cdccd;
+  --color-teal-500: #39d2c0;
+  --color-teal-600: #2bb3a3;
+
+  /* Tertiary — orange #EE8B60 */
+  --color-orange-400: #f2a37f;
+  --color-orange-500: #ee8b60;
+  --color-orange-600: #e06b3a;
+
+  /* Role accent — pink #F551C9 (Employee) */
+  --color-pink-400: #f774d4;
+  --color-pink-500: #f551c9;
+  --color-pink-600: #d633ac;
+
+  /* Neutrals — match Flutter exactly */
+  --color-gray-50: #f5f5f5; /* secondaryBackground */
+  --color-gray-200: #e0e3e7; /* lineColor */
+  --color-gray-500: #57636c; /* secondaryText */
+  --color-gray-900: #101213; /* primaryText */
+
+  /* Status — success/warning (error stays on Tailwind red, ~#E21C3D) */
+  --color-green-600: #04a24c;
+  --color-yellow-400: #fcdc0c;
+
+  /* =====================================================================
+     FULL FlutterFlow LightModeTheme palette — additive named tokens, one per
+     Flutter `FlutterFlowTheme` color (lib/flutter_flow/flutter_flow_theme.dart
+     LightModeTheme, lines 309–334). EXACT hex, lower-cased. These do not
+     override any Tailwind family color; they expose every Flutter token as a
+     utility (bg-brand, text-secondary, border-line, bg-surface, text-error,
+     bg-curve, …) so screens can be restyled to faithful values with zero
+     hardcoded hex drift. The names below are the canonical Foundation tokens.
+     ===================================================================== */
+  --color-primary: #6a0dad; /* primary */
+  --color-secondary: #39d2c0; /* secondary (teal) */
+  --color-tertiary: #ee8b60; /* tertiary (orange) */
+  --color-alternate: #ff5963; /* alternate (coral/red) */
+  --color-primary-text: #101213; /* primaryText */
+  --color-secondary-text: #57636c; /* secondaryText */
+  --color-primary-background: #ffffff; /* primaryBackground */
+  --color-secondary-background: #f5f5f5; /* secondaryBackground */
+  --color-accent1: #616161; /* accent1 */
+  --color-accent2: #757575; /* accent2 */
+  --color-accent3: #e0e0e0; /* accent3 */
+  --color-accent4: #eeeeee; /* accent4 */
+  --color-success: #04a24c; /* success */
+  --color-warning: #fcdc0c; /* warning */
+  --color-error: #e21c3d; /* error */
+  --color-info: #0e3876; /* info */
+  --color-primary-btn-text: #ffffff; /* primaryBtnText */
+  --color-line: #e0e3e7; /* lineColor — dividers / borders */
+  --color-btn-text: #ffffff; /* btnText */
+  --color-white: #ffffff; /* white */
+  --color-background: #1d2429; /* background (dark hero/footer) */
+  --color-custom1: #6a0dad; /* customColor1 */
+  --color-custom2: #edcddf; /* customColor2 */
+  --color-curve: #f2e1ff; /* curvedBgColor — curved purple hero bg */
+  --color-pink: #f551c9; /* pink (Employee role accent) */
+
+  /* Convenience aliases kept for already-shipped components (do not remove). */
+  --color-brand: #6a0dad; /* = primary */
+  --color-brand-accent: #f551c9; /* = pink role accent */
+  --color-surface: #f5f5f5; /* = secondaryBackground */
+
+  /* Typography — Montserrat throughout, matching the FlutterFlow theme
+     (45+ GoogleFonts.montserrat refs; the prior --font-geist-sans name was a
+     starter leftover, not Geist). Raleway is the button/Choose-Role-subtitle
+     face (FlutterFlow buttons + choose_role load Raleway), exposed as
+     --font-raleway for the AppBar action + FF-button parity work. */
+  --font-sans: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  --font-button: var(--font-raleway), var(--font-montserrat), Arial, Helvetica,
+    sans-serif;
+}
+
+/* Light-mode only for now. The app uses hardcoded Tailwind colors
+   (text-gray-900, bg-white, etc.) that don't respect prefers-color-scheme, so
+   the starter's dark-mode override produced invisible near-black text on a
+   near-black body. Reintroduce only when components opt in with dark tokens. */
+
+body {
+  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  /* FlutterFlow's bodyMedium/bodySmall override default to FontWeight.w600
+     (flutter_flow_theme.dart:268-280). The web body previously rendered the
+     normal 400 weight; 600 restores Flutter's semibold body baseline.
+     Per-element headings still set their own weight. */
+  font-weight: 600;
+}
+
+/* Shared shell for centered auth cards (login, signup, forgot-password,
+   phone-signin, onboarding, verify-email). Guarantees the card never clips:
+   the column is at least viewport height, top-aligned and scrollable on short
+   screens, centered from `sm:` up, with vertical breathing room. The full-bleed
+   choose-role screen does NOT use this — it owns its own full-screen layout. */
+.auth-card-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem 1rem; /* py-8 px-4 */
+}
+
+@media (min-width: 640px) {
+  .auth-card-shell {
+    justify-content: center;
+  }
+}

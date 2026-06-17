@@ -1,0 +1,3 @@
+-keep class com.schedulersystems.scheduler.** { *; }
+-keep class com.google.firebase.** { *; }
+-dontwarn kotlin.**

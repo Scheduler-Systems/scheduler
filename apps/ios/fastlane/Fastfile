@@ -1,0 +1,253 @@
+# =============================================================================
+# SCHEDULER NATIVE IOS FASTLANE CONFIGURATION
+# =============================================================================
+#
+# Purpose: Native iOS app deployment automation for scheduler-ios
+# Environments: dev, production
+# Features: TestFlight uploads, App Store deployment, code signing via match
+#
+# USAGE:
+#   TestFlight: fastlane ios beta
+#   App Store: fastlane ios release
+#   Firebase: fastlane ios firebase
+#
+# =============================================================================
+
+default_platform(:ios)
+
+platform :ios do
+  # ===========================================================================
+  # CONFIGURATION
+  # ===========================================================================
+
+  APP_NAME = "Scheduler"
+  SCHEME = ENV["XCODE_SCHEME"] || "SchedulerApp"
+  WORKSPACE = ENV["XCODE_WORKSPACE"] || "SchedulerApp.xcworkspace"
+  PROJECT = ENV["XCODE_PROJECT"] || "SchedulerApp.xcodeproj"
+
+  # ===========================================================================
+  # BUILD LANES
+  # ===========================================================================
+
+  desc "Build iOS app for development (no signing)"
+  lane :build_dev do
+    build_ios(configuration: "Debug", export_method: "development")
+  end
+
+  desc "Build iOS app for TestFlight"
+  lane :build_beta do
+    build_ios(configuration: "Release", export_method: "app-store")
+  end
+
+  desc "Build iOS app for App Store"
+  lane :build_release do
+    build_ios(configuration: "Release", export_method: "app-store")
+  end
+
+  # ===========================================================================
+  # DISTRIBUTION LANES
+  # ===========================================================================
+
+  desc "Upload to Firebase App Distribution (dev)"
+  lane :firebase do
+    build_ios(configuration: "Release", export_method: "ad-hoc")
+    distribute_firebase
+  end
+
+  desc "Upload to TestFlight (beta testing)"
+  lane :beta do
+    build_beta
+    upload_testflight
+  end
+
+  desc "Upload to App Store (production release)"
+  lane :release do
+    build_release
+    upload_app_store
+  end
+
+  # ===========================================================================
+  # CERTIFICATE MANAGEMENT
+  # ===========================================================================
+
+  desc "Update iOS certificates and provisioning profiles"
+  lane :update_certificates do |options|
+    cert_type = (options[:type] || :appstore).to_sym
+    readonly = options[:readonly].nil? ? true : options[:readonly].to_s == "true"
+
+    UI.message "🔐 Syncing iOS signing assets via match"
+    UI.message "  Type: #{cert_type}"
+    UI.message "  Read-only: #{readonly}"
+
+    match(
+      type: cert_type.to_s,
+      readonly: readonly,
+      skip_google_cloud_account_confirmation: true
+    )
+
+    UI.success "✅ Certificates and provisioning profiles updated"
+  end
+
+  desc "Create new iOS certificates (team admin only)"
+  lane :create_certificates do
+    match(type: "development", readonly: false, skip_google_cloud_account_confirmation: true)
+    match(type: "appstore", readonly: false, skip_google_cloud_account_confirmation: true)
+
+    UI.success "✅ New certificates created"
+  end
+
+  # ===========================================================================
+  # HELPER FUNCTIONS
+  # ===========================================================================
+
+  private_lane :build_ios do |options|
+    configuration = options[:configuration] || "Release"
+    export_method = options[:export_method] || "app-store"
+    app_identifier = ENV["APP_IDENTIFIER"] || "com.example.scheduler"
+
+    UI.message "🏗️ Building iOS app..."
+    UI.message "  Configuration: #{configuration}"
+    UI.message "  Export method: #{export_method}"
+
+    # Update certificates via match for signed builds
+    if export_method != "development" || ENV["CI"] == "true"
+      match_type = case export_method
+                   when "app-store" then "appstore"
+                   when "ad-hoc" then "adhoc"
+                   else "development"
+                   end
+
+      update_certificates(type: match_type, readonly: ENV["CI"] == "true")
+    end
+
+    # Build using gym
+    gym_options = {
+      scheme: SCHEME,
+      configuration: configuration,
+      export_method: export_method,
+      output_directory: "build/ios",
+      output_name: "#{APP_NAME}-#{configuration.downcase}.ipa",
+      clean: false,
+      silent: false,
+      xcargs: "-parallelizeTargets COMPILER_INDEX_STORE_ENABLE=NO"
+    }
+
+    # Use workspace if it exists, otherwise use project
+    if File.exist?(WORKSPACE)
+      gym_options[:workspace] = WORKSPACE
+    elsif File.exist?(PROJECT)
+      gym_options[:project] = PROJECT
+    else
+      UI.user_error!("No Xcode project or workspace found!")
+    end
+
+    gym(**gym_options)
+
+    UI.success "✅ iOS build completed"
+  end
+
+  private_lane :distribute_firebase do
+    ipa_path = Dir.glob("build/ios/*.ipa").first
+    UI.user_error!("No IPA found!") unless ipa_path
+
+    UI.message "🚀 Uploading to Firebase App Distribution..."
+    UI.message "📦 IPA: #{File.basename(ipa_path)}"
+
+    # Use firebase CLI if available
+    if `which firebase 2>/dev/null`.strip.empty?
+      UI.user_error!("Firebase CLI not installed. Run: npm install -g firebase-tools")
+    end
+
+    app_id = ENV["FIREBASE_APP_ID"]
+    UI.user_error!("FIREBASE_APP_ID not set!") unless app_id
+
+    sh("firebase appdistribution:distribute '#{ipa_path}' --app #{app_id}")
+
+    UI.success "✅ Firebase distribution completed"
+  end
+
+  private_lane :upload_testflight do
+    ipa_path = Dir.glob("build/ios/*.ipa").first
+    UI.user_error!("No IPA found!") unless ipa_path
+
+    app_identifier = ENV["APP_IDENTIFIER"] || "com.example.scheduler"
+
+    UI.message "📤 Uploading to TestFlight..."
+
+    # Validate App Store Connect API credentials
+    unless ENV["APP_STORE_CONNECT_API_KEY"] && ENV["APP_STORE_CONNECT_API_KEY_ID"] && ENV["APP_STORE_CONNECT_ISSUER_ID"]
+      UI.user_error!("❌ App Store Connect API credentials not found!")
+    end
+
+    api_key_hash = {
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key: ENV["APP_STORE_CONNECT_API_KEY"],
+      in_house: false
+    }
+
+    pilot(
+      ipa: ipa_path,
+      app_identifier: app_identifier,
+      skip_waiting_for_build_processing: true,
+      notify_external_testers: false,
+      api_key: api_key_hash
+    )
+
+    UI.success "✅ TestFlight upload completed"
+  end
+
+  private_lane :upload_app_store do
+    ipa_path = Dir.glob("build/ios/*.ipa").first
+    UI.user_error!("No IPA found!") unless ipa_path
+
+    app_identifier = ENV["APP_IDENTIFIER"] || "com.example.scheduler"
+
+    UI.message "📤 Uploading to App Store..."
+
+    # Validate App Store Connect API credentials
+    unless ENV["APP_STORE_CONNECT_API_KEY"] && ENV["APP_STORE_CONNECT_API_KEY_ID"] && ENV["APP_STORE_CONNECT_ISSUER_ID"]
+      UI.user_error!("❌ App Store Connect API credentials not found!")
+    end
+
+    api_key_hash = {
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key: ENV["APP_STORE_CONNECT_API_KEY"],
+      in_house: false
+    }
+
+    deliver(
+      ipa: ipa_path,
+      app_identifier: app_identifier,
+      submit_for_review: false,
+      automatic_release: false,
+      force: true,
+      skip_screenshots: true,
+      skip_metadata: false,
+      precheck_include_in_app_purchases: false,
+      run_precheck_before_submit: false,
+      api_key: api_key_hash
+    )
+
+    UI.success "✅ App Store upload completed"
+  end
+end
+
+# =============================================================================
+# HOOKS
+# =============================================================================
+
+before_all do |lane, options|
+  UI.message "🚀 Starting lane: #{lane}"
+  ENV["FASTLANE_SKIP_UPDATE_CHECK"] = "1"
+  ENV["FASTLANE_HIDE_GITHUB_ISSUES"] = "1"
+end
+
+after_all do |lane, options|
+  UI.success "🎉 Lane #{lane} completed successfully!"
+end
+
+error do |lane, exception, options|
+  UI.error "❌ Lane #{lane} failed: #{exception.message}"
+end

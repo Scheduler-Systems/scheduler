@@ -1,0 +1,42 @@
+# =============================================================================
+# SCHEDULER NATIVE IOS MATCH CONFIGURATION
+# =============================================================================
+
+# Google Cloud Storage for storing certificates
+storage_mode("google_cloud")
+google_cloud_bucket_name(ENV["MATCH_GCS_BUCKET"] || "your-ios-certificates-bucket")
+google_cloud_project_id(ENV["MATCH_GCS_PROJECT_ID"] || "your-gcp-project-id")
+
+# GCS authentication
+match_gcs_keys_file = ENV["MATCH_GCS_KEYS_FILE"] || ENV["GITHUB_ACTIONS_SA_CREDENTIALS"]
+if match_gcs_keys_file && !match_gcs_keys_file.empty?
+  google_cloud_keys_file(match_gcs_keys_file)
+end
+
+# Default app identifier
+app_identifier([ENV["APP_IDENTIFIER"] || "com.example.scheduler"])
+
+# Apple Developer Team ID
+team_id(ENV["APPLE_TEAM_ID"] || "YOUR_APPLE_TEAM_ID")
+
+# Apple ID for authentication
+username(ENV["APPLE_ID"] || "you@example.com")
+
+# Force certificate recreation for new devices
+force_for_new_devices(true)
+
+# Skip confirmation prompts in CI environments
+readonly(ENV["CI"] == "true")
+
+# Skip Google Cloud account confirmation prompts
+skip_google_cloud_account_confirmation(true)
+
+# Keychain configuration
+keychain_name(ENV["MATCH_KEYCHAIN_NAME"] || "login.keychain-db")
+keychain_password(ENV["MATCH_KEYCHAIN_PASSWORD"])
+
+# Shallow clone
+shallow_clone(true)
+
+# Platform
+platform("ios")

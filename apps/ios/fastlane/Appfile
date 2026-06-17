@@ -1,0 +1,8 @@
+# Apple Developer Team ID (set APPLE_TEAM_ID in your CI/env)
+team_id(ENV["APPLE_TEAM_ID"] || "YOUR_APPLE_TEAM_ID")
+
+# Apple ID for authentication (set APPLE_ID in your CI/env)
+apple_id(ENV["APPLE_ID"] || "you@example.com")
+
+# App identifier (set APP_IDENTIFIER in your CI/env)
+app_identifier(ENV["APP_IDENTIFIER"] || "com.example.scheduler")

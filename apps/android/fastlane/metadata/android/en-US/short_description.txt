@@ -1,0 +1,1 @@
+Employee shift scheduling & rota planner. Build staff work schedules fast.

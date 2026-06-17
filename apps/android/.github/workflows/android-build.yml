@@ -1,0 +1,175 @@
+# =============================================================================
+# ANDROID BUILD WORKFLOW
+# =============================================================================
+#
+# Runs Android builds for PR validation and main branch.
+#
+# =============================================================================
+
+name: Android Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'assets/**'
+      - 'fastlane/**'
+      - '.github/workflows/android-build.yml'
+
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'assets/**'
+      - 'fastlane/**'
+      - '.github/workflows/android-build.yml'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - prod
+        default: 'prod'
+      build_type:
+        description: 'Build type'
+        required: false
+        type: choice
+        options:
+          - apk
+          - appbundle
+        default: 'appbundle'
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  android-status:
+    name: Android Status
+    runs-on:
+      group: ci-standard
+      labels: [ci-standard-runc]
+    needs: [build]
+    if: always()
+    steps:
+      - name: Check build result
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: |
+          case "$BUILD_RESULT" in
+            success|skipped)
+              echo "Android build gate passed (result: $BUILD_RESULT)"
+              ;;
+            *)
+              echo "Android build gate FAILED (result: $BUILD_RESULT)"
+              exit 1
+              ;;
+          esac
+
+  build:
+    name: Build Android
+    runs-on: ci-android-runc-x64
+    timeout-minutes: 60
+    
+    env:
+      FLAVOR: ${{ inputs.environment || 'prod' }}
+      GRADLE_OPTS: >-
+        -Dorg.gradle.jvmargs=-Xmx3g
+        -Dorg.gradle.daemon=false
+        -Dorg.gradle.workers.max=1
+        -Dorg.gradle.caching=true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Verify Flutter
+        run: flutter --version
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-flutter-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Generate Firebase config
+        env:
+          GCP_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          FLAVOR_DIR="android/app/src/${{ env.FLAVOR }}"
+          mkdir -p "$FLAVOR_DIR"
+          
+          if [ ! -f "$FLAVOR_DIR/google-services.json" ]; then
+            echo "Firebase config not found, downloading..."
+            curl -s -H "Authorization: Bearer $GCP_ACCESS_TOKEN" \
+              "https://firebase.googleapis.com/v1beta1/projects/${{ secrets.FIREBASE_PROJECT }}/androidApps/${{ secrets.FIREBASE_ANDROID_APP_ID }}/config" \
+              -o "$FLAVOR_DIR/google-services.json" || echo "Firebase config download skipped"
+          fi
+
+      - name: Build Android (PR validation)
+        if: github.event_name == 'pull_request'
+        run: |
+          flutter build apk --debug --no-pub --flavor ${{ env.FLAVOR }} --target-platform android-arm64
+
+      - name: Build Android (main/validation)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          BUILD_TYPE="${{ inputs.build_type || 'appbundle' }}"
+          if [ "$BUILD_TYPE" = "apk" ]; then
+            flutter build apk --release --no-pub --split-per-abi --flavor ${{ env.FLAVOR }}
+          else
+            flutter build appbundle --release --no-pub --flavor ${{ env.FLAVOR }}
+          fi
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-build-${{ github.sha }}
+          path: |
+            build/app/outputs/bundle/**/release/*.aab
+            build/app/outputs/apk/**/*.apk
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Android Build" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ env.FLAVOR }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY

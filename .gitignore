@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+.next/
+**/.next/
+out/
+**/out/
+dist/
+**/dist/
+build/
+**/build/
+.gradle/
+**/.gradle/
+.cxx/
+**/.cxx/
+.build/
+**/.build/
+DerivedData/
+**/DerivedData/
+
+# Test / coverage artifacts
+coverage/
+**/coverage/
+test-results/
+**/test-results/
+playwright-report/
+**/playwright-report/
+*.tsbuildinfo
+
+# Local config / secrets (never commit)
+.env
+.env.*
+!.env.local.example
+local.properties
+**/local.properties
+*.keystore
+*.jks
+
+# OS / editor
+.DS_Store
+*.log
+.idea/
+*.xcuserdatad
+xcuserdata/
