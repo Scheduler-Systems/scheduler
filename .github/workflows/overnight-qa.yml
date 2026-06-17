@@ -1,0 +1,49 @@
+name: overnight-qa
+# Bounded, SAFE overnight QA (issue #18): hourly, watch scheduler-web/api `main` CI and
+# open a regression issue on the affected repo. READ + open-issue ONLY — never merges,
+# deploys, or changes production. Runs on GitHub's runners (off the founder's Mac).
+on:
+  schedule:
+    - cron: "0 * * * *"   # hourly (UTC) — covers the night regardless of timezone
+  workflow_dispatch: {}
+
+permissions: {}            # default GITHUB_TOKEN gets nothing; we use a scoped App token
+
+concurrency:
+  group: overnight-qa
+  cancel-in-progress: false
+
+jobs:
+  regression-watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint scoped GitHub App token
+        id: app
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: Scheduler-Systems
+          repositories: scheduler-web,scheduler-api,qa-agent-platform
+
+      - name: Watch main CI + open regression issues (idempotent)
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          set -uo pipefail
+          for REPO in Scheduler-Systems/scheduler-web Scheduler-Systems/scheduler-api; do
+            CONCL=$(gh run list -R "$REPO" --branch main --limit 30 --json conclusion,workflowName -q '[.[] | select(.workflowName | ascii_downcase | contains("deploy") | not)][0].conclusion' 2>/dev/null || echo "")
+            echo "::notice::$REPO main latest TEST-workflow conclusion (deploy workflows ignored) = ${CONCL:-none}"
+            if [ "$CONCL" = "failure" ]; then
+              TITLE="QA: regression on main ($REPO)"
+              EXISTING=$(gh issue list -R "$REPO" --state open --search "$TITLE in:title" --json number -q '.[0].number' 2>/dev/null || echo "")
+              if [ -z "$EXISTING" ]; then
+                gh issue create -R "$REPO" --title "$TITLE" \
+                  --body "Overnight QA watcher: the latest \`main\` CI run concluded **failure**. Please review. (Filed by qa-agent-platform overnight-qa, #18. Read-only watcher — no changes made.)" \
+                  2>/dev/null && echo "::warning::opened regression issue on $REPO" || echo "::error::could not open issue on $REPO"
+              else
+                echo "::notice::regression issue already open on $REPO (#$EXISTING) — skipping"
+              fi
+            fi
+          done
+          echo "overnight-qa pass complete"

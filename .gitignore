@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.venv/
+venv/
+.langgraph_api/
+*.egg-info/
+.DS_Store
+.payroll/

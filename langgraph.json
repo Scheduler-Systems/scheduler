@@ -1,0 +1,37 @@
+{
+  "$schema": "https://langgra.ph/schema.json",
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "canary_hello_gate": "./graphs/qa/canary.py:graph",
+    "qa_lead_aggregator": "./graphs/qa/qa_lead_aggregator.py:graph",
+    "hr_ops_manager": "./graphs/qa/hr_ops_manager.py:graph",
+    "web_automation_engineer": "./graphs/qa/web_automation_engineer.py:graph",
+    "web_manual_tester": "./graphs/qa/web_manual_tester.py:graph",
+    "android_automation_engineer": "./graphs/qa/android_automation_engineer.py:graph",
+    "android_manual_tester": "./graphs/qa/android_manual_tester.py:graph",
+    "ios_automation_engineer": "./graphs/qa/ios_automation_engineer.py:graph",
+    "ios_manual_tester": "./graphs/qa/ios_manual_tester.py:graph",
+    "web_qa_regression": "./graphs/qa/web_qa_regression.py:graph",
+    "env_doctor": "./graphs/qa/env_doctor.py:graph",
+    "git_maintainer": "./graphs/qa/git_maintainer.py:graph"
+  },
+  "env": ".env",
+  "python_version": "3.12",
+  "image_distro": "wolfi",
+  "pip_installer": "uv",
+  "store": {
+    "ttl": {
+      "default_ttl": 10080,
+      "sweep_interval_minutes": 60
+    }
+  },
+  "checkpointer": {
+    "ttl": {
+      "strategy": "delete",
+      "default_ttl": 43200
+    }
+  },
+  "dockerfile_lines": []
+}

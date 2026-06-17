@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.schedulersystems.qa-agent-shifts</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform &amp;&amp; set -a &amp;&amp; . ./.env &amp;&amp; set +a &amp;&amp; export LANGCHAIN_TRACING_V2=true LANGSMITH_PROJECT=scheduler-qa &amp;&amp; unset GITHUB_TOKEN GITHUB_DISPATCH_TOKEN &amp;&amp; ./.venv/bin/python scripts/shift_dispatcher.py</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>3600</integer>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/.payroll/shift_dispatcher.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/.payroll/shift_dispatcher.log</string>
+</dict>
+</plist>

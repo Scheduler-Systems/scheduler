@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Local git-maintainer LaunchAgent.
+
+  Install:
+    cp docs/launchd/com.schedulersystems.git-local-maintainer.plist ~/Library/LaunchAgents/
+    launchctl load  ~/Library/LaunchAgents/com.schedulersystems.git-local-maintainer.plist
+  Run once now:
+    launchctl start com.schedulersystems.git-local-maintainer
+  First-run safety: set GIT_MAINTAINER_DRY_RUN=1 below to report-only, review the
+  digest at .tmp/git-local-maintainer/latest.md, then remove it for real runs.
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.schedulersystems.git-local-maintainer.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.schedulersystems.git-local-maintainer</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/scripts/run_local_git_maintainer.sh</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>GIT_MAINTAINER_REPO</key>
+    <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform</string>
+    <key>GIT_MAINTAINER_ENV</key>
+    <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/worktrees/qa-deploy/.env</string>
+    <key>WORKSPACE_ROOT</key>
+    <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd</string>
+  </dict>
+
+  <!-- Daily at 11:00 local — after the deployed remote git_maintainer's 06:00 UTC
+       run, so locals already show 'upstream gone' and merged worktrees are detectable. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>11</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/git-local-maintainer/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/git-local-maintainer/launchd.err.log</string>
+</dict>
+</plist>
