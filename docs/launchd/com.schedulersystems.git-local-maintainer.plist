@@ -21,15 +21,15 @@
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>/Users/YOUR_USERNAME/workspace/Scheduler-Systems/qa-agent-platform/scripts/run_local_git_maintainer.sh</string>
+    <string>/Users/YOUR_USERNAME/workspace/Scheduler-Systems/agent-workforce/scripts/run_local_git_maintainer.sh</string>
   </array>
 
   <key>EnvironmentVariables</key>
   <dict>
     <key>GIT_MAINTAINER_REPO</key>
-    <string>/Users/YOUR_USERNAME/workspace/Scheduler-Systems/qa-agent-platform</string>
+    <string>/Users/YOUR_USERNAME/workspace/Scheduler-Systems/agent-workforce</string>
     <key>GIT_MAINTAINER_ENV</key>
-    <string>/Users/YOUR_USERNAME/workspace/Scheduler-Systems/qa-agent-platform/worktrees/qa-deploy/.env</string>
+    <string>/Users/YOUR_USERNAME/workspace/Scheduler-Systems/agent-workforce/worktrees/qa-deploy/.env</string>
     <key>WORKSPACE_ROOT</key>
     <string>/Users/YOUR_USERNAME/workspace</string>
   </dict>
