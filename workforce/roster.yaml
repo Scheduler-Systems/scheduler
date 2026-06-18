@@ -1,0 +1,120 @@
+# =============================================================================
+# Agent roster — the org chart + payroll + HR record for the deployed agent workforce.
+# Each agent is an "employee": a salary (token budget), a shift (schedule), a grade
+# (model tier), a status, and a performance scorecard.
+#
+# Edit the numbers — these are STARTING DEFAULTS. TBD = needs your decision.
+# Schedgy will eventually roster these inside the Scheduler app; today the "shifts"
+# are plain cron/event triggers.
+# =============================================================================
+
+policy:
+  budget_period: weekly                 # weekly | monthly
+  team_token_budget: 2500000            # total tokens/period for the QA team (= sum of salaries)
+  per_run_token_ceiling: 50000          # hard kill-switch: max tokens a single agent run may spend
+  shift_minutes: 5                      # length of one work shift — start SMALL; bounded by time AND token salary (whichever first)
+  global_kill_switch_env: AGENTS_DISABLED  # set this env var truthy to stop ALL agents immediately
+
+  # Hiring source = the open roles from the workspace audit (the "job board").
+  # NOTE: the catalog is not shipped in the OSS tree — supply your own at this path (or via
+  # the JOB_BOARD_PATH env var) to populate open roles; absent it, the board is empty.
+  job_board: docs/audit/catalog.json    # ~81 processes = unstaffed roles to hire into
+
+  # Hire (deploy a new agent) and fire (decommission one) are CONSEQUENTIAL:
+  # the HR-manager PROPOSES, a human APPROVES. No silent hiring/firing.
+  hire_fire_requires_approval: true
+
+  # New hires run report-only until they prove out, then earn write authority.
+  probation: report_only_until_2_clean_reviews
+
+  # A worker "doesn't work well" (fire-able) if it trips these over a review window:
+  review_window: 2_weeks
+  firing_criteria:
+    max_error_rate: 0.05                # > 5% of runs error out
+    max_false_positive_rate: 0.15       # QA flags that were wrong / drafts you rejected
+    max_cost_per_useful_action: 50000   # tokens per real bug caught / verdict accepted (review if exceeded)
+    min_useful_actions_per_period: 1    # too idle / never finds anything = redundant
+
+org:
+  hr_ops_manager: "runs payroll + scheduling + performance reviews; proposes hire/fire (approval-gated)"
+  team_lead: qa_lead_aggregator
+  workers:
+    - web_automation_engineer
+    - android_automation_engineer
+    - ios_automation_engineer
+    - web_manual_tester
+    - android_manual_tester
+    - ios_manual_tester
+
+# Per-agent record. salary = token budget per `policy.budget_period`.
+# scorecard fields are filled by the performance review (from LangSmith + outcomes).
+agents:
+  qa_lead_aggregator:
+    role: "QA lead — one shippability verdict across all platforms"
+    grade: gemini-2.5-flash
+    schedule: "on every PR + nightly"
+    salary_tokens_per_week: 300000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  web_automation_engineer:
+    role: "Vitest + Playwright on scheduler-web"
+    grade: gemini-2.5-flash
+    schedule: "on every PR -> scheduler-web"
+    salary_tokens_per_week: 500000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  android_automation_engineer:
+    role: "JUnit + Espresso on scheduler-android"
+    grade: gemini-2.5-flash
+    schedule: "on every PR -> scheduler-android"
+    salary_tokens_per_week: 400000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  ios_automation_engineer:
+    role: "XCTest on scheduler-ios"
+    grade: gemini-2.5-flash
+    schedule: "on every PR -> scheduler-ios"
+    salary_tokens_per_week: 400000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  web_manual_tester:
+    role: "Exploratory testing via headless browser on scheduler-web"
+    grade: gemini-2.5-pro            # browser tier (senior pay grade)
+    schedule: "daily"
+    salary_tokens_per_week: 300000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  android_manual_tester:
+    role: "Exploratory testing on an Android emulator (Stratus Mac node)"
+    grade: gemini-2.5-pro
+    schedule: "3x/week"
+    salary_tokens_per_week: 300000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  ios_manual_tester:
+    role: "Exploratory testing on an iOS simulator (Stratus Mac node)"
+    grade: gemini-2.5-pro
+    schedule: "3x/week"
+    salary_tokens_per_week: 300000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  # === OPS / LOCAL (OpenClaw) AGENTS ===
+  # Local-runtime employees that must touch local machine state (not LangSmith/LangGraph graphs,
+  # so they are not in langgraph.json and are correctly absent from the graph->roster coverage
+  # gate). Hired through HR like any employee. Approved by Shay 2026-06-11.
+  storage_maintainer:
+    role: "Mac storage maintainer — daily propose-only disk audit; ranks judgment-class reclaim (Docker images, ~/Downloads, node_modules, iOS runtimes) for human approval. Auto-safe cache class is owned by its deterministic tool disk_guard.sh (>90% trigger, zero-data-loss allow-list)."
+    grade: gemini-3-flash                 # cheapest tier passing its safety eval (cheapest-model-eval-driven)
+    schedule: "daily 09:00 audit + 09:20 safety-eval gate (Asia/Jerusalem)"
+    salary_tokens_per_week: 60000         # ~1 flash audit/day + headroom; STARTING DEFAULT
+    status: probation                     # already report-only (propose-only); never deletes
+    runtime: openclaw-local               # NOT a langgraph.json graph — local runtime by design
+    tools: [disk_guard.sh, disk-keeper-eval]
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null, proposal_safe_pass_rate: null }
