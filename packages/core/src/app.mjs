@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
-import { createAgentRoutes } from "./routes/agents.mjs";
 
 const require = createRequire(import.meta.url);
 
@@ -29,39 +28,9 @@ export function resolveStore(env = process.env) {
 export function createSchedulerApi(options = {}) {
   const store = options.store ?? resolveStore();
   const rateLimit = options.rateLimit ?? createMemoryRateLimit(1000);
-  const langsmithApiKey = options.langsmithApiKey ?? process.env.LANGSMITH_API_KEY ?? null;
-  const dispatchSecret = options.dispatchSecret ?? process.env.SCHEDULER_DISPATCH_SECRET ?? null;
-
-  const agentRoutes = createAgentRoutes({ langsmithApiKey, dispatchSecret });
 
   return async function handleRequest(request) {
     const url = new URL(request.url);
-    const parts = url.pathname.split("/").filter(Boolean);
-
-    // Try agent routes first — they handle /v1/tenants/{tid}/agents/...
-    // and may skip standard user auth (dispatch endpoint uses its own secret)
-    const agentRoute = parts[0] === "v1" && parts[1] === "tenants" && parts[3] === "agents"
-      ? agentRoutes.matchRoute(request.method, parts, { store })
-      : null;
-
-    if (agentRoute) {
-      if (!agentRoute.skipUserAuth) {
-        const auth = authenticate(request, agentRoute.params.tenantId);
-        if (!auth.ok) return jsonResponse(auth.status, { error: auth.error });
-        if (agentRoute.managerOnly && !hasManagerApprovalBoundary(auth.actor)) {
-          return jsonResponse(403, { error: "manager_approval_required" });
-        }
-        const limited = rateLimit.check(auth.actor.tenantId);
-        if (!limited.ok) {
-          return jsonResponse(429, { error: "rate_limited", retryAfter: limited.retryAfter });
-        }
-      }
-      try {
-        return await agentRoute.handler({ request, params: agentRoute.params, store });
-      } catch (error) {
-        return jsonResponse(400, { error: "bad_request", message: error.message });
-      }
-    }
 
     const route = matchRoute(request.method, url.pathname);
 
