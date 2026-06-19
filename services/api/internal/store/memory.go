@@ -10,28 +10,34 @@ import (
 // MemoryStore is a thread-safe in-memory implementation of Store.
 // It is the default store used during development and in tests.
 type MemoryStore struct {
-	mu           sync.RWMutex
-	schedules    map[string]Schedule   // key: "tenantID:scheduleID"
-	employees    map[string][]Employee // key: "tenantID:scheduleID" → ordered employees
-	invitations  map[string]Invitation // key: "tenantID:invitationID"
-	availability map[string]Availability
-	drafts       map[string]Draft
-	requests     map[string]Request
-	imports      map[string]Import
-	approvals    map[string]Approval
+	mu                     sync.RWMutex
+	schedules              map[string]Schedule              // key: "tenantID:scheduleID"
+	employees              map[string][]Employee            // key: "tenantID:scheduleID" → ordered employees
+	invitations            map[string]Invitation            // key: "tenantID:invitationID"
+	shiftRequests          map[string]ShiftRequest          // key: "tenantID:requestID"
+	scheduleChangeRequests map[string]ScheduleChangeRequest // key: "tenantID:requestID"
+	userProfiles           map[string]UserProfile           // key: "tenantID:uid"
+	availability           map[string]Availability
+	drafts                 map[string]Draft
+	requests               map[string]Request
+	imports                map[string]Import
+	approvals              map[string]Approval
 }
 
 // NewMemoryStore returns an initialised MemoryStore.
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
-		schedules:    make(map[string]Schedule),
-		employees:    make(map[string][]Employee),
-		invitations:  make(map[string]Invitation),
-		availability: make(map[string]Availability),
-		drafts:       make(map[string]Draft),
-		requests:     make(map[string]Request),
-		imports:      make(map[string]Import),
-		approvals:    make(map[string]Approval),
+		schedules:              make(map[string]Schedule),
+		employees:              make(map[string][]Employee),
+		invitations:            make(map[string]Invitation),
+		shiftRequests:          make(map[string]ShiftRequest),
+		scheduleChangeRequests: make(map[string]ScheduleChangeRequest),
+		userProfiles:           make(map[string]UserProfile),
+		availability:           make(map[string]Availability),
+		drafts:                 make(map[string]Draft),
+		requests:               make(map[string]Request),
+		imports:                make(map[string]Import),
+		approvals:              make(map[string]Approval),
 	}
 }
 
@@ -395,4 +401,159 @@ func (m *MemoryStore) ListInvitationsForSchedule(tenantID, scheduleID string) []
 		return out[i].CreatedAt > out[j].CreatedAt
 	})
 	return out
+}
+
+// -------------------------------------------------------------------------
+// Shift-swap requests (built_schedules/{bid}/shift_requests)
+// -------------------------------------------------------------------------
+
+// PutShiftRequest upserts a shift-swap request, keyed by tenant + id.
+func (m *MemoryStore) PutShiftRequest(req ShiftRequest) ShiftRequest {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.shiftRequests[req.TenantID+":"+req.ID] = req
+	return req
+}
+
+// GetShiftRequest returns a shift-swap request by tenant + id, or nil.
+func (m *MemoryStore) GetShiftRequest(tenantID, id string) *ShiftRequest {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	req, ok := m.shiftRequests[tenantID+":"+id]
+	if !ok {
+		return nil
+	}
+	cp := req
+	return &cp
+}
+
+// ListShiftRequestsForSchedule returns all shift-swap requests targeting a
+// schedule, newest first.
+func (m *MemoryStore) ListShiftRequestsForSchedule(tenantID, scheduleID string) []ShiftRequest {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	var out []ShiftRequest
+	for _, req := range m.shiftRequests {
+		if req.TenantID == tenantID && req.ScheduleID == scheduleID {
+			out = append(out, req)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].CreatedAt > out[j].CreatedAt
+	})
+	return out
+}
+
+// DeleteShiftRequest removes a shift-swap request by tenant + id. Returns true
+// if a request was removed.
+func (m *MemoryStore) DeleteShiftRequest(tenantID, id string) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	key := tenantID + ":" + id
+	if _, ok := m.shiftRequests[key]; !ok {
+		return false
+	}
+	delete(m.shiftRequests, key)
+	return true
+}
+
+// -------------------------------------------------------------------------
+// Schedule-change requests (scheduleChangeRequest)
+// -------------------------------------------------------------------------
+
+// PutScheduleChangeRequest upserts a schedule-change request, keyed by
+// tenant + id.
+func (m *MemoryStore) PutScheduleChangeRequest(req ScheduleChangeRequest) ScheduleChangeRequest {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.scheduleChangeRequests[req.TenantID+":"+req.ID] = req
+	return req
+}
+
+// GetScheduleChangeRequest returns a schedule-change request by tenant + id,
+// or nil.
+func (m *MemoryStore) GetScheduleChangeRequest(tenantID, id string) *ScheduleChangeRequest {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	req, ok := m.scheduleChangeRequests[tenantID+":"+id]
+	if !ok {
+		return nil
+	}
+	cp := req
+	return &cp
+}
+
+// ListScheduleChangeRequestsForSchedule returns all schedule-change requests
+// targeting a schedule, newest first.
+func (m *MemoryStore) ListScheduleChangeRequestsForSchedule(tenantID, scheduleID string) []ScheduleChangeRequest {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	var out []ScheduleChangeRequest
+	for _, req := range m.scheduleChangeRequests {
+		if req.TenantID == tenantID && req.ScheduleID == scheduleID {
+			out = append(out, req)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].CreatedAt > out[j].CreatedAt
+	})
+	return out
+}
+
+// -------------------------------------------------------------------------
+// User profiles (users/{uid})
+// -------------------------------------------------------------------------
+
+// GetUserProfile returns the profile for (tenantID, uid), or nil if none has
+// been written yet.
+func (m *MemoryStore) GetUserProfile(tenantID, uid string) *UserProfile {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	p, ok := m.userProfiles[tenantID+":"+uid]
+	if !ok {
+		return nil
+	}
+	cp := p
+	return &cp
+}
+
+// PutUserProfile upserts a profile with MERGE semantics, mirroring the web
+// client's setDoc(..., { merge: true }): only non-zero patch fields overwrite
+// the stored doc, so a name-only write does not clobber a previously chosen
+// role (and vice-versa). LastActiveTime is always applied (every write bumps
+// it). The (tenantID, uid) identity fields on the patch are authoritative and
+// always set on the stored doc.
+func (m *MemoryStore) PutUserProfile(patch UserProfile) UserProfile {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	key := patch.TenantID + ":" + patch.UID
+
+	// Start from the existing doc (if any) so unspecified fields are preserved.
+	merged := m.userProfiles[key]
+
+	// Identity is always authoritative on the patch.
+	merged.TenantID = patch.TenantID
+	merged.UID = patch.UID
+
+	// Mergeable scalar fields: only a non-empty patch value overwrites.
+	if patch.Email != "" {
+		merged.Email = patch.Email
+	}
+	if patch.DisplayName != "" {
+		merged.DisplayName = patch.DisplayName
+	}
+	if patch.Title != "" {
+		merged.Title = patch.Title
+	}
+	if patch.Role != "" {
+		merged.Role = patch.Role
+	}
+	// LastActiveTime is always bumped by the caller; apply it unconditionally so
+	// a freshly written timestamp is never dropped.
+	if patch.LastActiveTime != "" {
+		merged.LastActiveTime = patch.LastActiveTime
+	}
+
+	m.userProfiles[key] = merged
+	return merged
 }
