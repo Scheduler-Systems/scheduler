@@ -73,3 +73,24 @@ jobs:
         run: npm run test
       - name: Build
         run: npm run build
+
+  # Aggregator gate. Always runs so the org-level `gate` required status check
+  # is satisfied for every PR/push, even when the path-filtered api/web jobs are
+  # legitimately skipped. Fails only if a job that actually ran failed or was
+  # cancelled (skipped == OK).
+  gate:
+    needs: [changes, api, web]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require ran jobs to have succeeded
+        run: |
+          for pair in "changes:${{ needs.changes.result }}" "api:${{ needs.api.result }}" "web:${{ needs.web.result }}"; do
+            job="${pair%%:*}"; res="${pair#*:}"
+            echo "$job -> $res"
+            if [ "$res" = "failure" ] || [ "$res" = "cancelled" ]; then
+              echo "::error::required job '$job' did not pass (result=$res)"
+              exit 1
+            fi
+          done
+          echo "gate: all jobs passed or were skipped"
