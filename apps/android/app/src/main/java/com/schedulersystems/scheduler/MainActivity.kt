@@ -18,7 +18,9 @@ import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleDetailScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleListScreen
 import com.schedulersystems.scheduler.ui.theme.SchedulerTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
