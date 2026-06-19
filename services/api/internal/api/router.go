@@ -9,9 +9,11 @@ import (
 	"github.com/Scheduler-Systems/scheduler-api/internal/employees"
 	"github.com/Scheduler-Systems/scheduler-api/internal/health"
 	"github.com/Scheduler-Systems/scheduler-api/internal/httputil"
+	"github.com/Scheduler-Systems/scheduler-api/internal/requests"
 	"github.com/Scheduler-Systems/scheduler-api/internal/schedgy"
 	"github.com/Scheduler-Systems/scheduler-api/internal/schedules"
 	"github.com/Scheduler-Systems/scheduler-api/internal/store"
+	"github.com/Scheduler-Systems/scheduler-api/internal/userprofile"
 	"github.com/Scheduler-Systems/scheduler-api/internal/webhooks/whatsapp"
 )
 
@@ -237,6 +239,63 @@ func matchRoute(method, pathname string, st store.Store) *route {
 			rp := copyWith(p, "scheduleId", parts[4])
 			rp = copyWith(rp, "employeeEmail", decodePathSegment(parts[6]))
 			return &route{params: rp, managerOnly: true, handler: employees.RemoveHandler(st)}
+
+		// ---- Requests domain: shift-swap requests ---------------------------
+		// Read + create are open to any schedule member (membership-gated in
+		// the handler); the requester (employee) creates, the author deletes
+		// their own PENDING request. Status transitions are manager-gated.
+
+		// GET  /schedules/{id}/shift-requests
+		case method == http.MethodGet && depth == 6 && parts[5] == "shift-requests":
+			rp := copyWith(p, "scheduleId", parts[4])
+			return &route{params: rp, handler: requests.ListShiftRequestsHandler(st)}
+
+		// POST /schedules/{id}/shift-requests   (requester creates)
+		case method == http.MethodPost && depth == 6 && parts[5] == "shift-requests":
+			rp := copyWith(p, "scheduleId", parts[4])
+			return &route{params: rp, handler: requests.CreateShiftRequestHandler(st)}
+
+		// GET    /schedules/{id}/shift-requests/{requestId}
+		case method == http.MethodGet && depth == 7 && parts[5] == "shift-requests":
+			rp := copyWith(p, "scheduleId", parts[4])
+			rp = copyWith(rp, "requestId", parts[6])
+			return &route{params: rp, handler: requests.GetShiftRequestHandler(st)}
+
+		// PATCH  /schedules/{id}/shift-requests/{requestId}   (manager reviews)
+		case method == http.MethodPatch && depth == 7 && parts[5] == "shift-requests":
+			rp := copyWith(p, "scheduleId", parts[4])
+			rp = copyWith(rp, "requestId", parts[6])
+			return &route{params: rp, managerOnly: true, handler: requests.UpdateShiftRequestStatusHandler(st)}
+
+		// DELETE /schedules/{id}/shift-requests/{requestId}   (author deletes own PENDING)
+		case method == http.MethodDelete && depth == 7 && parts[5] == "shift-requests":
+			rp := copyWith(p, "scheduleId", parts[4])
+			rp = copyWith(rp, "requestId", parts[6])
+			return &route{params: rp, handler: requests.DeleteShiftRequestHandler(st)}
+
+		// ---- Requests domain: schedule-change requests ----------------------
+
+		// GET  /schedules/{id}/change-requests
+		case method == http.MethodGet && depth == 6 && parts[5] == "change-requests":
+			rp := copyWith(p, "scheduleId", parts[4])
+			return &route{params: rp, handler: requests.ListChangeRequestsHandler(st)}
+
+		// POST /schedules/{id}/change-requests   (requester creates)
+		case method == http.MethodPost && depth == 6 && parts[5] == "change-requests":
+			rp := copyWith(p, "scheduleId", parts[4])
+			return &route{params: rp, handler: requests.CreateChangeRequestHandler(st)}
+
+		// GET    /schedules/{id}/change-requests/{requestId}
+		case method == http.MethodGet && depth == 7 && parts[5] == "change-requests":
+			rp := copyWith(p, "scheduleId", parts[4])
+			rp = copyWith(rp, "requestId", parts[6])
+			return &route{params: rp, handler: requests.GetChangeRequestHandler(st)}
+
+		// PATCH  /schedules/{id}/change-requests/{requestId}   (manager reviews)
+		case method == http.MethodPatch && depth == 7 && parts[5] == "change-requests":
+			rp := copyWith(p, "scheduleId", parts[4])
+			rp = copyWith(rp, "requestId", parts[6])
+			return &route{params: rp, managerOnly: true, handler: requests.UpdateChangeRequestStatusHandler(st)}
 		}
 
 	// -------------------------------------------------------------------------
@@ -257,6 +316,33 @@ func matchRoute(method, pathname string, st store.Store) *route {
 		case method == http.MethodGet && depth == 6 && parts[4] == "imports":
 			rp := copyWith(p, "importId", parts[5])
 			return &route{params: rp, handler: schedgy.GetImportHandler(st)}
+		}
+
+	// -------------------------------------------------------------------------
+	// User-profile routes (users/{uid} document)
+	// -------------------------------------------------------------------------
+	//
+	// These are intentionally NOT managerOnly at the router: a plain employee
+	// must be able to onboard (set their own name/role). The IDOR-safe
+	// self-or-admin check lives in the handler (requireSelfOrAdmin) so the
+	// {uid} must be the actor's own uid unless they are an admin.
+	case "users":
+		switch {
+
+		// GET /users/{uid}
+		case method == http.MethodGet && depth == 5:
+			rp := copyWith(p, "uid", parts[4])
+			return &route{params: rp, handler: userprofile.GetHandler(st)}
+
+		// PUT /users/{uid}   (profile upsert: display_name/title [+ role])
+		case method == http.MethodPut && depth == 5:
+			rp := copyWith(p, "uid", parts[4])
+			return &route{params: rp, handler: userprofile.UpsertProfileHandler(st)}
+
+		// PUT /users/{uid}/role   (role-only upsert)
+		case method == http.MethodPut && depth == 6 && parts[5] == "role":
+			rp := copyWith(p, "uid", parts[4])
+			return &route{params: rp, handler: userprofile.UpsertRoleHandler(st)}
 		}
 
 	// -------------------------------------------------------------------------

@@ -49,6 +49,107 @@ type Request struct {
 	CreatedAt  string                 `json:"createdAt"`
 }
 
+// UserProfile mirrors the web/Flutter users/{uid} document written by
+// scheduler-web lib/firestore-write.ts upsertUserProfile / upsertUserRole.
+//
+// The field names and the role encoding are VERBATIM matches for the Firestore
+// doc so a profile written through this API round-trips with the existing
+// web/iOS/Android clients:
+//
+//   - UID / Email          — identity, set on every write.
+//   - DisplayName / Title  — the name-step fields.
+//   - Role                 — the FLUTTER ROLE STRING, not a struct: exactly one
+//     of "employer" or "employee" (see RoleEmployer /
+//     RoleEmployee). The web client derives this via
+//     roleStructToFlutterString(role) =
+//     is_admin||is_creator ? "employer" : "employee".
+//   - LastActiveTime       — RFC3339 timestamp; the web doc uses
+//     serverTimestamp() under the key "last_active_time".
+//
+// UserProfile is tenant-scoped in the Go API (key tenantId+uid) so that
+// cross-tenant identity collisions are impossible even though the Firestore
+// collection is flat (users/{uid}); TenantID is carried but NOT serialized into
+// the user-facing doc body (it is a routing/storage concern, json:"-").
+type UserProfile struct {
+	TenantID       string `json:"-"`
+	UID            string `json:"uid"`
+	Email          string `json:"email"`
+	DisplayName    string `json:"display_name"`
+	Title          string `json:"title"`
+	Role           string `json:"role,omitempty"`
+	LastActiveTime string `json:"last_active_time,omitempty"`
+}
+
+// Flutter role-string constants (the only valid values for UserProfile.Role).
+// These mirror scheduler-web roleStructToFlutterString output VERBATIM — the
+// server is authoritative for the role, but the wire encoding must stay byte
+// identical so clients keep parsing it.
+const (
+	RoleEmployer = "employer"
+	RoleEmployee = "employee"
+)
+
+// ShiftRequest mirrors the web/Flutter ShiftRequestsRecord document stored at
+// the Firestore subcollection
+// `schedules/{sid}/built_schedules/{bid}/shift_requests/{id}` (see
+// scheduler-web lib/requests-types.ts ShiftRequest and lib/requests.ts
+// createShiftRequest/updateShiftRequestStatus/deleteShiftRequest).
+//
+// The Firestore JSON keys are preserved VERBATIM — including the Flutter typo
+// `reuqesting_employee` (should be "requesting_employee") and the
+// `shift_request_status` enum values PENDING/ACCEPTED/"REJECETED" (the
+// metathesis typo is faithful to Flutter) — so data written by this API
+// round-trips with the existing iOS/Android/web clients.
+//
+// DocumentReference fields are represented as plain uid / id strings rather
+// than Firestore refs so the Go API stays storage-agnostic:
+//   - reuqesting_employee: the requester's uid (Flutter stores a users/{uid} ref)
+//   - built_schedule_ref:  the built-schedule id (Flutter stores the doc ref)
+//
+// Timestamps round-trip as RFC3339 strings (Flutter stores Firestore
+// Timestamps; the web layer converts to/from Date).
+type ShiftRequest struct {
+	ID                 string `json:"id"`
+	TenantID           string `json:"tenantId"`
+	ScheduleID         string `json:"scheduleId"`
+	BuiltScheduleID    string `json:"builtScheduleId"`
+	RequestingEmployee string `json:"reuqesting_employee"`
+	ShiftToChangeFrom  string `json:"shift_to_change_from"`
+	ShiftToChangeTo    string `json:"shift_to_change_to"`
+	BuiltScheduleRef   string `json:"built_schedule_ref"`
+	Status             string `json:"shift_request_status"`
+	// Audit fields the web layer adds on review (Flutter ignores unknown fields).
+	ReviewerUID string `json:"reviewer_uid,omitempty"`
+	ReviewedAt  string `json:"reviewed_at,omitempty"`
+	CreatedAt   string `json:"created_time,omitempty"`
+}
+
+// ScheduleChangeRequest mirrors the web/Flutter ScheduleChangeRequestRecord
+// document stored at the Firestore collection `scheduleChangeRequest/{id}`
+// (note camelCase collection name — see scheduler-web lib/requests-types.ts
+// ScheduleChangeRequest and lib/requests.ts createScheduleChangeRequest /
+// updateScheduleChangeRequestStatus).
+//
+// The Firestore JSON keys are preserved VERBATIM, including the CAPITALISED
+// FlutterFlow-generated field names `DateTime` and `Reason`. `userId` is a
+// plain uid string (not a ref), matching Flutter. `status` is a free-text
+// string — Flutter has no typed enum here — with the conventional values
+// "sent" (on create), "accepted" / "declined" (on review). `scheduleId` is a
+// web-added field (Flutter ignores it) used to filter per-schedule.
+type ScheduleChangeRequest struct {
+	ID         string `json:"id"`
+	TenantID   string `json:"tenantId"`
+	ScheduleID string `json:"scheduleId"`
+	DateTime   string `json:"DateTime"`
+	Reason     string `json:"Reason"`
+	UserID     string `json:"userId"`
+	Status     string `json:"status"`
+	// Audit fields the web layer adds on review (Flutter ignores unknown fields).
+	ReviewerUID string `json:"reviewer_uid,omitempty"`
+	ResolvedAt  string `json:"resolved_at,omitempty"`
+	CreatedAt   string `json:"created_time,omitempty"`
+}
+
 // RoleStruct mirrors the web/Flutter EmployeeDetails.role shape
 // (is_creator / is_admin / is_worker). It is server-authoritative: the role an
 // employee is stored with determines what the membership ACL grants.
@@ -163,6 +264,36 @@ type Store interface {
 	GetInvitation(tenantID, id string) *Invitation
 	ListInvitationsForSchedule(tenantID, scheduleID string) []Invitation
 
+	// ---- Requests: shift-swap (built_schedules/{bid}/shift_requests) ----------
+
+	// PutShiftRequest upserts a shift-swap request, keyed by tenant + id.
+	PutShiftRequest(req ShiftRequest) ShiftRequest
+
+	// GetShiftRequest returns a shift-swap request by tenant + id, or nil.
+	GetShiftRequest(tenantID, id string) *ShiftRequest
+
+	// ListShiftRequestsForSchedule returns the shift-swap requests targeting a
+	// schedule, newest first.
+	ListShiftRequestsForSchedule(tenantID, scheduleID string) []ShiftRequest
+
+	// DeleteShiftRequest removes a shift-swap request by tenant + id. Returns
+	// true if a request was removed.
+	DeleteShiftRequest(tenantID, id string) bool
+
+	// ---- Requests: schedule-change (scheduleChangeRequest) --------------------
+
+	// PutScheduleChangeRequest upserts a schedule-change request, keyed by
+	// tenant + id.
+	PutScheduleChangeRequest(req ScheduleChangeRequest) ScheduleChangeRequest
+
+	// GetScheduleChangeRequest returns a schedule-change request by tenant + id,
+	// or nil.
+	GetScheduleChangeRequest(tenantID, id string) *ScheduleChangeRequest
+
+	// ListScheduleChangeRequestsForSchedule returns the schedule-change requests
+	// targeting a schedule, newest first.
+	ListScheduleChangeRequestsForSchedule(tenantID, scheduleID string) []ScheduleChangeRequest
+
 	PutAvailability(e Availability) Availability
 	GetAvailability(id string) *Availability
 
@@ -178,4 +309,26 @@ type Store interface {
 	ListImports(tenantID string, limit int) []Import
 
 	PutApproval(a Approval) Approval
+
+	// ---- User profiles (users/{uid} document) ---------------------------------
+
+	// GetUserProfile returns the profile for (tenantID, uid), or nil if none
+	// exists yet.
+	GetUserProfile(tenantID, uid string) *UserProfile
+
+	// PutUserProfile upserts a user profile with MERGE semantics: only the
+	// non-zero fields of the supplied patch overwrite the stored doc, mirroring
+	// the web client's setDoc(..., { merge: true }). A first write for a uid
+	// creates the doc. Returns the resulting stored profile.
+	//
+	// Merge rules (per field):
+	//   - UID / Email / DisplayName / Title — overwritten when the patch value
+	//     is non-empty; an empty string in the patch leaves the stored value
+	//     untouched (a profile-name write must not clobber a previously set
+	//     role/email, and a role-only write must not clobber the name).
+	//   - Role — overwritten only when non-empty (so upsertUserRole sets role
+	//     without touching name/title, and upsertUserProfile without a role does
+	//     not wipe a role chosen on the earlier Choose-Role step).
+	//   - LastActiveTime — always overwritten (every write bumps it).
+	PutUserProfile(patch UserProfile) UserProfile
 }
