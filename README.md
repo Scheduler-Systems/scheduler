@@ -22,18 +22,35 @@ Licensed under **AGPL-3.0**.
 - 🔌 **BYO billing** — a pluggable seam; the open build is fully functional and **unmetered** (everyone is the free tier)
 - 🔓 100% open source (AGPL-3.0) — self-host anywhere
 
-## Quickstart (self-host)
+## Quickstart
+
+### Try it in 60 seconds — no install, no accounts
+
+Create your first schedule against the **dependency-free engine** (just Node 20+ and `curl`):
 
 ```sh
-# API — Go HTTP API, in-memory store
-cd services/api && make test && make dev          # :8080
+git clone https://github.com/Scheduler-Systems/scheduler && cd scheduler
+./examples/create-a-schedule.sh        # starts the engine, creates + lists a schedule
+```
 
-# Web — Next.js app
-cd apps/web && cp .env.local.example .env.local   # set your Firebase config
-npm install && npm run dev
+That's the whole loop: **clone → run → schedule created.** It runs
+`packages/core/src/server.mjs` — no `npm install`, no Firebase, no database.
+
+### Run the full stack (self-host)
+
+```sh
+# Go API — tenant auth + schedules/employees. In-memory by default; set
+# SCHEDULER_STORE=firestore (+ FIREBASE_PROJECT_ID) to persist across restarts.
+cd services/api && make test && make dev            # :8080  (config: .env.example)
+
+# Web — Next.js app (Firebase auth/Firestore)
+cd apps/web && cp .env.local.example .env.local     # set your Firebase config
+npm install && npm run dev                          # :3000
 ```
 
 Mobile: `apps/android` (`make run`) and `apps/ios` — see each app's README.
+
+More: [`examples/`](examples/) · [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Project layout
 
