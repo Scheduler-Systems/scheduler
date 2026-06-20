@@ -75,6 +75,8 @@ apps/web/          Next.js web app (Firebase auth/Firestore; billing STUBBED)
 apps/android/      Native Android client (Kotlin/Compose)
 apps/ios/          Native iOS client (Swift/SwiftUI)
 packages/core/     Billing-free scheduling engine (no-dependency Node)
+workforce/         Development/experimental LangGraph agent fleet — NOT part of
+                   the product (not built/run/supported by the release)
 ```
 
 - API — [`services/api/api-boundaries.md`](services/api/api-boundaries.md) · env: [`services/api/.env.example`](services/api/.env.example)

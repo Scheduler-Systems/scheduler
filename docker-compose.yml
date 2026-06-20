@@ -2,7 +2,8 @@
 # Firebase emulators + Go API + Next.js web, wired to a local-only `demo-` project.
 #
 #   docker compose up --build       # then open http://localhost:3000
-#   login: owner@demo.test / password123  (seed once: see note below)
+#   login: owner@demo.test / password123  (seed via scripts/seed-dev.sh once the
+#   emulators are up, or `make seed`)
 #
 # ⚠️ EXPERIMENTAL / NOT YET VERIFIED: authored without a Docker daemon available
 # in the build environment, so it has NOT been run end-to-end. The VERIFIED path

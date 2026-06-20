@@ -24,6 +24,10 @@ export FIRESTORE_EMULATOR_HOST="127.0.0.1:${FS_PORT}"
 command -v firebase >/dev/null || { echo "✗ Firebase CLI not found — install: npm i -g firebase-tools"; exit 1; }
 command -v go >/dev/null || { echo "✗ Go not found (need 1.22+)"; exit 1; }
 command -v node >/dev/null || { echo "✗ Node not found (need 20+)"; exit 1; }
+command -v curl >/dev/null || { echo "✗ curl not found (used to probe the emulators)"; exit 1; }
+# `java -version` exit code, NOT `command -v java`: macOS ships a /usr/bin/java
+# stub that exists but exits 1 with no JDK — the Firebase emulators are JVM processes.
+java -version >/dev/null 2>&1 || { echo "✗ JDK not found (need 11+) — the Firebase emulators are JVM processes"; exit 1; }
 
 # Build an emulator config with the chosen ports (defaults come from firebase.json).
 EMU_CONFIG="$(mktemp -t scheduler-emu-XXXX.json)"
