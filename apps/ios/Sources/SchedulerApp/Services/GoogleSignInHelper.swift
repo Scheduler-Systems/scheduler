@@ -7,10 +7,10 @@ import UIKit
 enum GoogleSignInHelper {
     @MainActor
     static func signIn(presenting viewController: UIViewController) async throws -> GIDSignInResult {
-        guard let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: viewController) else {
-            throw AuthError.googleSignInFailed
-        }
-        return result
+        // GoogleSignIn 8.x: signIn(withPresenting:) returns a non-optional
+        // GIDSignInResult and throws on failure (the older API returned an
+        // optional, which the migration was still binding with `guard let`).
+        return try await GIDSignIn.sharedInstance.signIn(withPresenting: viewController)
     }
     
     static func signOut() {
