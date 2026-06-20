@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- PLACEHOLDER Firebase config (project: scheduler-ci-placeholder, matching
+     apps/android/app/google-services.json). Lets FirebaseApp.configure()
+     succeed so the UI renders; real auth needs a real GoogleService-Info.plist
+     (git-ignored, supplied per apps/ios/docs/FIREBASE_SETUP.md). -->
+<plist version="1.0">
+<dict>
+    <key>API_KEY</key>
+    <string>AIzaSyDpLc-placeholder-ci-key-not-real00</string>
+    <key>GCM_SENDER_ID</key>
+    <string>000000000000</string>
+    <key>PLIST_VERSION</key>
+    <string>1</string>
+    <key>BUNDLE_ID</key>
+    <string>com.schedulersystems.scheduler</string>
+    <key>PROJECT_ID</key>
+    <string>scheduler-ci-placeholder</string>
+    <key>STORAGE_BUCKET</key>
+    <string>scheduler-ci-placeholder.appspot.com</string>
+    <key>IS_ADS_ENABLED</key>
+    <false/>
+    <key>IS_ANALYTICS_ENABLED</key>
+    <false/>
+    <key>IS_APPINVITE_ENABLED</key>
+    <true/>
+    <key>IS_GCM_ENABLED</key>
+    <true/>
+    <key>IS_SIGNIN_ENABLED</key>
+    <true/>
+    <key>GOOGLE_APP_ID</key>
+    <string>1:000000000000:ios:0000000000000000000000</string>
+    <key>CLIENT_ID</key>
+    <string>000000000000-placeholder.apps.googleusercontent.com</string>
+    <key>REVERSED_CLIENT_ID</key>
+    <string>com.googleusercontent.apps.000000000000-placeholder</string>
+</dict>
+</plist>

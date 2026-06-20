@@ -23,7 +23,8 @@ let package = Package(
                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
                 .product(name: "GoogleSignInSwift", package: "GoogleSignIn-iOS"),
             ],
-            path: "Sources/SchedulerApp"
+            path: "Sources/SchedulerApp",
+            resources: [.process("Resources")]
         ),
         .testTarget(
             name: "SchedulerAppTests",

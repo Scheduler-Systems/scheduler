@@ -1,3 +1,4 @@
+import FirebaseCore
 import SwiftUI
 
 @main
@@ -8,6 +9,11 @@ struct SchedulerApp: App {
     private let scheduleService: ScheduleDataServiceProtocol
 
     init() {
+        // Firebase must be configured before any Auth/Firestore use. This was
+        // missing from the native migration, which crashed/failed Firebase at
+        // launch. Requires GoogleService-Info.plist in the app bundle.
+        FirebaseApp.configure()
+
         let baseURL = Bundle.main.object(forInfoDictionaryKey: "SCHEDULER_API_URL") as? String
             ?? ProcessInfo.processInfo.environment["SCHEDULER_API_URL"]
             ?? "http://127.0.0.1:4180"
