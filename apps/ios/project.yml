@@ -43,3 +43,24 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+  SchedulerAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Tests/SchedulerAppTests
+    dependencies:
+      - target: SchedulerApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.schedulersystems.scheduler.tests
+        GENERATE_INFOPLIST_FILE: "YES"
+schemes:
+  SchedulerApp:
+    build:
+      targets:
+        SchedulerApp: all
+        SchedulerAppTests: [test]
+    test:
+      targets:
+        - SchedulerAppTests

@@ -67,6 +67,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    lint {
+        // Pre-existing lint debt (incl. incomplete es/he translations) is
+        // captured in lint-baseline.xml so CI lint fails only on NEW issues.
+        // Completing the translations is a tracked follow-up.
+        baseline = file("lint-baseline.xml")
+    }
 }
 
 dependencies {

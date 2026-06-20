@@ -1,0 +1,4423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.2.2" type="baseline" client="gradle" dependencies="false" name="AGP (8.2.2)" variant="all" version="8.2.2">
+
+    <issue
+        id="ObsoleteLintCustomCheck"
+        message="Library lint checks reference invalid APIs; these checks **will be skipped**!&#xA;&#xA;Lint found an issue registry (`androidx.compose.runtime.lint.RuntimeIssueRegistry`)&#xA;which contains some references to invalid API:&#xA;org.jetbrains.kotlin.analysis.api.session.KtAnalysisSessionProvider: org.jetbrains.kotlin.analysis.api.lifetime.KtLifetimeTokenFactory getTokenFactory()&#xA;(Referenced from androidx/compose/runtime/lint/AutoboxingStateCreationDetector.class)&#xA;&#xA;Therefore, this lint check library is **not** included&#xA;in analysis. This affects the following lint checks:&#xA;`AutoboxingStateValueProperty`&#xA;`AutoboxingStateCreation`&#xA;`CoroutineCreationDuringComposition`&#xA;`FlowOperatorInvokedInComposition`&#xA;`ComposableLambdaParameterNaming`&#xA;`ComposableLambdaParameterPosition`&#xA;`ComposableNaming`&#xA;`StateFlowValueCalledInComposition`&#xA;`CompositionLocalNaming`&#xA;`MutableCollectionMutableState`&#xA;`ProduceStateDoesNotAssignValue`&#xA;`RememberReturnType`&#xA;`OpaqueUnitKey`&#xA;`UnrememberedMutableState`&#xA;&#xA;To use this lint check, upgrade to a more recent version&#xA;of the library.">
+        <location
+            file="$GRADLE_USER_HOME/caches/transforms-3/af7ec9762f7bf5d42687b761ee604600/transformed/jetified-runtime-release/jars/lint.jar"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `capitalize(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="            text = &quot;Role: ${userRole?.name?.lowercase()?.capitalize() ?: &quot;Unknown&quot;}&quot;,"
+        errorLine2="                                                         ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/schedulersystems/scheduler/ui/screens/home/HomeScreen.kt"
+            line="189"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="LocaleFolder"
+        message="The locale folder &quot;`he`&quot; should be called &quot;`iw`&quot; instead; see the `java.util.Locale` documentation">
+        <location
+            file="src/main/res/values-he"/>
+    </issue>
+
+    <issue
+        id="OldTargetApi"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details."
+        errorLine1="        targetSdk = 34"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="21"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.core:core-ktx than 1.12.0 is available: 1.19.0"
+        errorLine1="    implementation(&quot;androidx.core:core-ktx:1.12.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="80"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.7.0 is available: 2.11.0"
+        errorLine1="    implementation(&quot;androidx.lifecycle:lifecycle-runtime-ktx:2.7.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="81"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.7.0 is available: 2.11.0"
+        errorLine1="    implementation(&quot;androidx.lifecycle:lifecycle-runtime-compose:2.7.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="82"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.activity:activity-compose than 1.8.2 is available: 1.13.0"
+        errorLine1="    implementation(&quot;androidx.activity:activity-compose:1.8.2&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="83"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.navigation:navigation-compose than 2.7.6 is available: 2.9.8"
+        errorLine1="    implementation(&quot;androidx.navigation:navigation-compose:2.7.6&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="90"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.7.0 is available: 2.11.0"
+        errorLine1="    implementation(&quot;androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="91"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.hilt:hilt-navigation-compose than 1.1.0 is available: 1.3.0"
+        errorLine1="    implementation(&quot;androidx.hilt:hilt-navigation-compose:1.1.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="104"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.ext:junit than 1.1.5 is available: 1.3.0"
+        errorLine1="    androidTestImplementation(&quot;androidx.test.ext:junit:1.1.5&quot;)"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="120"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.5.1 is available: 3.7.0"
+        errorLine1="    androidTestImplementation(&quot;androidx.test.espresso:espresso-core:3.5.1&quot;)"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="121"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.navigation:navigation-testing than 2.7.6 is available: 2.9.8"
+        errorLine1="    androidTestImplementation(&quot;androidx.navigation:navigation-testing:2.7.6&quot;)"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="124"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;sign_in_to_continue&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;sign_in_to_continue&quot;>Sign in to continue&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;or&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;or&quot;>or&lt;/string>"
+        errorLine2="            ~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="10"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;sign_in_with_phone&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;sign_in_with_phone&quot;>Sign in with Phone&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="11"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;sign_in_with_google&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;sign_in_with_google&quot;>Sign in with Google&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;sign_in_with_apple&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;sign_in_with_apple&quot;>Sign in with Apple&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="13"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;dont_have_account&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;dont_have_account&quot;>Don\&apos;t have an account?&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="14"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;sign_up&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;sign_up&quot;>Sign Up&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;phone_number&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;phone_number&quot;>Phone Number&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="16"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;send_code&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;send_code&quot;>Send Code&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="17"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;verification_code&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;verification_code&quot;>Verification Code&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="18"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;verify&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;verify&quot;>Verify&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;back&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;back&quot;>Back&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;send_verification_code&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;send_verification_code&quot;>Send Verification Code&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;enter_phone_number_hint&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;enter_phone_number_hint&quot;>Enter your phone number to receive a verification code&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="22"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;verify_phone_number&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;verify_phone_number&quot;>Verify Phone Number&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="23"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;enter_sms_code_hint&quot; is not translated in &quot;he&quot; (Hebrew) or &quot;es&quot; (Spanish)"
+        errorLine1="    &lt;string name=&quot;enter_sms_code_hint&quot;>Enter the SMS code sent to %s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="24"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;home&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;home&quot;>Hogar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="3"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;home&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;home&quot;>בית&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="3"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;my_schedules&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;my_schedules&quot;>Mis Horarios&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;my_schedules&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;my_schedules&quot;>לוחות הזמנים שלי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;create_new_schedule&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;create_new_schedule&quot;>Crear nuevo horario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;create_new_schedule&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;create_new_schedule&quot;>צור לוח זמנים חדש&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;no_account&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;no_account&quot;>¿No tienes una cuenta?&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="11"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;no_account&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;no_account&quot;>אין לך חשבון?&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="11"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;sign_up_here&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;sign_up_here&quot;>Regístrate aquí&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;sign_up_here&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;sign_up_here&quot;>הירשם כאן&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;privacy_policy&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;privacy_policy&quot;>Política de Privacidad&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="13"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;privacy_policy&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;privacy_policy&quot;>מדיניות פרטיות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="13"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;terms_conditions&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;terms_conditions&quot;>Términos y Condiciones&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="14"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;terms_conditions&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;terms_conditions&quot;>תנאים והגבלות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="14"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;and&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;and&quot;>y&lt;/string>"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;and&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;and&quot;>ו&lt;/string>"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;version&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;version&quot;>Versión&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="16"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;version&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;version&quot;>גרסה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="16"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;main&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;main&quot;>Principal&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="17"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;main&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;main&quot;>ראשי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="17"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;schedule_name&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;schedule_name&quot;>Nombre del horario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="18"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;schedule_name&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;schedule_name&quot;>שם לוח הזמנים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="18"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;insights&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;insights&quot;>Perspectivas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;insights&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;insights&quot;>תובנות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;please_select&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;please_select&quot;>Por favor seleccione...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;please_select&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;please_select&quot;>אנא בחר...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;search_item&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;search_item&quot;>Buscar un elemento...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;search_item&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;search_item&quot;>חפש פריט...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;this_week&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;this_week&quot;>Esta semana&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="22"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;this_week&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;this_week&quot;>שבוע זה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="22"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;this_month&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;this_month&quot;>Este mes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="23"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;this_month&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;this_month&quot;>חודש זה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="23"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;schedules&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;schedules&quot;>Horarios&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="24"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;schedules&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;schedules&quot;>לוחות זמנים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="24"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;free_times&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;free_times&quot;>Tiempos libres&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="25"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;free_times&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;free_times&quot;>זמנים פנויים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="25"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;busiest_day&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;busiest_day&quot;>Día más ocupado&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="26"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;busiest_day&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;busiest_day&quot;>היום העמוס ביותר&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="26"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;attendance&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;attendance&quot;>Asistencia&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="27"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;attendance&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;attendance&quot;>נוכחות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="27"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;task_completion&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;task_completion&quot;>Completamiento de tareas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="28"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;task_completion&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;task_completion&quot;>השלמת משימות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="28"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;on_time_completion&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;on_time_completion&quot;>Finalización a tiempo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;on_time_completion&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;on_time_completion&quot;>השלמה בזמן&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;tasks_completed&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;tasks_completed&quot;>Tareas completadas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="30"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;tasks_completed&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;tasks_completed&quot;>משימות שהושלמו&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="30"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;submit_priorities&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;submit_priorities&quot;>Enviar prioridades&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="31"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;submit_priorities&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;submit_priorities&quot;>שלח סדרי עדיפויות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="31"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;current_priorities&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;current_priorities&quot;>Prioridades actuales&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;current_priorities&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;current_priorities&quot;>סדרי עדיפויות נוכחיים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;add_employee&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;add_employee&quot;>Agregar empleado&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;add_employee&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;add_employee&quot;>הוסף עובד&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;employee_list&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;employee_list&quot;>Lista de empleados&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="34"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;employee_list&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;employee_list&quot;>רשימת עובדים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="34"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;schedule_settings&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;schedule_settings&quot;>Configuración del horario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="35"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;schedule_settings&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;schedule_settings&quot;>הגדרות לוח זמנים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="35"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;archived_schedules&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;archived_schedules&quot;>Horarios archivados&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="36"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;archived_schedules&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;archived_schedules&quot;>לוחות זמנים בארכיון&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="36"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;statistics&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;statistics&quot;>Estadística&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;statistics&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;statistics&quot;>סטטיסטיקה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;morning&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;morning&quot;>Mañana&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;morning&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;morning&quot;>בוקר&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;afternoon&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;afternoon&quot;>Mediodía&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="39"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;afternoon&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;afternoon&quot;>צהריים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="39"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;night&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;night&quot;>Noche&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="40"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;night&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;night&quot;>לילה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="40"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;sunday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;sunday&quot;>Domingo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="41"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;sunday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;sunday&quot;>ראשון&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="41"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;monday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;monday&quot;>Lunes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;monday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;monday&quot;>שני&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;tuesday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;tuesday&quot;>Martes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="43"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;tuesday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;tuesday&quot;>שלישי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="43"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;wednesday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;wednesday&quot;>Miércoles&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;wednesday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;wednesday&quot;>רביעי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;thursday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;thursday&quot;>Jueves&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;thursday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;thursday&quot;>חמישי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;friday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;friday&quot;>Viernes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;friday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;friday&quot;>שישי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;saturday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;saturday&quot;>Sábado&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="47"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;saturday&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;saturday&quot;>שבת&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="47"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;continue_email&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;continue_email&quot;>Continuar con el correo electrónico&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="48"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;continue_email&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;continue_email&quot;>המשך עם אימייל&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="48"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;continue_google&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;continue_google&quot;>Continuar con Google&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;continue_google&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;continue_google&quot;>המשך עם גוגל&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;continue_apple&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;continue_apple&quot;>Continuar con Apple&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="50"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;continue_apple&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;continue_apple&quot;>המשך עם אפל&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="50"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;login_to_continue&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;login_to_continue&quot;>Inicia sesión para continuar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="51"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;login_to_continue&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;login_to_continue&quot;>התחבר כדי להמשיך&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="51"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;create_account&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;create_account&quot;>Crear una cuenta&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="52"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;create_account&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;create_account&quot;>צור חשבון&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="52"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;confirm_password&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;confirm_password&quot;>Confirmar Contraseña&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="53"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;confirm_password&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;confirm_password&quot;>אשר סיסמה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="53"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;create_account_button&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;create_account_button&quot;>Crear Cuenta&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="54"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;create_account_button&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;create_account_button&quot;>צור חשבון&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="54"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;already_have_account&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;already_have_account&quot;>¿Ya tienes una cuenta?&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="55"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;already_have_account&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;already_have_account&quot;>כבר יש לך חשבון?&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="55"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;sign_in_here&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;sign_in_here&quot;>Inicia sesión aquí&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="56"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;sign_in_here&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;sign_in_here&quot;>התחבר כאן&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="56"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;approve&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;approve&quot;>Aprobar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="57"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;approve&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;approve&quot;>אישור&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="57"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;decline&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;decline&quot;>Rechazar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="58"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;decline&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;decline&quot;>סירוב&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="58"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;confirm_code&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;confirm_code&quot;>Confirma tu código&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="59"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;confirm_code&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;confirm_code&quot;>אשר את הקוד שלך&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="59"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;resend_code&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;resend_code&quot;>Reenviar codigo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="60"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;resend_code&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;resend_code&quot;>שלח קוד שוב&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="60"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;add&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;add&quot;>Agregar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="61"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;add&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;add&quot;>הוספה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="61"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;phone&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;phone&quot;>Teléfono&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="62"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;phone&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;phone&quot;>טלפון&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="62"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;field_required&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;field_required&quot;>Se requiere campo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="63"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;field_required&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;field_required&quot;>שדה נדרש&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="63"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;invalid_email&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;invalid_email&quot;>Email inválido&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="64"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;invalid_email&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;invalid_email&quot;>אימייל שגוי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="64"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;invite_users&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;invite_users&quot;>Invitar usuarios&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="65"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;invite_users&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;invite_users&quot;>הזמן משתמשים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="65"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;no_chats&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;no_chats&quot;>Sin chats&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="66"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;no_chats&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;no_chats&quot;>אין צ\u0027אטים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="66"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;accept&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;accept&quot;>Aceptar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="67"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;accept&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;accept&quot;>קבל&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="67"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;reject&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;reject&quot;>Rechazar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="68"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;reject&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;reject&quot;>דחה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="68"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;get_name&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;get_name&quot;>Obtener nombre&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="69"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;get_name&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;get_name&quot;>קבל שם&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="69"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;name&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;name&quot;>Nombre&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="70"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;name&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;name&quot;>שם&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="70"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;continue_button&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;continue_button&quot;>Continuar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="71"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;continue_button&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;continue_button&quot;>המשך&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="71"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;choose_role&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;choose_role&quot;>Elegir Rol&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="72"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;choose_role&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;choose_role&quot;>בחר תפקיד&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="72"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;employer_manager&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;employer_manager&quot;>Empleador/Gerente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="73"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;employer_manager&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;employer_manager&quot;>מעסיק/מנהל&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="73"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;employee&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;employee&quot;>Empleado&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="74"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;employee&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;employee&quot;>עובד&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="74"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;manager&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;manager&quot;>Gerente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="75"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;manager&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;manager&quot;>מנהל&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="75"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;employer&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;employer&quot;>Empleador&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="76"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;employer&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;employer&quot;>מעסיק&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="76"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;profile_settings&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;profile_settings&quot;>Configuración de perfil&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="77"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;profile_settings&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;profile_settings&quot;>הגדרות פרופיל&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="77"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;change_photo&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;change_photo&quot;>Cambiar foto&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="78"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;change_photo&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;change_photo&quot;>שנה תמונה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="78"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;display_name&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;display_name&quot;>Nombre para mostrar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="79"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;display_name&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;display_name&quot;>הצג שם&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="79"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;delete_account&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;delete_account&quot;>Borrar cuenta&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="80"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;delete_account&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;delete_account&quot;>מחק חשבון&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="80"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;new_schedule&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;new_schedule&quot;>Nuevo Horario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="81"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;new_schedule&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;new_schedule&quot;>לוח זמנים חדש&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="81"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;active_shifts&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;active_shifts&quot;>Turnos Activos&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="82"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;active_shifts&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;active_shifts&quot;>משמרות פעילות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="82"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;save_changes&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;save_changes&quot;>Guardar cambios&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="83"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;save_changes&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;save_changes&quot;>שמור שינויים&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="83"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;welcome&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;welcome&quot;>¡Bienvenido!&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="84"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;welcome&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;welcome&quot;>ברוך הבא!&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="84"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;congrats&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;congrats&quot;>¡Felicitaciones!&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="85"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;congrats&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;congrats&quot;>מזל טוב!&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="85"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;billing&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;billing&quot;>Facturación&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="86"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;billing&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;billing&quot;>חיוב&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="86"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;chat&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;chat&quot;>Charlar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="87"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;chat&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;chat&quot;>צ\u0027אט&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="87"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;settings&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;settings&quot;>Ajustes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="88"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;settings&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;settings&quot;>הגדרות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="88"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;support&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;support&quot;>Apoyo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="89"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;support&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;support&quot;>תמיכה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="89"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;logout&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;logout&quot;>Cerrar sesión&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="90"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;logout&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;logout&quot;>להתנתק&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="90"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;monthly&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;monthly&quot;>Mensual&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="91"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;monthly&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;monthly&quot;>חודשי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="91"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;annually&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;annually&quot;>Anualmente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="92"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;annually&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;annually&quot;>שנתי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="92"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;buy_premium&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;buy_premium&quot;>COMPRAR PREMIUM&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="93"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;buy_premium&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;buy_premium&quot;>קנה פרמיום&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="93"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;enterprise&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;enterprise&quot;>Empresa&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="94"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;enterprise&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;enterprise&quot;>חברות גדולות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="94"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;notifications&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;notifications&quot;>Notificaciones&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="95"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;notifications&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;notifications&quot;>התראות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="95"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;policies&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;policies&quot;>Políticas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="96"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;policies&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;policies&quot;>מדיניות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="96"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;archive&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;archive&quot;>Archivo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="97"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;archive&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;archive&quot;>ארכיון&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="97"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;calendar_export&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;calendar_export&quot;>Exportación de calendario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="98"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;calendar_export&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;calendar_export&quot;>ייצוא לוח שנה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="98"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;pdf_export&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;pdf_export&quot;>Exportación de PDF&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="99"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;pdf_export&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;pdf_export&quot;>ייצוא PDF&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="99"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;calendar_integration&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;calendar_integration&quot;>Integración de calendario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="100"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;calendar_integration&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;calendar_integration&quot;>אינטגרציית לוח שנה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="100"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;premium_subscription&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;premium_subscription&quot;>Suscripción Premium&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="101"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;premium_subscription&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;premium_subscription&quot;>מנוי פרימיום&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="101"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;restore_purchase&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;restore_purchase&quot;>Restaurar compra&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="102"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;restore_purchase&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;restore_purchase&quot;>שחזר רכישה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="102"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;close&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;close&quot;>Cerrar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="103"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;close&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;close&quot;>סגור&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="103"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;dismiss&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;dismiss&quot;>Despedir&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="104"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;dismiss&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;dismiss&quot;>לשחרר&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="104"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;update&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;update&quot;>Actualizar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="105"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;update&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;update&quot;>עדכון&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="105"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;delete&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;delete&quot;>Borrar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="106"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;delete&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;delete&quot;>למחוק&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="106"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;confirm&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;confirm&quot;>Confirmar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="107"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;confirm&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;confirm&quot;>אישור&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="107"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;cancel&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;cancel&quot;>Cancelar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="108"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;cancel&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;cancel&quot;>ביטול&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="108"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;save&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;save&quot;>Guardar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="109"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;save&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;save&quot;>שמור&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="109"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;loading&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;loading&quot;>Cargando&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="110"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;loading&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;loading&quot;>טוען&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="110"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;try_again&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;try_again&quot;>Intentar de nuevo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="111"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;try_again&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;try_again&quot;>נסה שוב&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="111"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;ok&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;ok&quot;>Aceptar&lt;/string>"
+        errorLine2="            ~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="112"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;ok&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;ok&quot;>אישור&lt;/string>"
+        errorLine2="            ~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="112"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;coming_soon&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;coming_soon&quot;>Próximamente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="113"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;coming_soon&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;coming_soon&quot;>בקרוב&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="113"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;request_sent&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;request_sent&quot;>Solicitud enviada&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="114"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;request_sent&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;request_sent&quot;>הבקשה נשלחה&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="114"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;password_mismatch&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;password_mismatch&quot;>¡Las contraseñas no coinciden!&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="115"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;password_mismatch&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;password_mismatch&quot;>הסיסמאות לא תואמות&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="115"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;auth_wrong_password&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;auth_wrong_password&quot;>Credenciales inválidas.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="116"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;auth_wrong_password&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;auth_wrong_password&quot;>פרטי התחברות שגויים.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="116"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;auth_user_not_found&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;auth_user_not_found&quot;>Cuenta no encontrada.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="117"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;auth_user_not_found&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;auth_user_not_found&quot;>חשבון לא נמצא.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="117"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;auth_network_error&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;auth_network_error&quot;>Conexión fallida.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="118"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;auth_network_error&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;auth_network_error&quot;>החיבור נכשל.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="118"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;verify_email&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;verify_email&quot;>Verificar correo electrónico&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="119"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;verify_email&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;verify_email&quot;>אמת כתובת אימייל&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="119"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;start_now&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;start_now&quot;>Empezar ahora&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="120"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;start_now&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;start_now&quot;>התחל עכשיו&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="120"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;skip&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;skip&quot;>Saltar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="121"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;skip&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;skip&quot;>דלג&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="121"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;view_profile&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;view_profile&quot;>Ver perfil&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="122"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;view_profile&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;view_profile&quot;>צפה בפרופיל&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="122"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;ask_gemini&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;ask_gemini&quot;>Preguntar a Gemini&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="123"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;ask_gemini&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;ask_gemini&quot;>שאל את ג\u0027מיני&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="123"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;fill_manually&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;fill_manually&quot;>Completar manualmente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="124"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;fill_manually&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;fill_manually&quot;>מילוי ידני&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="124"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;my_chats&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;my_chats&quot;>Mis Chats&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="125"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ExtraTranslation"
+        message="&quot;my_chats&quot; is translated here but not found in default locale"
+        errorLine1="    &lt;string name=&quot;my_chats&quot;>הצ\u0027אטים שלי&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="125"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 26"
+        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/schedulersystems/scheduler/domain/notifications/PushNotificationService.kt"
+            line="23"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`.">
+        <location
+            file="src/main/res/mipmap-anydpi-v26"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.purple_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;purple_dark&quot;>#5A0D9D&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="4"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.purple_light` appears to be unused"
+        errorLine1="    &lt;color name=&quot;purple_light&quot;>#8B3DD0&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="5"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.white` appears to be unused"
+        errorLine1="    &lt;color name=&quot;white&quot;>#FFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="6"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.black` appears to be unused"
+        errorLine1="    &lt;color name=&quot;black&quot;>#000000&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="7"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_light` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_light&quot;>#E5E5E5&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="8"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray&quot;>#808080&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="9"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.home` appears to be unused"
+        errorLine1="    &lt;string name=&quot;home&quot;>Hogar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="3"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.my_schedules` appears to be unused"
+        errorLine1="    &lt;string name=&quot;my_schedules&quot;>Mis Horarios&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.create_new_schedule` appears to be unused"
+        errorLine1="    &lt;string name=&quot;create_new_schedule&quot;>Crear nuevo horario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.no_account` appears to be unused"
+        errorLine1="    &lt;string name=&quot;no_account&quot;>¿No tienes una cuenta?&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="11"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.sign_up_here` appears to be unused"
+        errorLine1="    &lt;string name=&quot;sign_up_here&quot;>Regístrate aquí&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.privacy_policy` appears to be unused"
+        errorLine1="    &lt;string name=&quot;privacy_policy&quot;>Política de Privacidad&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="13"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.terms_conditions` appears to be unused"
+        errorLine1="    &lt;string name=&quot;terms_conditions&quot;>Términos y Condiciones&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="14"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.and` appears to be unused"
+        errorLine1="    &lt;string name=&quot;and&quot;>y&lt;/string>"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.version` appears to be unused"
+        errorLine1="    &lt;string name=&quot;version&quot;>Versión&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="16"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.main` appears to be unused"
+        errorLine1="    &lt;string name=&quot;main&quot;>Principal&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="17"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.send_code` appears to be unused"
+        errorLine1="    &lt;string name=&quot;send_code&quot;>Send Code&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="17"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.schedule_name` appears to be unused"
+        errorLine1="    &lt;string name=&quot;schedule_name&quot;>Nombre del horario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="18"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.insights` appears to be unused"
+        errorLine1="    &lt;string name=&quot;insights&quot;>Perspectivas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.please_select` appears to be unused"
+        errorLine1="    &lt;string name=&quot;please_select&quot;>Por favor seleccione...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.search_item` appears to be unused"
+        errorLine1="    &lt;string name=&quot;search_item&quot;>Buscar un elemento...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.this_week` appears to be unused"
+        errorLine1="    &lt;string name=&quot;this_week&quot;>Esta semana&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="22"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.this_month` appears to be unused"
+        errorLine1="    &lt;string name=&quot;this_month&quot;>Este mes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="23"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.schedules` appears to be unused"
+        errorLine1="    &lt;string name=&quot;schedules&quot;>Horarios&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="24"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.free_times` appears to be unused"
+        errorLine1="    &lt;string name=&quot;free_times&quot;>Tiempos libres&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="25"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.busiest_day` appears to be unused"
+        errorLine1="    &lt;string name=&quot;busiest_day&quot;>Día más ocupado&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="26"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.attendance` appears to be unused"
+        errorLine1="    &lt;string name=&quot;attendance&quot;>Asistencia&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="27"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.task_completion` appears to be unused"
+        errorLine1="    &lt;string name=&quot;task_completion&quot;>Completamiento de tareas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="28"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.on_time_completion` appears to be unused"
+        errorLine1="    &lt;string name=&quot;on_time_completion&quot;>Finalización a tiempo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tasks_completed` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tasks_completed&quot;>Tareas completadas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="30"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.submit_priorities` appears to be unused"
+        errorLine1="    &lt;string name=&quot;submit_priorities&quot;>Enviar prioridades&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="31"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.current_priorities` appears to be unused"
+        errorLine1="    &lt;string name=&quot;current_priorities&quot;>Prioridades actuales&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.add_employee` appears to be unused"
+        errorLine1="    &lt;string name=&quot;add_employee&quot;>Agregar empleado&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.employee_list` appears to be unused"
+        errorLine1="    &lt;string name=&quot;employee_list&quot;>Lista de empleados&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="34"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.schedule_settings` appears to be unused"
+        errorLine1="    &lt;string name=&quot;schedule_settings&quot;>Configuración del horario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="35"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.archived_schedules` appears to be unused"
+        errorLine1="    &lt;string name=&quot;archived_schedules&quot;>Horarios archivados&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="36"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.statistics` appears to be unused"
+        errorLine1="    &lt;string name=&quot;statistics&quot;>Estadística&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.morning` appears to be unused"
+        errorLine1="    &lt;string name=&quot;morning&quot;>Mañana&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.afternoon` appears to be unused"
+        errorLine1="    &lt;string name=&quot;afternoon&quot;>Mediodía&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="39"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.night` appears to be unused"
+        errorLine1="    &lt;string name=&quot;night&quot;>Noche&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="40"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.sunday` appears to be unused"
+        errorLine1="    &lt;string name=&quot;sunday&quot;>Domingo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="41"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.monday` appears to be unused"
+        errorLine1="    &lt;string name=&quot;monday&quot;>Lunes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tuesday` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tuesday&quot;>Martes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="43"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.wednesday` appears to be unused"
+        errorLine1="    &lt;string name=&quot;wednesday&quot;>Miércoles&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.thursday` appears to be unused"
+        errorLine1="    &lt;string name=&quot;thursday&quot;>Jueves&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.friday` appears to be unused"
+        errorLine1="    &lt;string name=&quot;friday&quot;>Viernes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.saturday` appears to be unused"
+        errorLine1="    &lt;string name=&quot;saturday&quot;>Sábado&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="47"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.continue_email` appears to be unused"
+        errorLine1="    &lt;string name=&quot;continue_email&quot;>Continuar con el correo electrónico&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="48"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.continue_google` appears to be unused"
+        errorLine1="    &lt;string name=&quot;continue_google&quot;>Continuar con Google&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.continue_apple` appears to be unused"
+        errorLine1="    &lt;string name=&quot;continue_apple&quot;>Continuar con Apple&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="50"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.login_to_continue` appears to be unused"
+        errorLine1="    &lt;string name=&quot;login_to_continue&quot;>Inicia sesión para continuar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="51"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.create_account` appears to be unused"
+        errorLine1="    &lt;string name=&quot;create_account&quot;>Crear una cuenta&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="52"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.confirm_password` appears to be unused"
+        errorLine1="    &lt;string name=&quot;confirm_password&quot;>Confirmar Contraseña&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="53"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.create_account_button` appears to be unused"
+        errorLine1="    &lt;string name=&quot;create_account_button&quot;>Crear Cuenta&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="54"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.already_have_account` appears to be unused"
+        errorLine1="    &lt;string name=&quot;already_have_account&quot;>¿Ya tienes una cuenta?&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="55"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.sign_in_here` appears to be unused"
+        errorLine1="    &lt;string name=&quot;sign_in_here&quot;>Inicia sesión aquí&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="56"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.approve` appears to be unused"
+        errorLine1="    &lt;string name=&quot;approve&quot;>Aprobar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="57"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.decline` appears to be unused"
+        errorLine1="    &lt;string name=&quot;decline&quot;>Rechazar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="58"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.confirm_code` appears to be unused"
+        errorLine1="    &lt;string name=&quot;confirm_code&quot;>Confirma tu código&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="59"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.resend_code` appears to be unused"
+        errorLine1="    &lt;string name=&quot;resend_code&quot;>Reenviar codigo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="60"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.add` appears to be unused"
+        errorLine1="    &lt;string name=&quot;add&quot;>Agregar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="61"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.phone` appears to be unused"
+        errorLine1="    &lt;string name=&quot;phone&quot;>Teléfono&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="62"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.field_required` appears to be unused"
+        errorLine1="    &lt;string name=&quot;field_required&quot;>Se requiere campo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="63"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.invalid_email` appears to be unused"
+        errorLine1="    &lt;string name=&quot;invalid_email&quot;>Email inválido&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="64"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.invite_users` appears to be unused"
+        errorLine1="    &lt;string name=&quot;invite_users&quot;>Invitar usuarios&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="65"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.no_chats` appears to be unused"
+        errorLine1="    &lt;string name=&quot;no_chats&quot;>Sin chats&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="66"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.accept` appears to be unused"
+        errorLine1="    &lt;string name=&quot;accept&quot;>Aceptar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="67"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reject` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reject&quot;>Rechazar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="68"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.get_name` appears to be unused"
+        errorLine1="    &lt;string name=&quot;get_name&quot;>Obtener nombre&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="69"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.name` appears to be unused"
+        errorLine1="    &lt;string name=&quot;name&quot;>Nombre&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="70"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.continue_button` appears to be unused"
+        errorLine1="    &lt;string name=&quot;continue_button&quot;>Continuar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="71"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.choose_role` appears to be unused"
+        errorLine1="    &lt;string name=&quot;choose_role&quot;>Elegir Rol&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="72"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.employer_manager` appears to be unused"
+        errorLine1="    &lt;string name=&quot;employer_manager&quot;>Empleador/Gerente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="73"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.employee` appears to be unused"
+        errorLine1="    &lt;string name=&quot;employee&quot;>Empleado&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="74"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.manager` appears to be unused"
+        errorLine1="    &lt;string name=&quot;manager&quot;>Gerente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="75"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.employer` appears to be unused"
+        errorLine1="    &lt;string name=&quot;employer&quot;>Empleador&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="76"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.profile_settings` appears to be unused"
+        errorLine1="    &lt;string name=&quot;profile_settings&quot;>Configuración de perfil&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="77"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.change_photo` appears to be unused"
+        errorLine1="    &lt;string name=&quot;change_photo&quot;>Cambiar foto&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="78"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.display_name` appears to be unused"
+        errorLine1="    &lt;string name=&quot;display_name&quot;>Nombre para mostrar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="79"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.delete_account` appears to be unused"
+        errorLine1="    &lt;string name=&quot;delete_account&quot;>Borrar cuenta&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="80"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.new_schedule` appears to be unused"
+        errorLine1="    &lt;string name=&quot;new_schedule&quot;>Nuevo Horario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="81"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.active_shifts` appears to be unused"
+        errorLine1="    &lt;string name=&quot;active_shifts&quot;>Turnos Activos&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="82"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.save_changes` appears to be unused"
+        errorLine1="    &lt;string name=&quot;save_changes&quot;>Guardar cambios&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="83"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.welcome` appears to be unused"
+        errorLine1="    &lt;string name=&quot;welcome&quot;>¡Bienvenido!&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="84"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.congrats` appears to be unused"
+        errorLine1="    &lt;string name=&quot;congrats&quot;>¡Felicitaciones!&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="85"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.billing` appears to be unused"
+        errorLine1="    &lt;string name=&quot;billing&quot;>Facturación&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="86"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.chat` appears to be unused"
+        errorLine1="    &lt;string name=&quot;chat&quot;>Charlar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="87"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings&quot;>Ajustes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="88"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.support` appears to be unused"
+        errorLine1="    &lt;string name=&quot;support&quot;>Apoyo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="89"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.logout` appears to be unused"
+        errorLine1="    &lt;string name=&quot;logout&quot;>Cerrar sesión&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="90"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.monthly` appears to be unused"
+        errorLine1="    &lt;string name=&quot;monthly&quot;>Mensual&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="91"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.annually` appears to be unused"
+        errorLine1="    &lt;string name=&quot;annually&quot;>Anualmente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="92"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.buy_premium` appears to be unused"
+        errorLine1="    &lt;string name=&quot;buy_premium&quot;>COMPRAR PREMIUM&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="93"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.enterprise` appears to be unused"
+        errorLine1="    &lt;string name=&quot;enterprise&quot;>Empresa&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="94"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.notifications` appears to be unused"
+        errorLine1="    &lt;string name=&quot;notifications&quot;>Notificaciones&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="95"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.policies` appears to be unused"
+        errorLine1="    &lt;string name=&quot;policies&quot;>Políticas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="96"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.archive` appears to be unused"
+        errorLine1="    &lt;string name=&quot;archive&quot;>Archivo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="97"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.calendar_export` appears to be unused"
+        errorLine1="    &lt;string name=&quot;calendar_export&quot;>Exportación de calendario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="98"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pdf_export` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pdf_export&quot;>Exportación de PDF&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="99"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.calendar_integration` appears to be unused"
+        errorLine1="    &lt;string name=&quot;calendar_integration&quot;>Integración de calendario&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="100"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.premium_subscription` appears to be unused"
+        errorLine1="    &lt;string name=&quot;premium_subscription&quot;>Suscripción Premium&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="101"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.restore_purchase` appears to be unused"
+        errorLine1="    &lt;string name=&quot;restore_purchase&quot;>Restaurar compra&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="102"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.close` appears to be unused"
+        errorLine1="    &lt;string name=&quot;close&quot;>Cerrar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="103"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.dismiss` appears to be unused"
+        errorLine1="    &lt;string name=&quot;dismiss&quot;>Despedir&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="104"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.update` appears to be unused"
+        errorLine1="    &lt;string name=&quot;update&quot;>Actualizar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="105"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.delete` appears to be unused"
+        errorLine1="    &lt;string name=&quot;delete&quot;>Borrar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="106"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.confirm` appears to be unused"
+        errorLine1="    &lt;string name=&quot;confirm&quot;>Confirmar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="107"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cancel` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cancel&quot;>Cancelar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="108"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.save` appears to be unused"
+        errorLine1="    &lt;string name=&quot;save&quot;>Guardar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="109"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.loading` appears to be unused"
+        errorLine1="    &lt;string name=&quot;loading&quot;>Cargando&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="110"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.try_again` appears to be unused"
+        errorLine1="    &lt;string name=&quot;try_again&quot;>Intentar de nuevo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="111"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.ok` appears to be unused"
+        errorLine1="    &lt;string name=&quot;ok&quot;>Aceptar&lt;/string>"
+        errorLine2="            ~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="112"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.coming_soon` appears to be unused"
+        errorLine1="    &lt;string name=&quot;coming_soon&quot;>Próximamente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="113"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.request_sent` appears to be unused"
+        errorLine1="    &lt;string name=&quot;request_sent&quot;>Solicitud enviada&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="114"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.password_mismatch` appears to be unused"
+        errorLine1="    &lt;string name=&quot;password_mismatch&quot;>¡Las contraseñas no coinciden!&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="115"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.auth_wrong_password` appears to be unused"
+        errorLine1="    &lt;string name=&quot;auth_wrong_password&quot;>Credenciales inválidas.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="116"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.auth_user_not_found` appears to be unused"
+        errorLine1="    &lt;string name=&quot;auth_user_not_found&quot;>Cuenta no encontrada.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="117"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.auth_network_error` appears to be unused"
+        errorLine1="    &lt;string name=&quot;auth_network_error&quot;>Conexión fallida.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="118"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.verify_email` appears to be unused"
+        errorLine1="    &lt;string name=&quot;verify_email&quot;>Verificar correo electrónico&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="119"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.start_now` appears to be unused"
+        errorLine1="    &lt;string name=&quot;start_now&quot;>Empezar ahora&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="120"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.skip` appears to be unused"
+        errorLine1="    &lt;string name=&quot;skip&quot;>Saltar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="121"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.view_profile` appears to be unused"
+        errorLine1="    &lt;string name=&quot;view_profile&quot;>Ver perfil&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="122"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.ask_gemini` appears to be unused"
+        errorLine1="    &lt;string name=&quot;ask_gemini&quot;>Preguntar a Gemini&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="123"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fill_manually` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fill_manually&quot;>Completar manualmente&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="124"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.my_chats` appears to be unused"
+        errorLine1="    &lt;string name=&quot;my_chats&quot;>Mis Chats&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="125"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;please_select&quot;>Por favor seleccione...&lt;/string>"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="20"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;please_select&quot;>אנא בחר...&lt;/string>"
+        errorLine2="                                 ~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="20"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;search_item&quot;>Buscar un elemento...&lt;/string>"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="21"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;search_item&quot;>חפש פריט...&lt;/string>"
+        errorLine2="                               ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-he/strings.xml"
+            line="21"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="MonochromeLauncherIcon"
+        message="The application adaptive icon is missing a monochrome tag"
+        errorLine1="&lt;adaptive-icon xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="^">
+        <location
+            file="src/main/res/mipmap-anydpi-v26/ic_launcher.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="MonochromeLauncherIcon"
+        message="The application adaptive roundIcon is missing a monochrome tag"
+        errorLine1="&lt;adaptive-icon xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="^">
+        <location
+            file="src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/algorithmic_calculation_dark.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/algorithmic_calculation_dark.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/algorithmic_calculation_light.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/algorithmic_calculation_light.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/customizable_approach_dark.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/customizable_approach_dark.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/customizable_approach_light.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/customizable_approach_light.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/stay_connected_dark.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/stay_connected_dark.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/stay_connected_light.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/stay_connected_light.png"/>
+    </issue>
+
+</issues>
