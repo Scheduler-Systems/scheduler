@@ -1,0 +1,58 @@
+# Run the whole Scheduler stack in containers with ZERO external accounts:
+# Firebase emulators + Go API + Next.js web, wired to a local-only `demo-` project.
+#
+#   docker compose up --build       # then open http://localhost:3000
+#   login: owner@demo.test / password123  (seed once: see note below)
+#
+# ⚠️ EXPERIMENTAL / NOT YET VERIFIED: authored without a Docker daemon available
+# in the build environment, so it has NOT been run end-to-end. The VERIFIED path
+# is `make dev` (host toolchain). Validating this compose in CI is a tracked
+# follow-up. The browser talks to the emulators via the host-published ports
+# (NEXT_PUBLIC_*_EMULATOR_HOST=127.0.0.1), while the server containers talk over
+# the compose network (FIRESTORE_EMULATOR_HOST=emulators:8088) — that split is
+# why apps/web/lib/firebase.ts reads the emulator host from env.
+services:
+  emulators:
+    build: { context: ., dockerfile: docker/emulators.Dockerfile }
+    command: >
+      firebase emulators:start --only auth,firestore
+      --project demo-scheduler --config /app/firebase.json
+    ports:
+      - "9099:9099"   # auth
+      - "8088:8088"   # firestore
+      - "4001:4001"   # emulator UI
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8088/"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  api:
+    build: { context: ./services/api }
+    environment:
+      PORT: "8080"
+      SCHEDULER_STORE: firestore
+      FIREBASE_PROJECT_ID: demo-scheduler
+      FIREBASE_AUTH_EMULATOR_HOST: emulators:9099
+      FIRESTORE_EMULATOR_HOST: emulators:8088
+    ports: ["8080:8080"]
+    depends_on:
+      emulators: { condition: service_healthy }
+
+  web:
+    build: { context: ., dockerfile: docker/web.Dockerfile }
+    environment:
+      PORT: "3000"
+      NEXT_PUBLIC_USE_FIREBASE_EMULATORS: "true"
+      NEXT_PUBLIC_FIREBASE_API_KEY: demo-emulator-key
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-scheduler
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: demo-scheduler.firebaseapp.com
+      # Browser → emulators via host-published ports:
+      NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099"
+      NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST: "127.0.0.1:8088"
+      # Server (Admin SDK in this container) → emulators over the compose network:
+      FIREBASE_AUTH_EMULATOR_HOST: emulators:9099
+      FIRESTORE_EMULATOR_HOST: emulators:8088
+    ports: ["3000:3000"]
+    depends_on:
+      emulators: { condition: service_healthy }
