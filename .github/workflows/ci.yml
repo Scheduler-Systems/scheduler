@@ -5,6 +5,11 @@ name: ci
 # Each job is path-filtered so it only runs when its part of the monorepo
 # changes. The per-app workflows under `apps/*/.github/workflows/` are kept for
 # reference but do NOT execute from a subdirectory.
+#
+# The android/ios jobs deliberately go beyond "does it build": they LAUNCH the
+# app on an emulator/simulator, because a green build hid real launch crashes in
+# the native migration (Android: missing @AndroidEntryPoint; iOS: missing
+# FirebaseApp.configure()). Build-only CI would not have caught either.
 
 on:
   pull_request:
@@ -17,6 +22,8 @@ jobs:
     outputs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
+      android: ${{ steps.filter.outputs.android }}
+      ios: ${{ steps.filter.outputs.ios }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -29,6 +36,12 @@ jobs:
             web:
               - 'apps/web/**'
               - 'packages/core/**'
+              - '.github/workflows/ci.yml'
+            android:
+              - 'apps/android/**'
+              - '.github/workflows/ci.yml'
+            ios:
+              - 'apps/ios/**'
               - '.github/workflows/ci.yml'
 
   api:
@@ -74,18 +87,98 @@ jobs:
       - name: Build
         run: npm run build
 
+  android:
+    needs: changes
+    if: ${{ needs.changes.outputs.android == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Build + unit tests + lint
+        working-directory: apps/android
+        run: ./gradlew --no-daemon assembleDebug testDebugUnitTest lintDebug
+      # Instrumented tests run the app through Hilt on a real emulator, so they
+      # catch crash-on-launch (e.g. a missing @AndroidEntryPoint) that build +
+      # unit tests cannot.
+      - name: Enable KVM (emulator acceleration)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Instrumented tests (emulator launch)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          working-directory: apps/android
+          script: ./gradlew --no-daemon connectedDebugAndroidTest
+
+  ios:
+    needs: changes
+    if: ${{ needs.changes.outputs.ios == 'true' }}
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: apps/ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Create + boot a simulator
+        id: sim
+        run: |
+          DEVTYPE=$(xcrun simctl list devicetypes available | grep -oE 'com.apple.CoreSimulator.SimDeviceType.iPhone-1[0-9][^ )]*' | head -1)
+          RUNTIME=$(xcrun simctl list runtimes available | grep -oE 'com.apple.CoreSimulator.SimRuntime.iOS-[0-9-]+' | tail -1)
+          UDID=$(xcrun simctl create ci-iphone "$DEVTYPE" "$RUNTIME")
+          xcrun simctl boot "$UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+      # Build for the SIMULATOR (not `swift build`, which only compiles the
+      # macOS host and skips the #if canImport(UIKit) code where the GoogleSignIn
+      # bug lived).
+      - name: Build for simulator
+        run: |
+          xcodebuild -project SchedulerApp.xcodeproj -scheme SchedulerApp \
+            -sdk iphonesimulator -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+      - name: Unit tests on simulator
+        run: |
+          xcodebuild -project SchedulerApp.xcodeproj -scheme SchedulerApp \
+            -sdk iphonesimulator -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO test
+      # Launch smoke: install + launch + assert the process is alive. Catches
+      # crash-on-launch such as a missing FirebaseApp.configure().
+      - name: Launch smoke
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          APP=$(find build/Build/Products -name 'SchedulerApp.app' -path '*iphonesimulator*' | head -1)
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch "$UDID" com.schedulersystems.scheduler
+          sleep 8
+          if ! xcrun simctl spawn "$UDID" launchctl list | grep -q schedulersystems; then
+            echo "::error::iOS app is not running after launch (crashed)"; exit 1
+          fi
+          echo "iOS app launched and is running"
+
   # Aggregator gate. Always runs so the org-level `gate` required status check
-  # is satisfied for every PR/push, even when the path-filtered api/web jobs are
+  # is satisfied for every PR/push, even when the path-filtered jobs are
   # legitimately skipped. Fails only if a job that actually ran failed or was
   # cancelled (skipped == OK).
   gate:
-    needs: [changes, api, web]
+    needs: [changes, api, web, android, ios]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Require ran jobs to have succeeded
         run: |
-          for pair in "changes:${{ needs.changes.result }}" "api:${{ needs.api.result }}" "web:${{ needs.web.result }}"; do
+          for pair in "changes:${{ needs.changes.result }}" "api:${{ needs.api.result }}" "web:${{ needs.web.result }}" "android:${{ needs.android.result }}" "ios:${{ needs.ios.result }}"; do
             job="${pair%%:*}"; res="${pair#*:}"
             echo "$job -> $res"
             if [ "$res" = "failure" ] || [ "$res" = "cancelled" ]; then
