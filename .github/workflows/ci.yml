@@ -24,6 +24,7 @@ jobs:
       web: ${{ steps.filter.outputs.web }}
       android: ${{ steps.filter.outputs.android }}
       ios: ${{ steps.filter.outputs.ios }}
+      engine: ${{ steps.filter.outputs.engine }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -42,6 +43,9 @@ jobs:
               - '.github/workflows/ci.yml'
             ios:
               - 'apps/ios/**'
+              - '.github/workflows/ci.yml'
+            engine:
+              - 'packages/core/**'
               - '.github/workflows/ci.yml'
 
   api:
@@ -98,9 +102,9 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
-      - name: Build + unit tests
+      - name: Build + unit tests + lint
         working-directory: apps/android
-        run: ./gradlew --no-daemon assembleDebug testDebugUnitTest
+        run: ./gradlew --no-daemon assembleDebug testDebugUnitTest lintDebug
       # Instrumented tests run the app through Hilt on a real emulator, so they
       # catch crash-on-launch (e.g. a missing @AndroidEntryPoint) that build +
       # unit tests cannot.
@@ -149,6 +153,11 @@ jobs:
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID"
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+      - name: Unit tests on simulator
+        run: |
+          xcodebuild -project SchedulerApp.xcodeproj -scheme SchedulerApp \
+            -sdk iphonesimulator -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO test
       # Launch smoke: install + launch + assert the process is alive. Catches
       # crash-on-launch such as a missing FirebaseApp.configure().
       - name: Launch smoke
@@ -164,18 +173,33 @@ jobs:
           fi
           echo "iOS app launched and is running"
 
+  engine:
+    needs: changes
+    if: ${{ needs.changes.outputs.engine == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Engine tests
+        run: node --test
+
   # Aggregator gate. Always runs so the org-level `gate` required status check
   # is satisfied for every PR/push, even when the path-filtered jobs are
   # legitimately skipped. Fails only if a job that actually ran failed or was
   # cancelled (skipped == OK).
   gate:
-    needs: [changes, api, web, android, ios]
+    needs: [changes, api, web, android, ios, engine]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Require ran jobs to have succeeded
         run: |
-          for pair in "changes:${{ needs.changes.result }}" "api:${{ needs.api.result }}" "web:${{ needs.web.result }}" "android:${{ needs.android.result }}" "ios:${{ needs.ios.result }}"; do
+          for pair in "changes:${{ needs.changes.result }}" "api:${{ needs.api.result }}" "web:${{ needs.web.result }}" "android:${{ needs.android.result }}" "ios:${{ needs.ios.result }}" "engine:${{ needs.engine.result }}"; do
             job="${pair%%:*}"; res="${pair#*:}"
             echo "$job -> $res"
             if [ "$res" = "failure" ] || [ "$res" = "cancelled" ]; then
