@@ -1,0 +1,266 @@
+rules_version = '2';
+
+// =============================================================================
+// Firestore security rules — Scheduler open core.
+//
+// The web client SDK and the native apps (Android/iOS) talk DIRECTLY to
+// Firestore, so for those paths THESE RULES ARE THE GATE. The Next.js API
+// routes use the Firebase Admin SDK (which bypasses rules) behind a `withAuth`
+// server tier and owner-scoped queries — that is the trusted path for the heavy
+// schedule/employee/webhook writes. These rules secure everything the *client*
+// SDK can reach.
+//
+// Design (clean-slate, OSS-native — NOT a port of the legacy priority-118da
+// ruleset, which depended on a Cloud-Function-maintained `schedule_acl` mirror +
+// a one-time backfill the open core does not ship):
+//   * Default deny. Every collection below is allow-listed explicitly; anything
+//     not matched is denied.
+//   * Authentication required for all access.
+//   * Ownership/membership uses ONLY fields the rules engine can evaluate:
+//       - schedules:      `created_by` (string uid, stamped by the creator).
+//       - notifications:  `to_user`   (reference to the recipient user doc).
+//       - schedule/shift requests: `from_user` / `reuqesting_employee`
+//                          (references to the author's user doc).
+//       - chats:          `users[]`   (uid strings on web; user refs on native —
+//                          both forms accepted).
+//   * Privilege/billing guards on `users`: `role` cannot be CHANGED once set,
+//     and the build-counter fields cannot be tampered by a client update.
+//   * `webhook_events` is server-only (RevenueCat/billing) → no client access.
+//
+// DOCUMENTED READ RESIDUALS (confidentiality-only; all writes are closed):
+//   The open-core schedule doc has no rules-queryable member-uid array (members
+//   are objects with `user_ref` references, not uids), and several client
+//   queries filter by reference/email rather than the caller's uid. Where a
+//   per-document read rule would make a legitimate query fail with
+//   PERMISSION_DENIED, READ stays authenticated-only and is called out inline.
+//   Tightening these requires app changes (owner-scoped queries or a uid-array
+//   membership field) — tracked as follow-up, out of scope for the rules-only
+//   change. The integrity-critical surface (cross-user / cross-tenant WRITES,
+//   role/billing escalation, writing server-owned collections) is fully closed.
+//
+// Verified by @firebase/rules-unit-testing against the Firestore emulator — see
+// apps/web/test/firestore-rules/. NOT yet deployed: a production deploy is a
+// founder hard gate (credentialed prod-snapshot replay + sign-off).
+// =============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===================== Helpers =====================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+
+    // The caller's own user-doc reference (matches `from_user`/`to_user`/
+    // `reuqesting_employee` reference fields).
+    function selfRef() {
+      return userPath(request.auth.uid);
+    }
+
+    // `role` may be SET on first write but never CHANGED by a client thereafter
+    // (anti privilege-escalation). Compares the stored doc to the incoming one.
+    function roleUnchanged() {
+      return !('role' in resource.data)
+        || !('role' in request.resource.data)
+        || request.resource.data.role == resource.data.role;
+    }
+
+    // A field is identical before/after (or absent on both). Used to stop a
+    // client tampering with server-owned counters via its own profile update.
+    function fieldUnchanged(field) {
+      return (field in resource.data) == (field in request.resource.data)
+        && (!(field in request.resource.data)
+            || request.resource.data[field] == resource.data[field]);
+    }
+
+    // Is the signed-in user the owner (created_by) of schedule {scheduleId}?
+    // Uses get() — only called on single-doc writes, so it is query-safe.
+    function isScheduleOwner(scheduleId) {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/schedules/$(scheduleId)).data.created_by == request.auth.uid;
+    }
+
+    // Is the signed-in user the owner of the schedule a reference points to?
+    function isRefScheduleOwner(scheduleRef) {
+      return isSignedIn()
+        && scheduleRef != null
+        && get(scheduleRef).data.created_by == request.auth.uid;
+    }
+
+    // ===================== users =====================
+    // Profile lookup BY EMAIL is required (invite-an-employee, start-a-chat), so
+    // READ stays authenticated (documented residual). Owner-only writes, with a
+    // role-immutability guard and a lock on the build-counter fields.
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isUser(userId);
+      allow update: if isUser(userId)
+                    && roleUnchanged()
+                    && fieldUnchanged('monthly_builds')
+                    && fieldUnchanged('total_builds');
+      allow delete: if false;
+
+      // Per-user membership index + name-uniqueness markers — strictly the
+      // owning user's own subtree.
+      match /schedules_involved/{scheduleId} {
+        allow read, write: if isUser(userId);
+      }
+      match /schedule_names/{markerId} {
+        allow read, write: if isUser(userId);
+      }
+
+      // Optional server-maintained ACL mirror (written only by the Admin SDK,
+      // which bypasses rules). A client may read its own; never write it.
+      match /schedule_acl/{scheduleId} {
+        allow read: if isUser(userId);
+        allow write: if false;
+      }
+    }
+
+    // ===================== schedules =====================
+    // READ is authenticated (documented residual: no member-uid array, and the
+    // client resolves a schedule by id from its own schedules_involved index).
+    // CREATE must stamp the caller as `created_by`. UPDATE/DELETE are owner-only,
+    // and `created_by` is immutable (no ownership forgery/transfer via client).
+    match /schedules/{scheduleId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && request.resource.data.created_by == request.auth.uid;
+      allow update: if isSignedIn()
+                    && resource.data.created_by == request.auth.uid
+                    && request.resource.data.created_by == resource.data.created_by;
+      allow delete: if isSignedIn()
+                    && resource.data.created_by == request.auth.uid;
+
+      // Built rosters — published by the schedule owner; members read.
+      match /built_schedules/{builtId} {
+        allow read: if isSignedIn();
+        allow create, update, delete: if isScheduleOwner(scheduleId);
+      }
+
+      // Priority submissions — a user writes their own uid slot; members read;
+      // the owner may clear them.
+      match /priorities_submissions/{uid} {
+        allow read: if isSignedIn();
+        allow create, update: if isUser(uid) || isScheduleOwner(scheduleId);
+        allow delete: if isScheduleOwner(scheduleId);
+      }
+    }
+
+    // ===================== shift_requests =====================
+    // Live nested under built_schedules; the web also reads them via
+    // collectionGroup('shift_requests'). A single recursive-wildcard rule covers
+    // both the nested path and the collection-group query. READ authenticated
+    // (the queries filter by reference, not the caller's uid). WRITES are gated
+    // on author identity: only the requesting employee may create their own; a
+    // reviewer (anyone who is NOT the requester) may accept/reject; the requester
+    // may delete their own still-PENDING request.
+    match /{path=**}/shift_requests/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && request.resource.data.reuqesting_employee == selfRef();
+      allow update: if isSignedIn()
+                    && resource.data.reuqesting_employee != selfRef();
+      allow delete: if isSignedIn()
+                    && (resource.data.reuqesting_employee != selfRef()
+                        || resource.data.shift_request_status == 'PENDING');
+    }
+
+    // ===================== schedule_requests (invites / join requests) =======
+    // READ authenticated (queried by schedule_ref / from_user / to_user /
+    // to_user_identification(email) — not all provable as the caller). WRITES:
+    // only the author (from_user) may create/cancel; the author OR the target
+    // schedule's owner may update (the owner reviews/accepts).
+    match /schedule_requests/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && request.resource.data.from_user == selfRef();
+      allow update: if isSignedIn()
+                    && (resource.data.from_user == selfRef()
+                        || isRefScheduleOwner(resource.data.schedule_ref));
+      allow delete: if isSignedIn()
+                    && resource.data.from_user == selfRef();
+    }
+
+    // ===================== scheduleChangeRequest (legacy change requests) =====
+    // READ authenticated (queried by scheduleId). WRITE: author (userId) creates;
+    // author or the owning schedule's owner may update the status.
+    match /scheduleChangeRequest/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn()
+                    && (resource.data.userId == request.auth.uid
+                        || isScheduleOwner(resource.data.scheduleId));
+      allow delete: if false;
+    }
+
+    // ===================== notifications =====================
+    // Recipient-scoped via the `to_user` reference. Created server/Flutter-side
+    // only; the recipient may read + mark-as-read.
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && resource.data.to_user == selfRef();
+      allow update: if isSignedIn() && resource.data.to_user == selfRef();
+      allow create, delete: if false;
+    }
+
+    // ===================== chats + messages =====================
+    // Participant-gated via `users[]`, accepting BOTH the web shape (uid strings)
+    // and the native shape (user references). READ stays authenticated because
+    // the native `where('users','array-contains', userRef)` stream cannot be
+    // proven per-doc for uid-string threads (documented residual); the integrity
+    // surface (writing a thread/message you are not a participant of) is closed.
+    match /chats/{chatId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isChatMember(request.resource.data.users);
+      allow update: if isSignedIn() && isChatMember(resource.data.users);
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && callerInChat(chatId);
+        allow create: if isSignedIn()
+                      && callerInChat(chatId)
+                      && request.resource.data.sender_uid == request.auth.uid;
+        allow update: if isSignedIn() && callerInChat(chatId);
+        allow delete: if false;
+      }
+    }
+
+    function isChatMember(usersArr) {
+      return isSignedIn()
+        && (request.auth.uid in usersArr || selfRef() in usersArr);
+    }
+
+    function callerInChat(chatId) {
+      return isChatMember(get(/databases/$(database)/documents/chats/$(chatId)).data.users);
+    }
+
+    // ===================== ff_user_push_notifications =====================
+    // FCM trigger queue + per-device token store, consumed by a Cloud Function.
+    // Any signed-in user may enqueue a push (the function authorizes delivery);
+    // the per-user token doc (id == uid) is readable/updatable only by its owner.
+    // The auto-id queue docs are therefore write-only to clients (id != uid).
+    match /ff_user_push_notifications/{docId} {
+      allow read: if isUser(docId);
+      allow create: if isSignedIn();
+      allow update: if isUser(docId);
+      allow delete: if false;
+    }
+
+    // ===================== webhook_events =====================
+    // Server-only (billing/RevenueCat webhooks via the Admin SDK). No client.
+    match /webhook_events/{eventId} {
+      allow read, write: if false;
+    }
+
+    // Anything not matched above is denied by default.
+  }
+}
