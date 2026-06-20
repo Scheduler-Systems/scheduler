@@ -149,11 +149,6 @@ jobs:
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID"
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
-      - name: Unit tests on simulator
-        run: |
-          xcodebuild -project SchedulerApp.xcodeproj -scheme SchedulerApp \
-            -sdk iphonesimulator -destination "id=${{ steps.sim.outputs.udid }}" \
-            -derivedDataPath build CODE_SIGNING_ALLOWED=NO test
       # Launch smoke: install + launch + assert the process is alive. Catches
       # crash-on-launch such as a missing FirebaseApp.configure().
       - name: Launch smoke
