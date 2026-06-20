@@ -1,0 +1,41 @@
+rules_version = '2';
+
+// =============================================================================
+// Cloud Storage security rules — Scheduler open core.
+//
+// Default deny. Signed-in users may upload only under their own /users/{uid}
+// prefix, and read/write chat attachments (the chat-membership integrity check
+// lives in Firestore). Uploads are size-capped. Anything else is denied.
+// NOT yet deployed (production deploy is a founder hard gate).
+// =============================================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Per-user files (avatars, exports). Owner-only write; any signed-in user
+    // may read (display names/avatars are shown across the team).
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn()
+                   && request.auth.uid == userId
+                   && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Chat attachments — any signed-in user may upload/read; the chat-membership
+    // gate is enforced on the message doc in Firestore.
+    match /chat_images/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn()
+                   && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Default deny everything else.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

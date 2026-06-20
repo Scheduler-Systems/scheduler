@@ -1,0 +1,14 @@
+{
+  "name": "scheduler-firestore-rules-tests",
+  "private": true,
+  "type": "module",
+  "description": "Firestore + Storage security-rules tests (Firebase emulator). Kept separate from the Next app so firebase-tools does not bloat the web build.",
+  "scripts": {
+    "test": "firebase emulators:exec --only firestore --project demo-scheduler --config ../../firebase.json 'node --test'"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.0.0",
+    "firebase-tools": "^13.0.0"
+  }
+}

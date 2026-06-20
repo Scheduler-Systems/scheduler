@@ -25,6 +25,7 @@ jobs:
       android: ${{ steps.filter.outputs.android }}
       ios: ${{ steps.filter.outputs.ios }}
       engine: ${{ steps.filter.outputs.engine }}
+      rules: ${{ steps.filter.outputs.rules }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -46,6 +47,13 @@ jobs:
               - '.github/workflows/ci.yml'
             engine:
               - 'packages/core/**'
+              - '.github/workflows/ci.yml'
+            rules:
+              - 'apps/web/firestore.rules'
+              - 'apps/web/storage.rules'
+              - 'apps/web/firestore.indexes.json'
+              - 'apps/web/firebase.json'
+              - 'apps/web/test/firestore-rules/**'
               - '.github/workflows/ci.yml'
 
   api:
@@ -188,18 +196,42 @@ jobs:
       - name: Engine tests
         run: node --test
 
+  rules:
+    needs: changes
+    if: ${{ needs.changes.outputs.rules == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web/test/firestore-rules
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # The Firestore emulator is a JVM process.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install
+        run: npm install
+      # emulators:exec boots the Firestore emulator, runs the rule tests against
+      # it (node --test), and tears it down. Exits non-zero if any test fails.
+      - name: Security-rules tests (Firestore emulator)
+        run: npm test
+
   # Aggregator gate. Always runs so the org-level `gate` required status check
   # is satisfied for every PR/push, even when the path-filtered jobs are
   # legitimately skipped. Fails only if a job that actually ran failed or was
   # cancelled (skipped == OK).
   gate:
-    needs: [changes, api, web, android, ios, engine]
+    needs: [changes, api, web, android, ios, engine, rules]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Require ran jobs to have succeeded
         run: |
-          for pair in "changes:${{ needs.changes.result }}" "api:${{ needs.api.result }}" "web:${{ needs.web.result }}" "android:${{ needs.android.result }}" "ios:${{ needs.ios.result }}" "engine:${{ needs.engine.result }}"; do
+          for pair in "changes:${{ needs.changes.result }}" "api:${{ needs.api.result }}" "web:${{ needs.web.result }}" "android:${{ needs.android.result }}" "ios:${{ needs.ios.result }}" "engine:${{ needs.engine.result }}" "rules:${{ needs.rules.result }}"; do
             job="${pair%%:*}"; res="${pair#*:}"
             echo "$job -> $res"
             if [ "$res" = "failure" ] || [ "$res" = "cancelled" ]; then
