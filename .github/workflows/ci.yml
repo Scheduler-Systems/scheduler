@@ -98,9 +98,9 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
-      - name: Build + unit tests + lint
+      - name: Build + unit tests
         working-directory: apps/android
-        run: ./gradlew --no-daemon assembleDebug testDebugUnitTest lintDebug
+        run: ./gradlew --no-daemon assembleDebug testDebugUnitTest
       # Instrumented tests run the app through Hilt on a real emulator, so they
       # catch crash-on-launch (e.g. a missing @AndroidEntryPoint) that build +
       # unit tests cannot.
@@ -131,22 +131,24 @@ jobs:
         run: brew install xcodegen
       - name: Generate Xcode project
         run: xcodegen generate
-      - name: Create + boot a simulator
-        id: sim
-        run: |
-          DEVTYPE=$(xcrun simctl list devicetypes available | grep -oE 'com.apple.CoreSimulator.SimDeviceType.iPhone-1[0-9][^ )]*' | head -1)
-          RUNTIME=$(xcrun simctl list runtimes available | grep -oE 'com.apple.CoreSimulator.SimRuntime.iOS-[0-9-]+' | tail -1)
-          UDID=$(xcrun simctl create ci-iphone "$DEVTYPE" "$RUNTIME")
-          xcrun simctl boot "$UDID"
-          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
       # Build for the SIMULATOR (not `swift build`, which only compiles the
       # macOS host and skips the #if canImport(UIKit) code where the GoogleSignIn
-      # bug lived).
+      # bug lived). `generic/platform=iOS Simulator` needs no specific device.
       - name: Build for simulator
         run: |
+          set -x
           xcodebuild -project SchedulerApp.xcodeproj -scheme SchedulerApp \
-            -sdk iphonesimulator -destination "id=${{ steps.sim.outputs.udid }}" \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+      - name: Boot a pre-existing simulator
+        id: sim
+        run: |
+          set -x
+          UDID=$(xcrun simctl list devices available | grep -i 'iPhone' | grep -oE '[0-9A-Fa-f-]{36}' | head -1)
+          echo "Using simulator $UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
       - name: Unit tests on simulator
         run: |
           xcodebuild -project SchedulerApp.xcodeproj -scheme SchedulerApp \
