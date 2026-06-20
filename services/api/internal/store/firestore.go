@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"sort"
 	"strings"
@@ -43,9 +44,19 @@ import (
 // error nor context (it was written for an infallible in-memory map). Firestore
 // I/O CAN fail, so failures are logged (with an "firestore-store:" prefix) and
 // the method degrades to the same zero/nil result an empty store would give.
-// Callers cannot currently distinguish "not found" from "backend error"; adding
-// error returns to Store is a tracked follow-up that would ripple through every
-// handler and the memory store, so it is intentionally out of scope here.
+// Callers cannot currently distinguish "not found" from "backend error".
+//
+// CONSEQUENCE FOR WRITES (tracked must-fix — do not back paying-customer traffic
+// until resolved): a Put* whose Firestore write fails still returns the input
+// value, so handlers respond 2xx and the client treats an un-persisted write as
+// durable — a silent, permanent loss (retry-on-error clients will not retry a
+// 2xx). This is mitigated at startup by a readiness probe (NewFirestoreStore
+// fails loud if the backend is unreachable or credentials/permissions are wrong,
+// so a misconfigured deployment crashes at boot instead of dropping writes at
+// runtime) — but it does NOT cover a backend that fails AFTER boot. The real fix,
+// giving Store methods error returns so handlers can return 5xx, ripples through
+// every handler and the memory store and is a tracked follow-up, intentionally
+// out of scope here.
 type FirestoreStore struct {
 	cl *firestore.Client
 }
@@ -77,6 +88,18 @@ func NewFirestoreStore(ctx context.Context, projectID string) (*FirestoreStore, 
 	cl, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, err
+	}
+	// Readiness probe. firestore.NewClient is lazy (it issues no RPC), so without
+	// this a deployment can "start" against an unreachable or misconfigured
+	// backend and then silently drop writes at runtime (see the LIMITATION note).
+	// A bounded Get on a sentinel doc forces one round-trip: NotFound proves the
+	// backend is reachable and credentials/permissions work; any transport or
+	// permission error fails init so the process crashes at boot instead.
+	pctx, cancel := context.WithTimeout(ctx, firestoreOpTimeout)
+	defer cancel()
+	if _, perr := cl.Collection("_healthz").Doc("_probe").Get(pctx); perr != nil && status.Code(perr) != codes.NotFound {
+		_ = cl.Close()
+		return nil, fmt.Errorf("firestore readiness probe failed (project %q unreachable or misconfigured): %w", projectID, perr)
 	}
 	return &FirestoreStore{cl: cl}, nil
 }
