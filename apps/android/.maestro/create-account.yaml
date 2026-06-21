@@ -8,8 +8,9 @@ appId: com.schedulersystems.scheduler
 - tapOn: "Sign Up"                         # bottom "Don't have an account? Sign Up" link
 - assertVisible: "Create Account"          # navigated to the (previously stub) create-account screen
 - takeScreenshot: 01-create-account
+- evalScript: ${output.signupEmail = 'qa-signup-' + Date.now() + '@example.com'}  # unique per run → repeatable
 - tapOn: "Email"
-- inputText: "qa-signup-${Math.floor(Math.random()*100000000)}@example.com"
+- inputText: ${output.signupEmail}
 - tapOn:
     text: "Password"
     index: 0                               # the Password field (Confirm Password is a separate match)
