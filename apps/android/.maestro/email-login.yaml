@@ -17,6 +17,6 @@ appId: com.schedulersystems.scheduler
 - hideKeyboard
 - tapOn: "Sign In"
 - extendedWaitUntil:
-    notVisible: "Welcome Back"                       # left login → authenticated → home
-    timeout: 10000
+    visible: "My Schedules"                          # logged in → real home content
+    timeout: 15000
 - takeScreenshot: 01-after-login

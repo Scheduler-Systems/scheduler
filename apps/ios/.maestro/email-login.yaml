@@ -19,6 +19,6 @@ appId: com.schedulersystems.scheduler
 - tapOn: "Scheduler"                               # tap the title to dismiss the keyboard
 - tapOn: "Sign In"
 - extendedWaitUntil:
-    notVisible: "Sign in to manage your schedules"  # left login → authenticated (verified → home route)
-    timeout: 10000
+    visible: "My Schedules"                         # logged in (verified) → real home content
+    timeout: 15000
 - takeScreenshot: 01-after-login

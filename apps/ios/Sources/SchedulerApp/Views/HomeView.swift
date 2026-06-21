@@ -12,26 +12,19 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $router.path) {
-            Group {
-                if vm.isLoading {
-                    ProgressView()
-                } else if vm.hasInitComplete {
-                    content
-                } else {
-                    ProgressView("Loading...")
-                }
-            }
-            .navigationTitle("Home")
-            .navigationDestination(for: Route.self) { route in
-                switch route {
-                case .scheduleList:
-                    ScheduleListView(vm: vm)
-                default:
-                    Text("\(String(describing: route))")
-                }
+        // HomeView is already inside SchedulerApp's NavigationStack — nesting another one
+        // bound to the same router.path made the inner stack render the route's default text
+        // ("home") instead of this content. The outer stack handles .scheduleList routing.
+        Group {
+            if vm.isLoading {
+                ProgressView()
+            } else if vm.hasInitComplete {
+                content
+            } else {
+                ProgressView("Loading...")
             }
         }
+        .navigationTitle("Home")
         .task {
             await vm.initialize()
         }

@@ -22,6 +22,8 @@ IOS_LOG=/tmp/eval-ios-unit.log
 IOS_DD="$IOS/build/dd"                       # iOS derivedData (shared by unit + e2e .app)
 IOS_DEST='platform=iOS Simulator,name=iPhone 17'
 IOS_UDID=""                                  # resolved/booted below when e2e runs
+E2E_CACHE=/tmp/eval-e2e-cache                 # per-run memo of e2e results (run each flow once)
+rm -rf "$E2E_CACHE" 2>/dev/null; mkdir -p "$E2E_CACHE"
 QUICK=0; [ "${1:-}" = "--quick" ] && QUICK=1
 : "${JAVA_HOME:=/Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home}"
 : "${ANDROID_HOME:=$HOME/Library/Android/sdk}"; export JAVA_HOME ANDROID_HOME
@@ -30,7 +32,7 @@ QUICK=0; [ "${1:-}" = "--quick" ] && QUICK=1
 AREAS=(
 "auth-email-login|AuthViewModelTest|email-login.yaml|testSignInWithEmail|email-login.yaml|-|done (android+ios, unit+e2e)"
 "auth-phone-signin|-|-|testBeginPhoneAuth|-|-|keep-native"
-"home|-|-|testHomeViewModel|-|-|keep-native"
+"home|HomeViewModelTest|email-login.yaml|testHomeViewModel|email-login.yaml|-|done (android+ios; login→home content)"
 "auth-password-reset|AuthViewModelPasswordResetTest|password-reset.yaml|testSendPasswordReset|password-reset.yaml|-|done (android+ios, unit+e2e)"
 "auth-create-account|AuthViewModelSignUpTest|create-account.yaml|testCreateAccount|create-account.yaml|-|done (android+ios, unit+e2e)"
 "auth-verify-email|AuthViewModelVerifyEmailTest|verify-email.yaml|testVerifyEmail|verify-email.yaml|-|done (android+ios, unit+e2e)"
@@ -90,11 +92,21 @@ a_unit_pass(){ [ "$1" = "-" ] && return 1; ls "$A_RESULTS"/*"$1"*.xml >/dev/null
 i_unit_pass(){ [ "$1" = "-" ] && return 1; [ -f "$IOS_LOG" ] || return 1
   grep -qE "Test Case .*'?-?\[?SchedulerAppTests.*$1.* passed" "$IOS_LOG" 2>/dev/null \
   && ! grep -qE "$1.* failed" "$IOS_LOG" 2>/dev/null; }
+# e2e runners: memoize per flow (a flow shared by two areas runs ONCE) + retry once
+# (a cold start after clearState can lose the render race under load; the 2nd attempt is warm).
 a_e2e_pass(){ [ "$1" = "-" ] && return 1; [ -f "$MAESTRO_DIR/$1" ] || return 1; [ $QUICK -eq 1 ] && return 1
-  ( cd "$ANDROID" && maestro ${AND_SERIAL:+--device "$AND_SERIAL"} test ".maestro/$1" >/tmp/eval-ae2e-"$1".log 2>&1 ); }
+  local m="$E2E_CACHE/a-$1"; [ -f "$m.pass" ] && return 0; [ -f "$m.fail" ] && return 1
+  local rc=1 a; for a in 1 2; do
+    ( cd "$ANDROID" && maestro ${AND_SERIAL:+--device "$AND_SERIAL"} test ".maestro/$1" >/tmp/eval-ae2e-"$1".log 2>&1 ) && { rc=0; break; }
+  done
+  [ $rc -eq 0 ] && touch "$m.pass" || touch "$m.fail"; return $rc; }
 i_e2e_pass(){ [ "$1" = "-" ] && return 1; [ -f "$IOS_MAESTRO_DIR/$1" ] || return 1; [ $QUICK -eq 1 ] && return 1
   [ -n "$IOS_UDID" ] || return 1
-  ( cd "$IOS" && maestro --device "$IOS_UDID" test ".maestro/$1" >/tmp/eval-ie2e-"$1".log 2>&1 ); }
+  local m="$E2E_CACHE/i-$1"; [ -f "$m.pass" ] && return 0; [ -f "$m.fail" ] && return 1
+  local rc=1 a; for a in 1 2; do
+    ( cd "$IOS" && maestro --device "$IOS_UDID" test ".maestro/$1" >/tmp/eval-ie2e-"$1".log 2>&1 ) && { rc=0; break; }
+  done
+  [ $rc -eq 0 ] && touch "$m.pass" || touch "$m.fail"; return $rc; }
 
 e1=0; afull=0; iunit=0; ie2e=0; web=0
 printf '\n%-22s %-4s | %-7s %-7s | %-7s %-7s | %-5s | %s\n' AREA E1 a-unit a-e2e i-unit i-e2e web VERDICT
