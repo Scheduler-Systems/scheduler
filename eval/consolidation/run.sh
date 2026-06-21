@@ -28,7 +28,7 @@ QUICK=0; [ "${1:-}" = "--quick" ] && QUICK=1
 
 # id | a_unit(class) | a_e2e(flow) | i_unit(iOS test-method substr) | i_e2e(flow) | w_e2e(spec) | verdict
 AREAS=(
-"auth-email-login|-|-|testSignInWithEmail|-|-|keep-native"
+"auth-email-login|AuthViewModelTest|email-login.yaml|testSignInWithEmail|email-login.yaml|-|done (android+ios, unit+e2e)"
 "auth-phone-signin|-|-|testBeginPhoneAuth|-|-|keep-native"
 "home|-|-|testHomeViewModel|-|-|keep-native"
 "auth-password-reset|AuthViewModelPasswordResetTest|password-reset.yaml|testSendPasswordReset|password-reset.yaml|-|done (android+ios, unit+e2e)"
@@ -62,6 +62,8 @@ echo "▶ consolidation eval — $INSCOPE in-scope areas (per-platform)"
 # Resolve the Android emulator serial so Maestro targets it explicitly (an iOS sim may be
 # co-booted for iOS e2e — without --device, Maestro can grab the wrong device).
 AND_SERIAL="$("$ANDROID_HOME/platform-tools/adb" devices 2>/dev/null | awk '/emulator-|device$/ && $2=="device"{print $1; exit}')"
+# Seed a verified user in the Auth emulator so the login→home e2e can reach home (idempotent).
+[ $QUICK -eq 0 ] && { echo "▶ seeding verified login user…"; bash "$(dirname "$0")/seed.sh" 2>&1 | sed 's/^/  /'; }
 echo "▶ Android unit suite…"; ( cd "$ANDROID" && ./gradlew :app:testDebugUnitTest --console=plain >/tmp/eval-a-unit.log 2>&1 ) \
   && echo "  android unit: GREEN" || echo "  android unit: RED (/tmp/eval-a-unit.log)"
 if [ $QUICK -eq 0 ]; then

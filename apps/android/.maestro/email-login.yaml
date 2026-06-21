@@ -1,0 +1,22 @@
+# Maestro GUI e2e for the Android email-login page (Flutter→native consolidation, keep-native).
+# Logs in with the seeded VERIFIED user (eval/consolidation/seed.sh) → leaves login for home.
+#   bash eval/consolidation/seed.sh && maestro --device emulator-5554 apps/android/.maestro/email-login.yaml
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:                                # cold start after clearState can be slow under load
+    visible: "Welcome Back"
+    timeout: 25000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    notVisible: "Welcome Back"                       # left login → authenticated → home
+    timeout: 10000
+- takeScreenshot: 01-after-login

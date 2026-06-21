@@ -8,7 +8,9 @@ appId: com.schedulersystems.scheduler
     clearState: true
     arguments:
       useFirebaseEmulator: true
-- assertVisible: "Sign in to manage your schedules"
+- extendedWaitUntil:                                    # cold start after clearState can be slow under load
+    visible: "Sign in to manage your schedules"
+    timeout: 25000
 - tapOn:
     text: "Create Account"
     index: 0                                            # login-screen "Create Account" button

@@ -1,0 +1,24 @@
+# Maestro GUI e2e for the iOS email-login page (Flutter→native consolidation, keep-native).
+# Logs in with the seeded VERIFIED user (eval/consolidation/seed.sh) → leaves login for home.
+#   bash eval/consolidation/seed.sh && maestro --device <ios-udid> apps/ios/.maestro/email-login.yaml
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:                               # cold start after clearState can be slow under load
+    visible: "Sign in to manage your schedules"
+    timeout: 25000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"                               # tap the title to dismiss the keyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    notVisible: "Sign in to manage your schedules"  # left login → authenticated (verified → home route)
+    timeout: 10000
+- takeScreenshot: 01-after-login

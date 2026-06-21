@@ -6,7 +6,9 @@ appId: com.schedulersystems.scheduler
 ---
 - launchApp:
     clearState: true
-- assertVisible: "Welcome Back"            # login screen
+- extendedWaitUntil:                       # cold start after clearState can be slow under load
+    visible: "Welcome Back"
+    timeout: 25000
 - tapOn: "Sign Up"
 - assertVisible: "Create Account"
 - evalScript: ${output.signupEmail = 'qa-verify-' + Date.now() + '@example.com'}  # unique per run
