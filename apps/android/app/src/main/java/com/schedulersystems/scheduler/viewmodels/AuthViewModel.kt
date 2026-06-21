@@ -85,8 +85,26 @@ class AuthViewModel @Inject constructor(
                 _uiState.update { it.copy(error = null) }
             }
             is AuthEvent.ResetPassword -> {
-                // Navigate to password reset
+                // Navigation-only event; the password-reset screen handles SendPasswordReset.
             }
+            is AuthEvent.SendPasswordReset -> {
+                sendPasswordReset(event.email)
+            }
+        }
+    }
+
+    private fun sendPasswordReset(email: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null, passwordResetSent = false) }
+            val result = authRepository.sendPasswordResetEmail(email)
+            result.fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isLoading = false, passwordResetSent = true) }
+                },
+                onFailure = { error ->
+                    _uiState.update { it.copy(isLoading = false, error = error.message) }
+                }
+            )
         }
     }
 
