@@ -70,6 +70,21 @@ if curl -s -m 3 -o /dev/null "$API" 2>/dev/null || curl -s -m 3 -o /dev/null "$A
   else
     echo "seed: WARN could not resolve QA Demo Schedule id — employee not seeded"
   fi
+
+  # Prune leftover E2E-created schedules. The new-schedule-create e2e creates a
+  # uniquely-named "E2E ..." schedule each run (the API 409s on duplicate names);
+  # delete them so the list stays short and the eval stays re-runnable/deterministic.
+  e2e_ids=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" \
+    "$API/v1/tenants/$localId/schedules" \
+    | python3 -c 'import sys,json; d=json.load(sys.stdin); print("\n".join(s["id"] for s in d.get("items",[]) if str(s.get("name","")).startswith("E2E ")))' 2>/dev/null)
+  if [ -n "$e2e_ids" ]; then
+    n=0
+    for del in $e2e_ids; do
+      curl -s -X DELETE -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" \
+        "$API/v1/tenants/$localId/schedules/$del" >/dev/null && n=$((n+1))
+    done
+    echo "seed: pruned $n leftover E2E schedule(s)"
+  fi
 else
   echo "seed: (Go API not up — schedule data pages will be empty)"
 fi

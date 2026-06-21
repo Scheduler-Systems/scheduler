@@ -156,19 +156,22 @@ private fun ActionButtons(
             Text("My Schedules", fontSize = 18.sp)
         }
 
-        if (userRole == Role.EMPLOYER) {
-            Button(
-                onClick = onNewScheduleClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF6A0DAD)
-                ),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text("Create New Schedule", fontSize = 18.sp)
-            }
+        // Shown to any signed-in user, matching iOS (which is ungated). The Go API
+        // enforces who may actually create (manager-only), so this is UI parity, not
+        // an authz decision. NOTE: Android currently never populates userRole
+        // (FirebaseAuthRepository.toDomainUser hardcodes role=null), so the previous
+        // `userRole == Role.EMPLOYER` gate made this button dead for everyone.
+        Button(
+            onClick = onNewScheduleClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF6A0DAD)
+            ),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Text("Create New Schedule", fontSize = 18.sp)
         }
     }
 }

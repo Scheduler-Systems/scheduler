@@ -1,0 +1,45 @@
+# Maestro GUI e2e for the iOS new-schedule-create page (Flutter→native consolidation).
+# login → Home → "Create New Schedule" → enter a UNIQUE name → Create → schedule
+# persists via the Go API (POST /schedules) and appears in My Schedules.
+# Unique name per run because the API 409s on duplicate schedule names; seed.sh prunes "E2E ..." leftovers.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"
+    timeout: 25000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "Create New Schedule"
+    timeout: 15000
+- evalScript: ${output.sched = 'E2E iOS ' + Math.floor(Math.random() * 1000000)}
+- tapOn: "Create New Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name"
+    timeout: 15000
+- tapOn: "Schedule Name"
+- inputText: ${output.sched}
+- tapOn: "New Schedule"                         # tap the static nav title to dismiss the keyboard
+- tapOn: "Create Schedule"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"                       # wait for the list to finish its async load first
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      text: ${output.sched}
+    timeout: 15000
+- takeScreenshot: 01-new-schedule-create

@@ -19,6 +19,7 @@ import com.schedulersystems.scheduler.ui.screens.auth.PhoneSignInScreen
 import com.schedulersystems.scheduler.ui.screens.auth.VerifyEmailScreen
 import com.schedulersystems.scheduler.ui.screens.employees.EmployeeListScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
+import com.schedulersystems.scheduler.ui.screens.schedule.NewScheduleScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleDetailScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleListScreen
 import com.schedulersystems.scheduler.ui.theme.SchedulerTheme
@@ -113,8 +114,21 @@ fun SchedulerNavHost(
         composable("home") {
             HomeScreen(
                 onNavigateToMySchedules = { navController.navigate("scheduleList") },
-                onNavigateToNewSchedule = { },
+                onNavigateToNewSchedule = { navController.navigate("newSchedule") },
                 onNavigateToNotifications = { }
+            )
+        }
+
+        composable("newSchedule") {
+            NewScheduleScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onCreated = {
+                    // Land on My Schedules so the new schedule is visible; drop the
+                    // create screen from the back stack.
+                    navController.navigate("scheduleList") {
+                        popUpTo("newSchedule") { inclusive = true }
+                    }
+                }
             )
         }
         

@@ -21,5 +21,7 @@ appId: com.schedulersystems.scheduler
     visible: "My Schedules"
     timeout: 15000
 - tapOn: "My Schedules"
-- assertVisible: "QA Demo Schedule"                 # loaded from the Go API
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"                       # loaded from the Go API (async — wait, don't assert eagerly)
+    timeout: 15000
 - takeScreenshot: 01-my-schedules

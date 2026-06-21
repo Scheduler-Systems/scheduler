@@ -17,18 +17,37 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
     }
 
     func fetchSchedules(tenantId: String) async throws -> [Schedule] {
-        let items = try await api.fetchSchedules(tenantId: tenantId)
+        let items = try await Self.withRetry { try await self.api.fetchSchedules(tenantId: tenantId) }
         return items.map { Self.map($0) }
     }
 
     func fetchSchedule(tenantId: String, scheduleId: String) async throws -> Schedule {
-        let result = try await api.fetchSchedule(tenantId: tenantId, scheduleId: scheduleId)
+        let result = try await Self.withRetry { try await self.api.fetchSchedule(tenantId: tenantId, scheduleId: scheduleId) }
         return Self.map(result)
     }
 
     func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [Employee] {
-        let items = try await api.fetchEmployees(tenantId: tenantId, scheduleId: scheduleId)
+        let items = try await Self.withRetry { try await self.api.fetchEmployees(tenantId: tenantId, scheduleId: scheduleId) }
         return items.map { Self.map($0, tenantId: tenantId) }
+    }
+
+    // Bounded retry for idempotent GETs only. On a cold app start (or host under
+    // load) the first request can fail/time out; a one-shot fetch would leave the
+    // view silently empty (Android's repository polls and self-heals — this gives
+    // iOS the same resilience). NOT used for create/update/delete (side effects).
+    private static func withRetry<T>(_ attempts: Int = 3, _ op: () async throws -> T) async throws -> T {
+        var lastError: Error?
+        for attempt in 1...attempts {
+            do {
+                return try await op()
+            } catch {
+                lastError = error
+                if attempt < attempts {
+                    try? await Task.sleep(nanoseconds: 700_000_000)
+                }
+            }
+        }
+        throw lastError ?? ApiError.server(status: 0, message: "retry exhausted")
     }
 
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule {

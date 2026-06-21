@@ -23,7 +23,9 @@ appId: com.schedulersystems.scheduler
     visible: "My Schedules"
     timeout: 15000
 - tapOn: "My Schedules"
-- assertVisible: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
 - tapOn: "QA Demo Schedule"
 - extendedWaitUntil:
     visible: "Schedule Name:"

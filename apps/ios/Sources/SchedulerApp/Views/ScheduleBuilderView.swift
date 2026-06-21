@@ -1,13 +1,19 @@
 import SwiftUI
 
 struct ScheduleBuilderView: View {
+    let scheduleService: ScheduleDataServiceProtocol
     @State private var name = ""
     @State private var startDate = Date()
     @State private var endDate = Date().addingTimeInterval(7 * 86400)
     @State private var shifts: [Shift] = []
+    @State private var isCreating = false
+    @State private var createError: String?
     @EnvironmentObject private var router: Router
+    @EnvironmentObject private var auth: AuthViewModel
 
-    var onSave: ((Schedule) -> Void)?
+    init(scheduleService: ScheduleDataServiceProtocol) {
+        self.scheduleService = scheduleService
+    }
 
     var body: some View {
         Form {
@@ -30,13 +36,16 @@ struct ScheduleBuilderView: View {
 
             Section {
                 Button(action: buildSchedule) {
-                    Text("Create Schedule")
+                    Text(isCreating ? "Creating…" : "Create Schedule")
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .foregroundColor(.white)
                 }
                 .listRowBackground(Color.purple)
-                .disabled(name.isEmpty || shifts.isEmpty)
+                .disabled(name.isEmpty || isCreating)
+                if let createError {
+                    Text(createError).foregroundColor(.red).font(.caption)
+                }
             }
         }
         .navigationTitle("New Schedule")
@@ -73,9 +82,13 @@ struct ScheduleBuilderView: View {
     private var shiftCount: Int { shifts.count }
 
     private func buildSchedule() {
+        guard let tenantId = auth.currentUserId else {
+            createError = "Not signed in"
+            return
+        }
         let schedule = Schedule(
             id: UUID().uuidString,
-            tenantId: "",
+            tenantId: tenantId,
             name: name,
             startDate: startDate,
             endDate: endDate,
@@ -84,7 +97,17 @@ struct ScheduleBuilderView: View {
             createdAt: Date(),
             updatedAt: Date()
         )
-        onSave?(schedule)
-        router.pop()
+        isCreating = true
+        createError = nil
+        Task {
+            do {
+                _ = try await scheduleService.createSchedule(tenantId: tenantId, schedule: schedule)
+                isCreating = false
+                router.pop()
+            } catch {
+                isCreating = false
+                createError = error.localizedDescription
+            }
+        }
     }
 }

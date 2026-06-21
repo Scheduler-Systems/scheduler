@@ -41,7 +41,7 @@ AREAS=(
 "onboarding|-|-|testOnboarding|-|-|todo"
 "my-schedules|ScheduleListViewModelTest|my-schedules.yaml|testHomeViewModel|my-schedules.yaml|-|done (android+ios; login→Go-API data)"
 "schedule-dashboard|ScheduleDetailViewModelTest|schedule-dashboard.yaml|testScheduleDetailView|schedule-dashboard.yaml|-|done (android+ios; login→detail by id)"
-"new-schedule-create|-|-|-|-|-|todo(needs-signoff)"
+"new-schedule-create|NewScheduleViewModelTest|new-schedule-create.yaml|testCreateSchedule|new-schedule-create.yaml|-|done (android+ios; Home→create→persists via POST /schedules)"
 "schedule-build|-|-|-|-|-|todo(needs-signoff,merge)"
 "schedule-settings|-|-|-|-|-|todo(needs-signoff)"
 "schedule-requests|-|-|-|-|-|todo(needs-signoff)"
@@ -107,6 +107,25 @@ i_e2e_pass(){ [ "$1" = "-" ] && return 1; [ -f "$IOS_MAESTRO_DIR/$1" ] || return
     ( cd "$IOS" && maestro --device "$IOS_UDID" test ".maestro/$1" >/tmp/eval-ie2e-"$1".log 2>&1 ) && { rc=0; break; }
   done
   [ $rc -eq 0 ] && touch "$m.pass" || touch "$m.fail"; return $rc; }
+
+# Phase the e2e: run ALL iOS flows as a block FIRST, THEN ALL Android flows —
+# never interleaved. On this resource-constrained host, interleaving iOS-sim and
+# Android-emulator Maestro thrashes RAM and the iOS data flows lose the API render
+# race (My Schedules comes back empty). iOS goes FIRST because it is the fragile one:
+# verified that the identical iOS flows pass 9/9 as a contiguous block on a fresh
+# machine, but fail once the machine is already exhausted by a prior block. Android
+# is resilient (its repo polls/self-heals) and passes even when run last. The runners
+# memoize per flow, so this just pre-populates the cache; the report loop reads it.
+if [ $QUICK -ne 1 ]; then
+  echo "▶ e2e phase 1/2: iOS e2e (block first, on the freshest machine state)…"
+  for row in "${AREAS[@]}"; do IFS='|' read -r _ _ _ _ ie _ _ <<< "$row"
+    [ "$ie" != "-" ] && { i_e2e_pass "$ie" && echo "  ✓ ios $ie" || echo "  ✗ ios $ie"; }
+  done
+  echo "▶ e2e phase 2/2: Android e2e (block, no concurrent iOS Maestro)…"
+  for row in "${AREAS[@]}"; do IFS='|' read -r _ _ ae _ _ _ _ <<< "$row"
+    [ "$ae" != "-" ] && { a_e2e_pass "$ae" && echo "  ✓ android $ae" || echo "  ✗ android $ae"; }
+  done
+fi
 
 e1=0; afull=0; iunit=0; ie2e=0; web=0
 printf '\n%-22s %-4s | %-7s %-7s | %-7s %-7s | %-5s | %s\n' AREA E1 a-unit a-e2e i-unit i-e2e web VERDICT
