@@ -152,6 +152,9 @@ final class ViewModelTests: XCTestCase {
 
 final class MockScheduleApiService: ScheduleDataServiceProtocol {
     func fetchSchedules(tenantId: String) async throws -> [Schedule] { [] }
+    func fetchSchedule(tenantId: String, scheduleId: String) async throws -> Schedule {
+        Schedule(id: scheduleId, tenantId: tenantId, name: "Mock", startDate: Date(), endDate: Date(), shifts: [], status: .draft, createdAt: Date(), updatedAt: Date())
+    }
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule { schedule }
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule { schedule }
     func deleteSchedule(tenantId: String, scheduleId: String) async throws {}

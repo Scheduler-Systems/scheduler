@@ -2,9 +2,9 @@ import XCTest
 import SwiftUI
 @testable import SchedulerApp
 
-final class ScheduleDetailPlaceholderTests: XCTestCase {
-    func testScheduleDetailPlaceholderInit() {
-        let view = ScheduleDetailPlaceholder(id: "test-id")
+final class ScheduleDetailViewTests: XCTestCase {
+    func testScheduleDetailViewInit() {
+        let view = ScheduleDetailView(scheduleId: "test-id", scheduleService: MockScheduleApiService())
         XCTAssertNotNil(view)
     }
 }

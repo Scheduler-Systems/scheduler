@@ -2,6 +2,7 @@ import Foundation
 
 protocol ScheduleDataServiceProtocol {
     func fetchSchedules(tenantId: String) async throws -> [Schedule]
+    func fetchSchedule(tenantId: String, scheduleId: String) async throws -> Schedule
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func deleteSchedule(tenantId: String, scheduleId: String) async throws
@@ -17,6 +18,11 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
     func fetchSchedules(tenantId: String) async throws -> [Schedule] {
         let items = try await api.fetchSchedules(tenantId: tenantId)
         return items.map { Self.map($0) }
+    }
+
+    func fetchSchedule(tenantId: String, scheduleId: String) async throws -> Schedule {
+        let result = try await api.fetchSchedule(tenantId: tenantId, scheduleId: scheduleId)
+        return Self.map(result)
     }
 
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule {

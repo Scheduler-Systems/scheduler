@@ -81,7 +81,7 @@ struct SchedulerApp: App {
         case .scheduleList:
             ScheduleListView(scheduleService: scheduleService, authViewModel: auth)
         case .scheduleDetail(let id):
-            ScheduleDetailPlaceholder(id: id)
+            ScheduleDetailView(scheduleId: id, scheduleService: scheduleService)
         case .scheduleBuilder:
             ScheduleBuilderView()
         case .employeeList:
@@ -96,11 +96,35 @@ struct SchedulerApp: App {
     }
 }
 
-struct ScheduleDetailPlaceholder: View {
-    let id: String
+// Self-loading: the .scheduleDetail route only carries the id, so fetch the schedule
+// (tenant = current user id) and show the real dashboard. Wires the previously-orphaned
+// ScheduleDashboardView (the route was a "Schedule Detail: <id>" stub).
+struct ScheduleDetailView: View {
+    let scheduleId: String
+    let scheduleService: ScheduleDataServiceProtocol
+    @EnvironmentObject private var auth: AuthViewModel
+    @State private var schedule: Schedule?
+    @State private var loadError: String?
+
     var body: some View {
-        Text("Schedule Detail: \(id)")
-            .navigationTitle("Schedule")
+        Group {
+            if let schedule {
+                ScheduleDashboardView(schedule: schedule, scheduleService: scheduleService)
+            } else if let loadError {
+                Text(loadError).foregroundColor(.red)
+            } else {
+                ProgressView()
+            }
+        }
+        .navigationTitle("Schedule")
+        .task {
+            guard let tenantId = auth.currentUserId else { return }
+            do {
+                schedule = try await scheduleService.fetchSchedule(tenantId: tenantId, scheduleId: scheduleId)
+            } catch {
+                loadError = error.localizedDescription
+            }
+        }
     }
 }
 

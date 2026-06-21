@@ -40,7 +40,7 @@ AREAS=(
 "auth-choose-role|-|-|-|-|-|todo(needs-signoff)"
 "onboarding|-|-|testOnboarding|-|-|todo"
 "my-schedules|ScheduleListViewModelTest|my-schedules.yaml|testHomeViewModel|my-schedules.yaml|-|done (android+ios; login→Go-API data)"
-"schedule-dashboard|-|-|-|-|-|todo(merge)"
+"schedule-dashboard|ScheduleDetailViewModelTest|schedule-dashboard.yaml|testScheduleDetailView|schedule-dashboard.yaml|-|done (android+ios; login→detail by id)"
 "new-schedule-create|-|-|-|-|-|todo(needs-signoff)"
 "schedule-build|-|-|-|-|-|todo(needs-signoff,merge)"
 "schedule-settings|-|-|-|-|-|todo(needs-signoff)"

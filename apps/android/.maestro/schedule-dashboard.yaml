@@ -1,0 +1,28 @@
+# Maestro GUI e2e for the Android schedule-dashboard page (Flutter→native consolidation).
+# login → My Schedules → tap the schedule → schedule detail (loaded by id from the Go API).
+# Preconditions: same as my-schedules (Go API :4180 + seed.sh + seeded schedule).
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 25000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- assertVisible: "QA Demo Schedule"
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"                          # the detail screen (loaded by id from the API)
+    timeout: 15000
+- takeScreenshot: 01-schedule-dashboard
