@@ -1,6 +1,9 @@
 package com.schedulersystems.scheduler.data.network
 
 import com.google.firebase.auth.FirebaseAuth
+import com.schedulersystems.scheduler.data.network.dto.AddEmployeeApiRequest
+import com.schedulersystems.scheduler.data.network.dto.ApiEmployeeDto
+import com.schedulersystems.scheduler.data.network.dto.EmployeeListApiResponse
 import com.schedulersystems.scheduler.data.network.dto.ScheduleDto
 import com.schedulersystems.scheduler.data.network.dto.ScheduleListResponse
 import okhttp3.Interceptor
@@ -48,6 +51,28 @@ interface SchedulerApiService {
     suspend fun deleteSchedule(
         @Path("tid") tenantId: String,
         @Path("id") scheduleId: String
+    ): retrofit2.Response<Unit>
+
+    // Schedule roster (separate endpoint; employees are NOT embedded in the schedule).
+    @GET("v1/tenants/{tid}/schedules/{sid}/employees")
+    suspend fun listEmployees(
+        @Path("tid") tenantId: String,
+        @Path("sid") scheduleId: String
+    ): retrofit2.Response<EmployeeListApiResponse>
+
+    @POST("v1/tenants/{tid}/schedules/{sid}/employees")
+    suspend fun addEmployee(
+        @Path("tid") tenantId: String,
+        @Path("sid") scheduleId: String,
+        @Body employee: AddEmployeeApiRequest
+    ): retrofit2.Response<ApiEmployeeDto>
+
+    // Identity is the (url-encoded) employee email.
+    @DELETE("v1/tenants/{tid}/schedules/{sid}/employees/{email}")
+    suspend fun removeEmployee(
+        @Path("tid") tenantId: String,
+        @Path("sid") scheduleId: String,
+        @Path("email") employeeEmail: String
     ): retrofit2.Response<Unit>
 }
 

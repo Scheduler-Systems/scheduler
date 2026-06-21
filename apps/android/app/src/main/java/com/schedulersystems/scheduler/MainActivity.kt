@@ -17,6 +17,7 @@ import com.schedulersystems.scheduler.ui.screens.auth.LoginScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PasswordResetScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PhoneSignInScreen
 import com.schedulersystems.scheduler.ui.screens.auth.VerifyEmailScreen
+import com.schedulersystems.scheduler.ui.screens.employees.EmployeeListScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleDetailScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleListScreen
@@ -129,6 +130,15 @@ fun SchedulerNavHost(
         composable("scheduleDetail/{scheduleId}") { backStackEntry ->
             val scheduleId = backStackEntry.arguments?.getString("scheduleId") ?: ""
             ScheduleDetailScreen(
+                scheduleId = scheduleId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEmployeeList = { navController.navigate("employeeList/$scheduleId") }
+            )
+        }
+
+        composable("employeeList/{scheduleId}") { backStackEntry ->
+            val scheduleId = backStackEntry.arguments?.getString("scheduleId") ?: ""
+            EmployeeListScreen(
                 scheduleId = scheduleId,
                 onNavigateBack = { navController.popBackStack() }
             )

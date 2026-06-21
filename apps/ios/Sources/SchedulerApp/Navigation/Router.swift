@@ -14,7 +14,7 @@ enum Route: Hashable {
     case scheduleList
     case scheduleDetail(Schedule.ID)
     case scheduleBuilder
-    case employeeList
+    case employeeList(Schedule.ID)
     case employeeDetail(Employee.ID)
     case settings
     case profile

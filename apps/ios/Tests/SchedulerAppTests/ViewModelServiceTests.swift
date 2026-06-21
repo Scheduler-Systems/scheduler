@@ -10,8 +10,10 @@ final class MockScheduleDataService: ScheduleDataServiceProtocol {
         Schedule(id: "s1", tenantId: "t1", name: "Updated", startDate: Date(), endDate: Date(), shifts: [], status: .published, createdAt: Date(), updatedAt: Date())
     )
     var deleteScheduleError: Error?
-    
+    var fetchEmployeesResult: Result<[Employee], Error> = .success([])
+
     var fetchedTenantIds: [String] = []
+    var fetchedEmployeeScheduleIds: [String] = []
     var createdSchedules: [Schedule] = []
     var updatedSchedules: [Schedule] = []
     var deletedScheduleIds: [String] = []
@@ -23,6 +25,11 @@ final class MockScheduleDataService: ScheduleDataServiceProtocol {
 
     func fetchSchedule(tenantId: String, scheduleId: String) async throws -> Schedule {
         Schedule(id: scheduleId, tenantId: tenantId, name: "Test", startDate: Date(), endDate: Date(), shifts: [], status: .draft, createdAt: Date(), updatedAt: Date())
+    }
+
+    func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [Employee] {
+        fetchedEmployeeScheduleIds.append(scheduleId)
+        return try fetchEmployeesResult.get()
     }
 
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule {

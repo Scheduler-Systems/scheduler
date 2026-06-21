@@ -39,6 +39,11 @@ class FirestoreScheduleRepository @Inject constructor(
         return doc.toSchedule()
     }
 
+    // Firestore embeds the roster in the schedule document.
+    override suspend fun getEmployees(scheduleId: String): List<Employee> {
+        return getScheduleById(scheduleId)?.employees ?: emptyList()
+    }
+
     override suspend fun createSchedule(schedule: Schedule): Result<String> {
         return try {
             val docRef = firestore.collection("schedules").document()

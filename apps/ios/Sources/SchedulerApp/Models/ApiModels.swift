@@ -38,6 +38,37 @@ struct DeleteResponse: Decodable {
     let id: String
 }
 
+// Employee embedded in a schedule (schedules/{id}.employees[] on the web/Flutter
+// side). The Go API uses snake_case keys mirroring scheduler-web's EmployeeDetails;
+// identity is the email. Served from GET .../schedules/{id}/employees as {items:[...]}.
+struct EmployeeResponse: Decodable {
+    let employeeName: String
+    let employeeEmail: String
+    let employeePhone: String?
+    let role: EmployeeRoleResponse?
+    let userRef: String?
+
+    enum CodingKeys: String, CodingKey {
+        case employeeName = "employee_name"
+        case employeeEmail = "employee_email"
+        case employeePhone = "employee_phone"
+        case role
+        case userRef = "user_ref"
+    }
+}
+
+struct EmployeeRoleResponse: Decodable {
+    let isCreator: Bool?
+    let isAdmin: Bool?
+    let isWorker: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case isCreator = "is_creator"
+        case isAdmin = "is_admin"
+        case isWorker = "is_worker"
+    }
+}
+
 struct AvailabilityRequest: Encodable {
     let availability: [String: String]
 }

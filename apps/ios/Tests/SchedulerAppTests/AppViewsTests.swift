@@ -11,7 +11,7 @@ final class ScheduleDetailViewTests: XCTestCase {
 
 final class EmployeeListViewTests: XCTestCase {
     func testEmployeeListViewInit() {
-        let view = EmployeeListView()
+        let view = EmployeeListView(scheduleId: "sched-1", scheduleService: MockScheduleApiService())
         XCTAssertNotNil(view)
     }
 }

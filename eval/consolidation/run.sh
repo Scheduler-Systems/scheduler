@@ -45,7 +45,7 @@ AREAS=(
 "schedule-build|-|-|-|-|-|todo(needs-signoff,merge)"
 "schedule-settings|-|-|-|-|-|todo(needs-signoff)"
 "schedule-requests|-|-|-|-|-|todo(needs-signoff)"
-"employees-list|-|-|-|-|-|todo"
+"employees-list|EmployeeListViewModelTest|employees-list.yaml|testFetchEmployees|employees-list.yaml|-|done (android+ios; login→roster via Go-API employees endpoint)"
 "employees-add|-|-|-|-|-|todo(needs-signoff)"
 "priorities-submission|-|-|-|-|-|todo(needs-signoff)"
 "priorities-current|-|-|-|-|-|todo(needs-signoff)"

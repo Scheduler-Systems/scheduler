@@ -139,6 +139,7 @@ final class MockApiClient: ApiClientProtocol {
     var fetchScheduleResult: Result<ScheduleResponse, Error> = .success(
         ScheduleResponse(id: "1", tenantId: "t1", name: "Test", settings: nil, status: "draft", createdBy: nil, createdAt: nil, updatedAt: nil)
     )
+    var fetchEmployeesResult: Result<[EmployeeResponse], Error> = .success([])
     var createScheduleResult: Result<ScheduleResponse, Error> = .success(
         ScheduleResponse(id: "new", tenantId: "t1", name: "New", settings: nil, status: "draft", createdBy: nil, createdAt: nil, updatedAt: nil)
     )
@@ -170,7 +171,12 @@ final class MockApiClient: ApiClientProtocol {
     func fetchSchedule(tenantId: String, scheduleId: String) async throws -> ScheduleResponse {
         return try fetchScheduleResult.get()
     }
-    
+
+    func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [EmployeeResponse] {
+        recordedScheduleIds.append(scheduleId)
+        return try fetchEmployeesResult.get()
+    }
+
     func createSchedule(tenantId: String, body: CreateScheduleRequest) async throws -> ScheduleResponse {
         return try createScheduleResult.get()
     }
@@ -265,7 +271,52 @@ final class ScheduleApiServiceTests: XCTestCase {
         XCTAssertEqual(schedules.count, 1)
         XCTAssertEqual(schedules[0].status, .archived)
     }
-    
+
+    // MARK: - fetchEmployees
+
+    func testFetchEmployeesMapsRosterRow() async throws {
+        let response = EmployeeResponse(
+            employeeName: "Alex Worker",
+            employeeEmail: "alex.worker@example.com",
+            employeePhone: "+15551234567",
+            role: EmployeeRoleResponse(isCreator: false, isAdmin: false, isWorker: true),
+            userRef: "uid-1"
+        )
+        mockApi.fetchEmployeesResult = .success([response])
+
+        let employees = try await service.fetchEmployees(tenantId: "t1", scheduleId: "s1")
+
+        XCTAssertEqual(employees.count, 1)
+        let emp = employees[0]
+        // email is the API's stable identity → used as the model id
+        XCTAssertEqual(emp.id, "alex.worker@example.com")
+        XCTAssertEqual(emp.email, "alex.worker@example.com")
+        XCTAssertEqual(emp.displayName, "Alex Worker")
+        XCTAssertEqual(emp.phone, "+15551234567")
+        XCTAssertEqual(emp.userId, "uid-1")
+        XCTAssertEqual(emp.role, .worker)
+        XCTAssertTrue(mockApi.recordedScheduleIds.contains("s1"))
+    }
+
+    func testFetchEmployeesRoleMapping() async throws {
+        let admin = EmployeeResponse(employeeName: "A", employeeEmail: "a@x.com", employeePhone: nil,
+            role: EmployeeRoleResponse(isCreator: false, isAdmin: true, isWorker: false), userRef: nil)
+        let creator = EmployeeResponse(employeeName: "C", employeeEmail: "c@x.com", employeePhone: nil,
+            role: EmployeeRoleResponse(isCreator: true, isAdmin: false, isWorker: false), userRef: nil)
+        mockApi.fetchEmployeesResult = .success([admin, creator])
+
+        let employees = try await service.fetchEmployees(tenantId: "t1", scheduleId: "s1")
+
+        XCTAssertEqual(employees[0].role, .admin)    // isAdmin wins
+        XCTAssertEqual(employees[1].role, .manager)  // isCreator → manager
+    }
+
+    func testFetchEmployeesEmpty() async throws {
+        mockApi.fetchEmployeesResult = .success([])
+        let employees = try await service.fetchEmployees(tenantId: "t1", scheduleId: "s1")
+        XCTAssertTrue(employees.isEmpty)
+    }
+
     // MARK: - createSchedule
     
     func testCreateScheduleSuccess() async throws {

@@ -79,13 +79,14 @@ class EmployeeListViewModelTest {
     }
 
     @Test
-    fun `loadEmployees should populate state with employees from schedule`() = runTest {
+    fun `loadEmployees should populate state with employees from roster endpoint`() = runTest {
         val employees = listOf(
             createMockEmployee(id = "e-1", name = "Alice"),
             createMockEmployee(id = "e-2", name = "Bob")
         )
-        val schedule = createMockSchedule(employees)
-        coEvery { scheduleRepository.getScheduleById("s-1") } returns schedule
+        // schedule provides the name/existence; the roster comes from its own endpoint
+        coEvery { scheduleRepository.getScheduleById("s-1") } returns createMockSchedule()
+        coEvery { scheduleRepository.getEmployees("s-1") } returns employees
 
         val vm = EmployeeListViewModel(scheduleRepository)
         vm.loadEmployees("s-1")
@@ -117,8 +118,8 @@ class EmployeeListViewModelTest {
     @Test
     fun `addEmployee should add employee and reload`() = runTest {
         val initialEmployees = listOf(createMockEmployee(id = "e-1", name = "Alice"))
-        val schedule = createMockSchedule(initialEmployees)
-        coEvery { scheduleRepository.getScheduleById("s-1") } returns schedule
+        coEvery { scheduleRepository.getScheduleById("s-1") } returns createMockSchedule()
+        coEvery { scheduleRepository.getEmployees("s-1") } returns initialEmployees
         coEvery { scheduleRepository.addEmployee(eq("s-1"), any()) } returns Result.success(Unit)
 
         val vm = EmployeeListViewModel(scheduleRepository)
@@ -143,8 +144,8 @@ class EmployeeListViewModelTest {
 
     @Test
     fun `addEmployee should handle failure`() = runTest {
-        val schedule = createMockSchedule()
-        coEvery { scheduleRepository.getScheduleById("s-1") } returns schedule
+        coEvery { scheduleRepository.getScheduleById("s-1") } returns createMockSchedule()
+        coEvery { scheduleRepository.getEmployees("s-1") } returns emptyList()
         coEvery { scheduleRepository.addEmployee(eq("s-1"), any()) } returns
             Result.failure(Exception("Failed to add employee"))
 
@@ -164,17 +165,16 @@ class EmployeeListViewModelTest {
 
     @Test
     fun `removeEmployee should remove employee and reload`() = runTest {
-        val twoEmployeeSchedule = createMockSchedule(listOf(
+        val twoEmployees = listOf(
             createMockEmployee(id = "e-1", name = "Alice"),
             createMockEmployee(id = "e-2", name = "Bob")
-        ))
-        val oneEmployeeSchedule = createMockSchedule(listOf(
-            createMockEmployee(id = "e-1", name = "Alice")
-        ))
+        )
+        val oneEmployee = listOf(createMockEmployee(id = "e-1", name = "Alice"))
+        coEvery { scheduleRepository.getScheduleById("s-1") } returns createMockSchedule()
         var callCount = 0
-        coEvery { scheduleRepository.getScheduleById("s-1") } answers {
+        coEvery { scheduleRepository.getEmployees("s-1") } answers {
             callCount++
-            if (callCount >= 2) oneEmployeeSchedule else twoEmployeeSchedule
+            if (callCount >= 2) oneEmployee else twoEmployees
         }
         coEvery { scheduleRepository.removeEmployee("s-1", "e-2") } returns Result.success(Unit)
 
@@ -194,8 +194,8 @@ class EmployeeListViewModelTest {
 
     @Test
     fun `removeEmployee should handle failure`() = runTest {
-        val schedule = createMockSchedule(listOf(createMockEmployee(id = "e-1")))
-        coEvery { scheduleRepository.getScheduleById("s-1") } returns schedule
+        coEvery { scheduleRepository.getScheduleById("s-1") } returns createMockSchedule()
+        coEvery { scheduleRepository.getEmployees("s-1") } returns listOf(createMockEmployee(id = "e-1"))
         coEvery { scheduleRepository.removeEmployee("s-1", "e-1") } returns
             Result.failure(Exception("Failed to remove employee"))
 
@@ -238,8 +238,8 @@ class EmployeeListViewModelTest {
 
     @Test
     fun `addEmployee with empty fields should still create employee`() = runTest {
-        val schedule = createMockSchedule()
-        coEvery { scheduleRepository.getScheduleById("s-1") } returns schedule
+        coEvery { scheduleRepository.getScheduleById("s-1") } returns createMockSchedule()
+        coEvery { scheduleRepository.getEmployees("s-1") } returns emptyList()
         coEvery { scheduleRepository.addEmployee(eq("s-1"), any()) } returns Result.success(Unit)
 
         val vm = EmployeeListViewModel(scheduleRepository)

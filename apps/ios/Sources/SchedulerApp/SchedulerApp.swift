@@ -84,8 +84,8 @@ struct SchedulerApp: App {
             ScheduleDetailView(scheduleId: id, scheduleService: scheduleService)
         case .scheduleBuilder:
             ScheduleBuilderView()
-        case .employeeList:
-            EmployeeListView()
+        case .employeeList(let id):
+            EmployeeListView(scheduleId: id, scheduleService: scheduleService)
         case .employeeDetail(let id):
             EmployeeDetailPlaceholder(id: id)
         case .settings:
@@ -128,10 +128,60 @@ struct ScheduleDetailView: View {
     }
 }
 
+// Self-loading: fetches the schedule's roster (tenant = current user id) from the
+// Go API and lists each employee. Wires the previously-stub EmployeeListView, reached
+// from the schedule dashboard's "Employee List & Requests" button.
 struct EmployeeListView: View {
+    let scheduleId: String
+    let scheduleService: ScheduleDataServiceProtocol
+    @EnvironmentObject private var auth: AuthViewModel
+    @State private var employees: [Employee] = []
+    @State private var isLoading = true
+    @State private var loadError: String?
+
+    init(scheduleId: String, scheduleService: ScheduleDataServiceProtocol) {
+        self.scheduleId = scheduleId
+        self.scheduleService = scheduleService
+    }
+
     var body: some View {
-        Text("Employee List")
-            .navigationTitle("Employees")
+        Group {
+            if isLoading {
+                ProgressView()
+            } else if let loadError {
+                Text(loadError).foregroundColor(.red)
+            } else if employees.isEmpty {
+                Text("No employees yet").foregroundColor(.secondary)
+            } else {
+                List(employees) { employee in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(employee.displayName.isEmpty ? employee.email : employee.displayName)
+                            .fontWeight(.semibold)
+                        Text(employee.email).font(.subheadline).foregroundColor(.secondary)
+                        if let phone = employee.phone, !phone.isEmpty {
+                            Text(phone).font(.caption).foregroundColor(.secondary)
+                        }
+                        Text(employee.role.rawValue.capitalized)
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+        }
+        .navigationTitle("Employees")
+        .task {
+            guard let tenantId = auth.currentUserId else {
+                isLoading = false
+                return
+            }
+            do {
+                employees = try await scheduleService.fetchEmployees(tenantId: tenantId, scheduleId: scheduleId)
+            } catch {
+                loadError = error.localizedDescription
+            }
+            isLoading = false
+        }
     }
 }
 

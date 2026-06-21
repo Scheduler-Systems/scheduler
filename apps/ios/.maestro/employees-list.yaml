@@ -1,0 +1,36 @@
+# Maestro GUI e2e for the iOS employees-list page (Flutter→native consolidation).
+# login → My Schedules → tap the schedule → dashboard → "Employee List & Requests"
+# → employees list (loaded by schedule id from the Go API), assert the seeded employee.
+# Preconditions: Go API :4180 + seed.sh (seeds qa-verified, QA Demo Schedule, + employee Alex Worker).
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"
+    timeout: 25000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- assertVisible: "QA Demo Schedule"
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- tapOn: "Employee List & Requests"
+- extendedWaitUntil:
+    visible: "Alex Worker"                               # the seeded roster employee (from the Go API)
+    timeout: 15000
+- assertVisible: "alex.worker@example.com"
+- takeScreenshot: 01-employees-list

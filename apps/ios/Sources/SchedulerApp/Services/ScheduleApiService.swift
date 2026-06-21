@@ -3,6 +3,7 @@ import Foundation
 protocol ScheduleDataServiceProtocol {
     func fetchSchedules(tenantId: String) async throws -> [Schedule]
     func fetchSchedule(tenantId: String, scheduleId: String) async throws -> Schedule
+    func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [Employee]
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func deleteSchedule(tenantId: String, scheduleId: String) async throws
@@ -23,6 +24,11 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
     func fetchSchedule(tenantId: String, scheduleId: String) async throws -> Schedule {
         let result = try await api.fetchSchedule(tenantId: tenantId, scheduleId: scheduleId)
         return Self.map(result)
+    }
+
+    func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [Employee] {
+        let items = try await api.fetchEmployees(tenantId: tenantId, scheduleId: scheduleId)
+        return items.map { Self.map($0, tenantId: tenantId) }
     }
 
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule {
@@ -60,6 +66,34 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
             status: status,
             createdAt: parseISO(response.createdAt),
             updatedAt: parseISO(response.updatedAt)
+        )
+    }
+
+    // Maps the API's embedded employee (snake_case, email-as-identity) onto the
+    // existing Employee model. id = email (the API's stable identity); fields the
+    // embedded record doesn't carry (stations, isActive, createdAt) take sensible
+    // defaults — the schedule roster row is a lightweight EmployeeDetails, not the
+    // full employees-collection document.
+    private static func map(_ response: EmployeeResponse, tenantId: String) -> Employee {
+        let role: EmployeeRole
+        if response.role?.isAdmin == true {
+            role = .admin
+        } else if response.role?.isCreator == true {
+            role = .manager
+        } else {
+            role = .worker
+        }
+        return Employee(
+            id: response.employeeEmail,
+            tenantId: tenantId,
+            userId: response.userRef ?? "",
+            displayName: response.employeeName,
+            email: response.employeeEmail,
+            phone: response.employeePhone,
+            role: role,
+            stations: [],
+            isActive: true,
+            createdAt: Date()
         )
     }
 

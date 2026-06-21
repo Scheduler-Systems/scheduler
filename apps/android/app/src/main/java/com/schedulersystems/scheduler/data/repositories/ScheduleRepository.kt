@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface ScheduleRepository {
     fun getSchedulesForUser(userId: String): Flow<List<Schedule>>
     suspend fun getScheduleById(scheduleId: String): Schedule?
+    suspend fun getEmployees(scheduleId: String): List<Employee>
     suspend fun createSchedule(schedule: Schedule): Result<String>
     suspend fun updateSchedule(schedule: Schedule): Result<Unit>
     suspend fun deleteSchedule(scheduleId: String): Result<Unit>

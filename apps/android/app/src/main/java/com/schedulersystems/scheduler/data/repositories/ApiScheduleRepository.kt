@@ -1,6 +1,7 @@
 package com.schedulersystems.scheduler.data.repositories
 
 import com.schedulersystems.scheduler.data.network.SchedulerApi
+import com.schedulersystems.scheduler.data.network.dto.toAddRequest
 import com.schedulersystems.scheduler.data.network.dto.toDomain
 import com.schedulersystems.scheduler.data.network.dto.toDto
 import com.schedulersystems.scheduler.models.domain.Employee
@@ -50,6 +51,21 @@ class ApiScheduleRepository @Inject constructor(
         return null
     }
 
+    override suspend fun getEmployees(scheduleId: String): List<Employee> {
+        return try {
+            val response = api.service.listEmployees(currentTenant(), scheduleId)
+            if (response.isSuccessful) {
+                response.body()?.items?.map { it.toDomain() } ?: emptyList()
+            } else {
+                android.util.Log.e("ApiSchedRepo", "listEmployees HTTP ${response.code()}")
+                emptyList()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ApiSchedRepo", "listEmployees failed", e)
+            emptyList()
+        }
+    }
+
     override suspend fun createSchedule(schedule: Schedule): Result<String> {
         return try {
             val response = api.service.createSchedule(currentTenant(), schedule.toDto())
@@ -89,21 +105,31 @@ class ApiScheduleRepository @Inject constructor(
         }
     }
 
+    // Employees live behind their own endpoint, not embedded in the schedule, so
+    // add/remove POST/DELETE directly against it (the previous read-modify-write of
+    // the whole schedule silently no-op'd — the server ignores a schedule.employees body).
     override suspend fun addEmployee(scheduleId: String, employee: Employee): Result<Unit> {
         return try {
-            val schedule = getScheduleById(scheduleId) ?: return Result.failure(Exception("Schedule not found"))
-            val updated = schedule.copy(employees = schedule.employees + employee)
-            updateSchedule(updated)
+            val response = api.service.addEmployee(currentTenant(), scheduleId, employee.toAddRequest())
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to add employee: ${response.code()}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
+    // employeeId is the employee email (the API's stable identity; see EmployeeApiDto).
     override suspend fun removeEmployee(scheduleId: String, employeeId: String): Result<Unit> {
         return try {
-            val schedule = getScheduleById(scheduleId) ?: return Result.failure(Exception("Schedule not found"))
-            val updated = schedule.copy(employees = schedule.employees.filter { it.id != employeeId })
-            updateSchedule(updated)
+            val response = api.service.removeEmployee(currentTenant(), scheduleId, employeeId)
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to remove employee: ${response.code()}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

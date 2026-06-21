@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 fun ScheduleDetailScreen(
     scheduleId: String,
     onNavigateBack: () -> Unit,
+    onNavigateToEmployeeList: () -> Unit = {},
     viewModel: ScheduleDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -96,7 +97,7 @@ fun ScheduleDetailScreen(
                     ScheduleDetailContent(
                         schedule = state.schedule!!,
                         userRole = state.userRole,
-                        onEmployeeListClick = { },
+                        onEmployeeListClick = onNavigateToEmployeeList,
                         onPrioritiesClick = { },
                         onBuildClick = { },
                         modifier = Modifier.padding(padding)

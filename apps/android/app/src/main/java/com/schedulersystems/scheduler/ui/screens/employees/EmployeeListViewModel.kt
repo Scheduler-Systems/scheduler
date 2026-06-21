@@ -44,18 +44,22 @@ class EmployeeListViewModel @Inject constructor(
     fun loadEmployees(scheduleId: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
+            // The schedule is fetched for its display name (and existence check); the
+            // roster comes from its own endpoint (not embedded in the schedule doc).
             val schedule = scheduleRepository.getScheduleById(scheduleId)
-            if (schedule != null) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        employees = schedule.employees,
-                        scheduleName = schedule.name,
-                        scheduleId = scheduleId
-                    )
-                }
-            } else {
+            if (schedule == null) {
                 _state.update { it.copy(isLoading = false, error = "Schedule not found") }
+                return@launch
+            }
+            val employees = scheduleRepository.getEmployees(scheduleId)
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    employees = employees,
+                    scheduleName = schedule.name,
+                    scheduleId = scheduleId,
+                    error = null
+                )
             }
         }
     }

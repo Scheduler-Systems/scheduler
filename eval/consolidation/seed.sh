@@ -35,16 +35,40 @@ else
 fi
 
 # Data pages: if the Go API is up, ensure a schedule exists for this tenant (uid) so the
-# my-schedules e2e has data to render. No-op if the API isn't running.
+# my-schedules e2e has data to render, and seed one employee onto it for the
+# employees-list e2e. No-op if the API isn't running.
 API=${SCHEDULER_API:-http://127.0.0.1:4180}
 if curl -s -m 3 -o /dev/null "$API" 2>/dev/null || curl -s -m 3 -o /dev/null "$API/healthz" 2>/dev/null; then
-  has=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" "$API/v1/tenants/$localId/schedules" 2>/dev/null | grep -o 'QA Demo Schedule')
-  if [ -z "$has" ]; then
-    curl -s -X POST -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" -H 'Content-Type: application/json' \
-      -d '{"name":"QA Demo Schedule","status":"active"}' "$API/v1/tenants/$localId/schedules" >/dev/null
+  schedules=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" "$API/v1/tenants/$localId/schedules" 2>/dev/null)
+  if ! echo "$schedules" | grep -q 'QA Demo Schedule'; then
+    schedules=$(curl -s -X POST -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" -H 'Content-Type: application/json' \
+      -d '{"name":"QA Demo Schedule","status":"active"}' "$API/v1/tenants/$localId/schedules")
     echo "seed: created QA Demo Schedule"
   else
     echo "seed: QA Demo Schedule present"
+  fi
+
+  # Resolve the schedule id: it's random per API start (memory store), so parse it
+  # from the listing rather than hardcoding. There's exactly one QA Demo Schedule,
+  # so grab the first schedule_ id token.
+  sid=$(echo "$schedules" | grep -o '"id":"schedule_[^"]*"' | head -1 | sed 's/.*"id":"\([^"]*\)"/\1/')
+  if [ -z "$sid" ]; then
+    sid=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" "$API/v1/tenants/$localId/schedules" \
+      | grep -o '"id":"schedule_[^"]*"' | head -1 | sed 's/.*"id":"\([^"]*\)"/\1/')
+  fi
+  if [ -n "$sid" ]; then
+    emps=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" \
+      "$API/v1/tenants/$localId/schedules/$sid/employees" 2>/dev/null)
+    if echo "$emps" | grep -q 'alex.worker@example.com'; then
+      echo "seed: employee Alex Worker present"
+    else
+      curl -s -X POST -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" -H 'Content-Type: application/json' \
+        -d '{"employee_name":"Alex Worker","employee_email":"alex.worker@example.com","employee_phone":"+15551234567","role":{"is_worker":true}}' \
+        "$API/v1/tenants/$localId/schedules/$sid/employees" >/dev/null
+      echo "seed: added employee Alex Worker to QA Demo Schedule ($sid)"
+    fi
+  else
+    echo "seed: WARN could not resolve QA Demo Schedule id — employee not seeded"
   fi
 else
   echo "seed: (Go API not up — schedule data pages will be empty)"

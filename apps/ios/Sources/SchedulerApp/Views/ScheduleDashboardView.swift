@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ScheduleDashboardView: View {
+    @EnvironmentObject private var router: Router
     @StateObject private var vm: ScheduleViewModel
     let schedule: Schedule
 
@@ -43,7 +44,7 @@ struct ScheduleDashboardView: View {
                 }
 
                 VStack(spacing: 12) {
-                    Button(action: {}) {
+                    Button(action: { router.push(.employeeList(schedule.id)) }) {
                         Label("Employee List & Requests", systemImage: "person.3")
                             .frame(maxWidth: .infinity)
                             .padding()
