@@ -12,7 +12,8 @@ data class AuthUiState(
     val phoneNumber: String = "",
     val verificationId: String? = null,
     val smsCode: String = "",
-    val isCodeSent: Boolean = false
+    val isCodeSent: Boolean = false,
+    val passwordResetSent: Boolean = false
 )
 
 sealed class AuthEvent {
@@ -29,6 +30,7 @@ sealed class AuthEvent {
     data object SignOut : AuthEvent()
     data object ClearError : AuthEvent()
     data object ResetPassword : AuthEvent()
+    data class SendPasswordReset(val email: String) : AuthEvent()
 }
 
 sealed class AuthNavigation {
