@@ -29,7 +29,7 @@ AREAS=(
 "auth-phone-signin|-|-|keep-native"
 "home|-|-|keep-native"
 "auth-password-reset|AuthViewModelPasswordResetTest|password-reset.yaml|done"
-"auth-create-account|-|-|todo"
+"auth-create-account|AuthViewModelSignUpTest|create-account.yaml|done"
 "auth-verify-email|-|-|todo"
 "auth-get-name|-|-|todo(needs-signoff)"
 "auth-choose-role|-|-|todo(needs-signoff)"

@@ -1,0 +1,26 @@
+# Maestro GUI e2e for the Android create-account page (Flutter→native consolidation, page 2).
+# Zero-account against the Firebase Auth emulator; unique email per run so it's repeatable.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Welcome Back"            # login screen
+- tapOn: "Sign Up"                         # bottom "Don't have an account? Sign Up" link
+- assertVisible: "Create Account"          # navigated to the (previously stub) create-account screen
+- takeScreenshot: 01-create-account
+- tapOn: "Email"
+- inputText: "qa-signup-${Math.floor(Math.random()*100000000)}@example.com"
+- tapOn:
+    text: "Password"
+    index: 0                               # the Password field (Confirm Password is a separate match)
+- inputText: "Password123!"
+- tapOn: "Confirm Password"
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn:
+    text: "Create Account"
+    index: 1                               # index 0 = title, index 1 = the button
+- extendedWaitUntil:
+    notVisible: "Confirm Password"         # signup succeeded → navigated to home (left the create-account screen)
+    timeout: 10000
+- takeScreenshot: 02-after-signup

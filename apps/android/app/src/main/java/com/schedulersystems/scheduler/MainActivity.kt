@@ -12,6 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.schedulersystems.scheduler.ui.screens.auth.CreateAccountScreen
 import com.schedulersystems.scheduler.ui.screens.auth.LoginScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PasswordResetScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PhoneSignInScreen
@@ -52,7 +53,7 @@ fun SchedulerNavHost(
             LoginScreen(
                 onNavigateToPhoneSignIn = { navController.navigate("phoneSignIn") },
                 onNavigateToEmailSignIn = { },
-                onNavigateToSignUp = { },
+                onNavigateToSignUp = { navController.navigate("createAccount") },
                 onNavigateToPasswordReset = { navController.navigate("passwordReset") },
                 onNavigateToHome = { 
                     navController.navigate("home") {
@@ -79,7 +80,18 @@ fun SchedulerNavHost(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-        
+
+        composable("createAccount") {
+            CreateAccountScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToHome = {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable("home") {
             HomeScreen(
                 onNavigateToMySchedules = { navController.navigate("scheduleList") },

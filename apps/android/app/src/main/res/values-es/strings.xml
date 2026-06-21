@@ -127,4 +127,6 @@
     <string name="reset_password_subtitle">Ingresa tu correo y te enviaremos un enlace para restablecerla</string>
     <string name="send_reset_email">Enviar correo de restablecimiento</string>
     <string name="reset_email_sent">Revisa tu correo para ver el enlace de restablecimiento</string>
+    <string name="create_account_subtitle">Regístrate para empezar</string>
+    <string name="passwords_dont_match">Las contraseñas no coinciden</string>
 </resources>
