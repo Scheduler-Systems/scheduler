@@ -16,8 +16,12 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ANDROID="$ROOT/apps/android"; IOS="$ROOT/apps/ios"
 MAESTRO_DIR="$ANDROID/.maestro"
+IOS_MAESTRO_DIR="$IOS/.maestro"
 A_RESULTS="$ANDROID/app/build/test-results/testDebugUnitTest"
 IOS_LOG=/tmp/eval-ios-unit.log
+IOS_DD="$IOS/build/dd"                       # iOS derivedData (shared by unit + e2e .app)
+IOS_DEST='platform=iOS Simulator,name=iPhone 17'
+IOS_UDID=""                                  # resolved/booted below when e2e runs
 QUICK=0; [ "${1:-}" = "--quick" ] && QUICK=1
 : "${JAVA_HOME:=/Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home}"
 : "${ANDROID_HOME:=$HOME/Library/Android/sdk}"; export JAVA_HOME ANDROID_HOME
@@ -27,8 +31,8 @@ AREAS=(
 "auth-email-login|-|-|testSignInWithEmail|-|-|keep-native"
 "auth-phone-signin|-|-|testBeginPhoneAuth|-|-|keep-native"
 "home|-|-|testHomeViewModel|-|-|keep-native"
-"auth-password-reset|AuthViewModelPasswordResetTest|password-reset.yaml|testSendPasswordReset|-|-|done(android); ios e2e pending"
-"auth-create-account|AuthViewModelSignUpTest|create-account.yaml|testCreateAccount|-|-|done(android); ios e2e pending"
+"auth-password-reset|AuthViewModelPasswordResetTest|password-reset.yaml|testSendPasswordReset|password-reset.yaml|-|done (android+ios, unit+e2e)"
+"auth-create-account|AuthViewModelSignUpTest|create-account.yaml|testCreateAccount|create-account.yaml|-|done (android+ios, unit+e2e)"
 "auth-verify-email|-|-|-|-|-|todo"
 "auth-get-name|-|-|-|-|-|todo(needs-signoff)"
 "auth-choose-role|-|-|-|-|-|todo(needs-signoff)"
@@ -55,13 +59,28 @@ AREAS=(
 INSCOPE=${#AREAS[@]}   # 27 (gemini-ai + billing-revenuecat excluded)
 
 echo "▶ consolidation eval — $INSCOPE in-scope areas (per-platform)"
+# Resolve the Android emulator serial so Maestro targets it explicitly (an iOS sim may be
+# co-booted for iOS e2e — without --device, Maestro can grab the wrong device).
+AND_SERIAL="$("$ANDROID_HOME/platform-tools/adb" devices 2>/dev/null | awk '/emulator-|device$/ && $2=="device"{print $1; exit}')"
 echo "▶ Android unit suite…"; ( cd "$ANDROID" && ./gradlew :app:testDebugUnitTest --console=plain >/tmp/eval-a-unit.log 2>&1 ) \
   && echo "  android unit: GREEN" || echo "  android unit: RED (/tmp/eval-a-unit.log)"
 if [ $QUICK -eq 0 ]; then
-  echo "▶ iOS unit suite (xcodebuild — slow)…"
+  echo "▶ iOS unit + e2e setup (xcodebuild — slow)…"
+  # iOS e2e precondition: the Firebase Auth emulator must be running on 127.0.0.1:9099.
+  # One simulator serves unit + e2e: reuse a booted iPhone, else boot iPhone 17.
+  IOS_UDID="$(xcrun simctl list devices booted 2>/dev/null | grep -iE 'iPhone' | grep -oE '[0-9A-F-]{36}' | head -1)"
+  if [ -z "$IOS_UDID" ]; then
+    IOS_UDID="$(xcrun simctl list devices available 2>/dev/null | grep -E 'iPhone 17 \(' | grep -oE '[0-9A-F-]{36}' | head -1)"
+    [ -n "$IOS_UDID" ] && xcrun simctl boot "$IOS_UDID" >/dev/null 2>&1
+  fi
+  IOS_TEST_DEST="$IOS_DEST"; [ -n "$IOS_UDID" ] && IOS_TEST_DEST="id=$IOS_UDID"
   ( cd "$IOS" && xcodegen generate >/dev/null 2>&1 && xcodebuild test -project SchedulerApp.xcodeproj \
-      -scheme SchedulerApp -destination 'platform=iOS Simulator,name=iPhone 17' >"$IOS_LOG" 2>&1 ) \
-    && echo "  ios unit: GREEN" || echo "  ios unit: RED (/tmp/eval-ios-unit.log)"
+      -scheme SchedulerApp -destination "$IOS_TEST_DEST" -derivedDataPath "$IOS_DD" >"$IOS_LOG" 2>&1 ) \
+    && echo "  ios unit: GREEN" || echo "  ios unit: RED ($IOS_LOG)"
+  # Install the freshly-built (ad-hoc-signed) .app so iOS Maestro e2e can drive it.
+  IOS_APP="$(find "$IOS_DD/Build/Products" -maxdepth 3 -name 'SchedulerApp.app' 2>/dev/null | head -1)"
+  [ -n "$IOS_UDID" ] && [ -n "$IOS_APP" ] && xcrun simctl install "$IOS_UDID" "$IOS_APP" >/dev/null 2>&1 \
+    && echo "  ios app installed → e2e ready ($IOS_UDID)"
 fi
 
 a_unit_pass(){ [ "$1" = "-" ] && return 1; ls "$A_RESULTS"/*"$1"*.xml >/dev/null 2>&1 \
@@ -70,7 +89,10 @@ i_unit_pass(){ [ "$1" = "-" ] && return 1; [ -f "$IOS_LOG" ] || return 1
   grep -qE "Test Case .*'?-?\[?SchedulerAppTests.*$1.* passed" "$IOS_LOG" 2>/dev/null \
   && ! grep -qE "$1.* failed" "$IOS_LOG" 2>/dev/null; }
 a_e2e_pass(){ [ "$1" = "-" ] && return 1; [ -f "$MAESTRO_DIR/$1" ] || return 1; [ $QUICK -eq 1 ] && return 1
-  ( cd "$ANDROID" && maestro test ".maestro/$1" >/tmp/eval-ae2e-"$1".log 2>&1 ); }
+  ( cd "$ANDROID" && maestro ${AND_SERIAL:+--device "$AND_SERIAL"} test ".maestro/$1" >/tmp/eval-ae2e-"$1".log 2>&1 ); }
+i_e2e_pass(){ [ "$1" = "-" ] && return 1; [ -f "$IOS_MAESTRO_DIR/$1" ] || return 1; [ $QUICK -eq 1 ] && return 1
+  [ -n "$IOS_UDID" ] || return 1
+  ( cd "$IOS" && maestro --device "$IOS_UDID" test ".maestro/$1" >/tmp/eval-ie2e-"$1".log 2>&1 ); }
 
 e1=0; afull=0; iunit=0; ie2e=0; web=0
 printf '\n%-22s %-4s | %-7s %-7s | %-7s %-7s | %-5s | %s\n' AREA E1 a-unit a-e2e i-unit i-e2e web VERDICT
@@ -84,8 +106,9 @@ for row in "${AREAS[@]}"; do
   [ "$au" != "-" ] && [ "$AU" != "✅" ] && AU="❌"
   i_unit_pass "$iu" && { IU="✅"; iunit=$((iunit+1)); }
   [ "$iu" != "-" ] && [ "$IU" != "✅" ] && IU="❌"
-  # iOS e2e + web not wired yet → pending unless a flow/spec is defined and passes
-  [ "$ie" != "-" ] && IE="❌"   # (no iOS-sim maestro runner yet)
+  i_e2e_pass "$ie" && { IE="✅"; ie2e=$((ie2e+1)); }
+  [ "$ie" != "-" ] && [ "$IE" != "✅" ] && IE="❌"
+  # web e2e not wired yet → pending unless a spec is defined and passes
   [ "$we" != "-" ] && WE="❌"
   a_full=0; [ "$AU" = "✅" ] && [ "$AE" = "✅" ] && { a_full=1; afull=$((afull+1)); }
   i_full=0; [ "$IU" = "✅" ] && [ "$IE" = "✅" ] && i_full=1
@@ -98,7 +121,7 @@ echo "════ SCORECARD (per-platform) ════"
 echo "  E1 parity (BOTH natives full): $e1/$INSCOPE   ← the done bar"
 echo "  ├ android-full (unit+e2e):     $afull/$INSCOPE"
 echo "  ├ ios-unit:                    $iunit/$INSCOPE"
-echo "  ├ ios-e2e:                     $ie2e/$INSCOPE   (iOS-sim Maestro + Firebase-emulator wiring: TODO)"
+echo "  ├ ios-e2e:                     $ie2e/$INSCOPE   (Maestro on iOS sim + Firebase Auth emulator)"
 echo "  └ web-e2e (feeds E5):          $web/$INSCOPE    (Playwright/make dev: TODO)"
 if [ "$e1" -eq "$INSCOPE" ]; then echo "  RESULT: ✅ PASS — consolidation done"; exit 0
 else echo "  RESULT: ❌ FAIL — $((INSCOPE-e1)) areas not yet parity on both platforms"; exit 1; fi

@@ -1,0 +1,34 @@
+# Maestro GUI e2e for the iOS create-account page (Flutter→native consolidation, page 2).
+# Zero-account against the Firebase Auth emulator; unique email per run so it's repeatable.
+#   maestro test --device <ios-udid> apps/ios/.maestro/create-account.yaml
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- assertVisible: "Sign in to manage your schedules"   # login screen
+- tapOn:
+    text: "Create Account"
+    index: 0                                            # the login-screen "Create Account" button
+- assertVisible: "Create Account"                       # navigated to the create-account screen (title)
+- takeScreenshot: 01-create-account
+- evalScript: ${output.signupEmail = 'qa-ios-signup-' + Date.now() + '@example.com'}  # unique per run
+- tapOn: "Email"
+- inputText: ${output.signupEmail}
+- tapOn:
+    text: "Password"
+    index: 0                                            # the Password field (Confirm Password matches separately)
+- inputText: "Password123!"
+- tapOn: "Confirm Password"
+- inputText: "Password123!"
+- tapOn:
+    text: "Create Account"
+    index: 0                                            # tap the title (static text) to dismiss the keyboard
+- tapOn:
+    text: "Create Account"
+    index: 1                                            # index 0 = title, index 1 = the button
+- extendedWaitUntil:
+    notVisible: "Confirm Password"                      # signup succeeded → left the create-account screen
+    timeout: 10000
+- takeScreenshot: 02-after-signup

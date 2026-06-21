@@ -49,6 +49,9 @@ GoogleService-Info.plist
 secrets/
 credentials/
 
+# Maestro e2e screenshots (written to this dir at run time — test artifacts, not source)
+/[0-9][0-9]-*.png
+
 # OS
 .DS_Store
 *.swp

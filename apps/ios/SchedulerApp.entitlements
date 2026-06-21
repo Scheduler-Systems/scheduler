@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Firebase Auth persists the signed-in session to the iOS keychain. Without a
+         keychain-access-group entitlement an unsigned simulator install hits
+         errSecMissingEntitlement ("An error occurred when accessing the keychain")
+         on createUser/signIn. Ad-hoc signing applies this on the simulator. -->
+    <key>keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)com.schedulersystems.scheduler</string>
+    </array>
+</dict>
+</plist>

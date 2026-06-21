@@ -61,12 +61,12 @@ struct LoginView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .disabled(vm.isLoading)
 
-                Button(action: { router.push(.onboarding) }) {
+                Button(action: { router.push(.createAccount) }) {
                     Text("Create Account")
                         .fontWeight(.medium)
                 }
 
-                Button(action: { Task { await vm.sendPasswordReset() } }) {
+                Button(action: { router.push(.passwordReset) }) {
                     Text("Forgot Password?")
                         .font(.caption)
                 }

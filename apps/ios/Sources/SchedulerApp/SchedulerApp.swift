@@ -1,3 +1,4 @@
+import FirebaseAuth
 import FirebaseCore
 import SwiftUI
 
@@ -13,6 +14,24 @@ struct SchedulerApp: App {
         // missing from the native migration, which crashed/failed Firebase at
         // launch. Requires GoogleService-Info.plist in the app bundle.
         FirebaseApp.configure()
+
+        // Zero-account e2e: point Auth at the local Firebase Auth emulator when launched for
+        // testing. Triggered by env USE_FIREBASE_EMULATOR=true, UserDefaults `-useFirebaseEmulator`,
+        // or ANY process launch argument mentioning useFirebaseEmulator (Maestro passes its
+        // launchArguments map in a form that doesn't always reach NSUserDefaults, so match the
+        // raw argv too). iOS Simulator reaches the host machine via 127.0.0.1 (Android uses 10.0.2.2).
+        let env = ProcessInfo.processInfo.environment
+        let emulatorOn = env["USE_FIREBASE_EMULATOR"] == "true"
+            || UserDefaults.standard.bool(forKey: "useFirebaseEmulator")
+            || ProcessInfo.processInfo.arguments.contains { $0.localizedCaseInsensitiveContains("useFirebaseEmulator") }
+        if emulatorOn {
+            let host = env["FIREBASE_EMULATOR_HOST"] ?? "127.0.0.1"
+            Auth.auth().useEmulator(withHost: host, port: 9099)
+            // Zero-account e2e must start logged out. Maestro's clearState wipes the app
+            // container but NOT the iOS keychain, so a prior sign-in (e.g. create-account)
+            // persists and the app would launch straight to home. Clear it for a deterministic start.
+            try? Auth.auth().signOut()
+        }
 
         let baseURL = Bundle.main.object(forInfoDictionaryKey: "SCHEDULER_API_URL") as? String
             ?? ProcessInfo.processInfo.environment["SCHEDULER_API_URL"]
