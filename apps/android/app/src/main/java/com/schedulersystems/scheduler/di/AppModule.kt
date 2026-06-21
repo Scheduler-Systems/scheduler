@@ -24,7 +24,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideScheduleRepository(api: SchedulerApi): ScheduleRepository {
-        return ApiScheduleRepository(api)
+    fun provideScheduleRepository(api: SchedulerApi, authRepository: AuthRepository): ScheduleRepository {
+        return ApiScheduleRepository(api, authRepository)
     }
 }

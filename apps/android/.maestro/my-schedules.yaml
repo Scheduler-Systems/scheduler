@@ -1,0 +1,25 @@
+# Maestro GUI e2e for the Android my-schedules page (Flutter→native consolidation).
+# Logged-in data page: login (seeded verified+claimed user) → home → My Schedules list,
+# loaded from the Go REST API. Build with -PuseFirebaseEmulator=true -PschedulerApiUrl=http://10.0.2.2:4180.
+# Preconditions: auth emulator + Go API (PORT=4180, demo-scheduler) + seed.sh + a seeded schedule.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 25000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- assertVisible: "QA Demo Schedule"                 # loaded from the Go API
+- takeScreenshot: 01-my-schedules

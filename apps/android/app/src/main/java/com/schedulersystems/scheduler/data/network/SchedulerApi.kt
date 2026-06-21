@@ -68,6 +68,8 @@ class AuthInterceptor(private val firebaseAuth: FirebaseAuth) : Interceptor {
             user?.let {
                 addHeader("x-user-id", it.uid)
             }
+            // Required by the API (tracing; 400 missing_actor_context without it).
+            addHeader("x-correlation-id", java.util.UUID.randomUUID().toString())
         }.build()
         return chain.proceed(request)
     }

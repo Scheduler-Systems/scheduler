@@ -1,0 +1,28 @@
+# Maestro GUI e2e for the iOS my-schedules page (Flutter→native consolidation).
+# Logged-in data page: login (seeded verified+claimed user) → home → My Schedules list,
+# which loads from the Go REST API (:4180) and shows the seeded "QA Demo Schedule".
+# Preconditions: auth emulator + Go API (PORT=4180, FIREBASE_PROJECT_ID=demo-scheduler) +
+# eval/consolidation/seed.sh (verified user + tenant_id/role claims) + a seeded schedule.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"
+    timeout: 25000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- assertVisible: "QA Demo Schedule"                 # loaded from the Go API
+- takeScreenshot: 01-my-schedules

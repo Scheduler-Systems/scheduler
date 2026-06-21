@@ -27,7 +27,12 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "SCHEDULER_API_URL", "\"https://api.scheduler-systems.com\"")
+        // Overridable for local/staging, e.g. -PschedulerApiUrl=http://10.0.2.2:4180 (emulator → host).
+        buildConfigField(
+            "String",
+            "SCHEDULER_API_URL",
+            "\"${project.findProperty("schedulerApiUrl") ?: "https://api.scheduler-systems.com"}\""
+        )
 
         // Zero-account local dev / e2e: point Firebase at the local emulators.
         // Default false (real Firebase for release / Scheduler Cloud). Enable with:

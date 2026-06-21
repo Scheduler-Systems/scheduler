@@ -95,17 +95,30 @@ struct HomeView: View {
 }
 
 struct ScheduleListView: View {
-    let vm: HomeViewModel
+    // Self-loading so it works regardless of the navigation entry point (the outer
+    // NavigationStack builds this fresh). @StateObject so @Published changes re-render.
+    @StateObject private var vm: HomeViewModel
+
+    init(scheduleService: ScheduleDataServiceProtocol, authViewModel: AuthViewModel) {
+        _vm = StateObject(wrappedValue: HomeViewModel(scheduleService: scheduleService, authViewModel: authViewModel))
+    }
 
     var body: some View {
-        List(vm.schedules) { schedule in
-            NavigationLink(value: Route.scheduleDetail(schedule.id)) {
-                VStack(alignment: .leading) {
-                    Text(schedule.name).fontWeight(.semibold)
-                    Text(schedule.status.rawValue.capitalized).font(.caption)
+        Group {
+            if vm.isLoading && vm.schedules.isEmpty {
+                ProgressView()
+            } else {
+                List(vm.schedules) { schedule in
+                    NavigationLink(value: Route.scheduleDetail(schedule.id)) {
+                        VStack(alignment: .leading) {
+                            Text(schedule.name).fontWeight(.semibold)
+                            Text(schedule.status.rawValue.capitalized).font(.caption)
+                        }
+                    }
                 }
             }
         }
         .navigationTitle("My Schedules")
+        .task { await vm.initialize() }
     }
 }

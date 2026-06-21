@@ -79,7 +79,7 @@ struct SchedulerApp: App {
         case .home:
             HomeView(scheduleService: scheduleService, authViewModel: auth)
         case .scheduleList:
-            ScheduleListView(vm: HomeViewModel(scheduleService: scheduleService, authViewModel: auth))
+            ScheduleListView(scheduleService: scheduleService, authViewModel: auth)
         case .scheduleDetail(let id):
             ScheduleDetailPlaceholder(id: id)
         case .scheduleBuilder:

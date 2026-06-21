@@ -20,6 +20,11 @@ localId="$(get_localid signInWithPassword)"
 curl -s -X POST "$EMU/accounts:update" -H 'Authorization: Bearer owner' \
   -H 'Content-Type: application/json' -d "{\"localId\":\"$localId\",\"emailVerified\":true}" >/dev/null
 
+# Logged-in pages: the API derives tenant/role from token CLAIMS (IDOR-remediation), so the
+# user needs tenant_id + role custom claims (tenant_id = own uid, the app's tenant convention).
+curl -s -X POST "$EMU/accounts:update" -H 'Authorization: Bearer owner' -H 'Content-Type: application/json' \
+  -d "{\"localId\":\"$localId\",\"customAttributes\":\"{\\\"tenant_id\\\":\\\"$localId\\\",\\\"role\\\":\\\"manager\\\"}\"}" >/dev/null
+
 idt="$(curl -s -X POST "$EMU/accounts:signInWithPassword?key=$KEY" -H 'Content-Type: application/json' \
   -d "{\"email\":\"$EMAIL\",\"password\":\"$PW\",\"returnSecureToken\":true}" | sed -n 's/.*"idToken":"\([^"]*\)".*/\1/p')"
 if curl -s -X POST "$EMU/accounts:lookup?key=$KEY" -H 'Content-Type: application/json' \

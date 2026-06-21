@@ -12,17 +12,19 @@ import java.time.Instant
 import java.time.LocalTime
 
 data class ScheduleListResponse(
-    @SerializedName("schedules") val schedules: List<ScheduleDto>
+    @SerializedName("items") val schedules: List<ScheduleDto>
 )
 
 data class ScheduleDto(
     @SerializedName("id") val id: String? = null,
     @SerializedName("name") val name: String,
-    @SerializedName("tenant_id") val tenantId: String,
-    @SerializedName("employees") val employees: List<EmployeeDto> = emptyList(),
-    @SerializedName("current_priorities") val currentPriorities: List<String> = emptyList(),
-    @SerializedName("settings") val settings: ScheduleSettingsDto = ScheduleSettingsDto(),
-    @SerializedName("next_schedule") val nextSchedule: List<ShiftRowDto> = emptyList(),
+    @SerializedName("tenantId") val tenantId: String,
+    // Nullable because gson ignores Kotlin defaults — an absent JSON field becomes null,
+    // not emptyList(), so .map{} on it would NPE. toDomain() coalesces to emptyList().
+    @SerializedName("employees") val employees: List<EmployeeDto>? = null,
+    @SerializedName("current_priorities") val currentPriorities: List<String>? = null,
+    @SerializedName("settings") val settings: ScheduleSettingsDto? = null,
+    @SerializedName("next_schedule") val nextSchedule: List<ShiftRowDto>? = null,
     @SerializedName("created_at") val createdAt: String? = null,
     @SerializedName("updated_at") val updatedAt: String? = null
 )
@@ -63,10 +65,10 @@ fun ScheduleDto.toDomain(): Schedule {
         id = id ?: "",
         name = name,
         tenantId = tenantId,
-        employees = employees.map { it.toDomain() },
-        currentPriorities = currentPriorities,
-        settings = settings.toDomain(),
-        nextSchedule = nextSchedule.map { it.toDomain() },
+        employees = employees?.map { it.toDomain() } ?: emptyList(),
+        currentPriorities = currentPriorities ?: emptyList(),
+        settings = (settings ?: ScheduleSettingsDto()).toDomain(),
+        nextSchedule = nextSchedule?.map { it.toDomain() } ?: emptyList(),
         createdAt = parseInstantOrNow(createdAt),
         updatedAt = parseInstantOrNow(updatedAt)
     )
