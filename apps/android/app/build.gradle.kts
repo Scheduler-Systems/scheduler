@@ -28,6 +28,21 @@ android {
         }
 
         buildConfigField("String", "SCHEDULER_API_URL", "\"https://api.scheduler-systems.com\"")
+
+        // Zero-account local dev / e2e: point Firebase at the local emulators.
+        // Default false (real Firebase for release / Scheduler Cloud). Enable with:
+        //   ./gradlew assembleDebug -PuseFirebaseEmulator=true
+        // 10.0.2.2 is the Android emulator's alias for the host machine's loopback.
+        buildConfigField(
+            "boolean",
+            "USE_FIREBASE_EMULATOR",
+            (project.findProperty("useFirebaseEmulator") ?: "false").toString()
+        )
+        buildConfigField(
+            "String",
+            "FIREBASE_EMULATOR_HOST",
+            "\"${project.findProperty("firebaseEmulatorHost") ?: "10.0.2.2"}\""
+        )
     }
 
     buildFeatures {
