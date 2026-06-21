@@ -129,8 +129,8 @@ struct ScheduleDetailView: View {
 }
 
 // Self-loading: fetches the schedule's roster (tenant = current user id) from the
-// Go API and lists each employee. Wires the previously-stub EmployeeListView, reached
-// from the schedule dashboard's "Employee List & Requests" button.
+// Go API and lists each employee, with a "+" to add one (POST /employees). Wires the
+// previously-stub EmployeeListView, reached from the schedule dashboard.
 struct EmployeeListView: View {
     let scheduleId: String
     let scheduleService: ScheduleDataServiceProtocol
@@ -138,6 +138,7 @@ struct EmployeeListView: View {
     @State private var employees: [Employee] = []
     @State private var isLoading = true
     @State private var loadError: String?
+    @State private var showAddSheet = false
 
     init(scheduleId: String, scheduleService: ScheduleDataServiceProtocol) {
         self.scheduleId = scheduleId
@@ -170,17 +171,98 @@ struct EmployeeListView: View {
             }
         }
         .navigationTitle("Employees")
-        .task {
-            guard let tenantId = auth.currentUserId else {
-                isLoading = false
-                return
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { showAddSheet = true } label: { Image(systemName: "plus") }
+                    .accessibilityLabel("Add Employee")
+                    .accessibilityIdentifier("addEmployeeButton")
             }
-            do {
-                employees = try await scheduleService.fetchEmployees(tenantId: tenantId, scheduleId: scheduleId)
-            } catch {
-                loadError = error.localizedDescription
+        }
+        .sheet(isPresented: $showAddSheet) {
+            AddEmployeeSheet(scheduleId: scheduleId, scheduleService: scheduleService) {
+                await load()
             }
+            .environmentObject(auth)
+        }
+        .task { await load() }
+    }
+
+    private func load() async {
+        guard let tenantId = auth.currentUserId else {
             isLoading = false
+            return
+        }
+        do {
+            employees = try await scheduleService.fetchEmployees(tenantId: tenantId, scheduleId: scheduleId)
+            loadError = nil
+        } catch {
+            loadError = error.localizedDescription
+        }
+        isLoading = false
+    }
+}
+
+// Add-employee form (name/email/phone) → POST /employees. On success, asks the parent
+// to reload the roster and dismisses. The server is the source of truth for duplicate
+// emails (409), surfaced here as an error.
+struct AddEmployeeSheet: View {
+    let scheduleId: String
+    let scheduleService: ScheduleDataServiceProtocol
+    let onAdded: () async -> Void
+    @EnvironmentObject private var auth: AuthViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var email = ""
+    @State private var phone = ""
+    @State private var isAdding = false
+    @State private var addError: String?
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Employee") {
+                    TextField("Name", text: $name)
+                    TextField("Email", text: $email)
+                        .autocorrectionDisabled(true)
+                    TextField("Phone", text: $phone)
+                }
+                if let addError {
+                    Text(addError).foregroundColor(.red).font(.caption)
+                }
+                Section {
+                    Button(action: add) {
+                        Text(isAdding ? "Adding…" : "Save Employee")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .disabled(email.isEmpty || isAdding)
+                }
+            }
+            .navigationTitle("Add Employee")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func add() {
+        guard let tenantId = auth.currentUserId else { addError = "Not signed in"; return }
+        isAdding = true
+        addError = nil
+        Task {
+            do {
+                _ = try await scheduleService.addEmployee(
+                    tenantId: tenantId, scheduleId: scheduleId,
+                    name: name, email: email, phone: phone
+                )
+                await onAdded()
+                isAdding = false
+                dismiss()
+            } catch {
+                isAdding = false
+                addError = error.localizedDescription
+            }
         }
     }
 }

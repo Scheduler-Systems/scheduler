@@ -90,9 +90,18 @@ fun EmployeeListScreen(
         }
     }
 
+    // Auto-close the dialog once the add succeeds (isAdded flips async, so the old
+    // synchronous check at click-time never closed it).
+    LaunchedEffect(addState.isAdded) {
+        if (addState.isAdded) {
+            showAddDialog = false
+            viewModel.dismissAdd()
+        }
+    }
+
     if (showAddDialog) {
         AlertDialog(
-            onDismissRequest = { showAddDialog = false },
+            onDismissRequest = { showAddDialog = false; viewModel.dismissAdd() },
             title = { Text("Add Employee") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -122,14 +131,11 @@ fun EmployeeListScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = {
-                        viewModel.addEmployee(scheduleId)
-                        if (addState.isAdded) showAddDialog = false
-                    },
-                    enabled = !addState.isAdding && addState.name.isNotBlank(),
+                    onClick = { viewModel.addEmployee(scheduleId) },
+                    enabled = !addState.isAdding && addState.name.isNotBlank() && addState.email.isNotBlank(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0DAD))
                 ) {
-                    Text("Add")
+                    Text("Save")
                 }
             },
             dismissButton = {

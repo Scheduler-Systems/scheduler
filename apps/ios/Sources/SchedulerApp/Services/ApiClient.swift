@@ -25,6 +25,7 @@ protocol ApiClientProtocol {
     func fetchSchedules(tenantId: String) async throws -> [ScheduleResponse]
     func fetchSchedule(tenantId: String, scheduleId: String) async throws -> ScheduleResponse
     func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [EmployeeResponse]
+    func addEmployee(tenantId: String, scheduleId: String, body: AddEmployeeRequest) async throws -> EmployeeResponse
     func createSchedule(tenantId: String, body: CreateScheduleRequest) async throws -> ScheduleResponse
     func updateSchedule(tenantId: String, scheduleId: String, body: UpdateScheduleRequest) async throws -> ScheduleResponse
     func deleteSchedule(tenantId: String, scheduleId: String) async throws -> DeleteResponse
@@ -100,6 +101,11 @@ final class ApiClient: ApiClientProtocol {
         let req = try await makeRequest(path: "v1/tenants/\(tenantId)/schedules/\(scheduleId)/employees", method: "GET", tenantId: tenantId)
         let wrapper: ListResponse<EmployeeResponse> = try await execute(req)
         return wrapper.items
+    }
+
+    func addEmployee(tenantId: String, scheduleId: String, body: AddEmployeeRequest) async throws -> EmployeeResponse {
+        let req = try await makeRequest(path: "v1/tenants/\(tenantId)/schedules/\(scheduleId)/employees", method: "POST", tenantId: tenantId, body: body)
+        return try await execute(req)
     }
 
     func createSchedule(tenantId: String, body: CreateScheduleRequest) async throws -> ScheduleResponse {

@@ -67,6 +67,20 @@ if curl -s -m 3 -o /dev/null "$API" 2>/dev/null || curl -s -m 3 -o /dev/null "$A
         "$API/v1/tenants/$localId/schedules/$sid/employees" >/dev/null
       echo "seed: added employee Alex Worker to QA Demo Schedule ($sid)"
     fi
+    # Prune e2e-added employees: the employees-add e2e adds a uniquely-emailed
+    # employee each run (API 409s on duplicate email); keep only the seeded Alex Worker
+    # so the roster stays deterministic. (Identity is the email; delete by email.)
+    extra=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" \
+      "$API/v1/tenants/$localId/schedules/$sid/employees" \
+      | python3 -c 'import sys,json,urllib.parse; d=json.load(sys.stdin); print("\n".join(urllib.parse.quote(e["employee_email"],safe="") for e in d.get("items",[]) if e.get("employee_email") and e.get("employee_email")!="alex.worker@example.com"))' 2>/dev/null)
+    if [ -n "$extra" ]; then
+      ne=0
+      for em in $extra; do
+        curl -s -X DELETE -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" \
+          "$API/v1/tenants/$localId/schedules/$sid/employees/$em" >/dev/null && ne=$((ne+1))
+      done
+      echo "seed: pruned $ne e2e-added employee(s)"
+    fi
   else
     echo "seed: WARN could not resolve QA Demo Schedule id — employee not seeded"
   fi

@@ -4,6 +4,7 @@ protocol ScheduleDataServiceProtocol {
     func fetchSchedules(tenantId: String) async throws -> [Schedule]
     func fetchSchedule(tenantId: String, scheduleId: String) async throws -> Schedule
     func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [Employee]
+    func addEmployee(tenantId: String, scheduleId: String, name: String, email: String, phone: String) async throws -> Employee
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func deleteSchedule(tenantId: String, scheduleId: String) async throws
@@ -29,6 +30,13 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
     func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [Employee] {
         let items = try await Self.withRetry { try await self.api.fetchEmployees(tenantId: tenantId, scheduleId: scheduleId) }
         return items.map { Self.map($0, tenantId: tenantId) }
+    }
+
+    func addEmployee(tenantId: String, scheduleId: String, name: String, email: String, phone: String) async throws -> Employee {
+        // POST is not retried (side effect; the server 409s on duplicate email).
+        let body = AddEmployeeRequest(name: name, email: email, phone: phone)
+        let result = try await api.addEmployee(tenantId: tenantId, scheduleId: scheduleId, body: body)
+        return Self.map(result, tenantId: tenantId)
     }
 
     // Bounded retry for idempotent GETs only. On a cold app start (or host under

@@ -140,6 +140,9 @@ final class MockApiClient: ApiClientProtocol {
         ScheduleResponse(id: "1", tenantId: "t1", name: "Test", settings: nil, status: "draft", createdBy: nil, createdAt: nil, updatedAt: nil)
     )
     var fetchEmployeesResult: Result<[EmployeeResponse], Error> = .success([])
+    var addEmployeeResult: Result<EmployeeResponse, Error> = .success(
+        EmployeeResponse(employeeName: "Added", employeeEmail: "added@example.com", employeePhone: nil, role: nil, userRef: nil)
+    )
     var createScheduleResult: Result<ScheduleResponse, Error> = .success(
         ScheduleResponse(id: "new", tenantId: "t1", name: "New", settings: nil, status: "draft", createdBy: nil, createdAt: nil, updatedAt: nil)
     )
@@ -175,6 +178,11 @@ final class MockApiClient: ApiClientProtocol {
     func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [EmployeeResponse] {
         recordedScheduleIds.append(scheduleId)
         return try fetchEmployeesResult.get()
+    }
+
+    func addEmployee(tenantId: String, scheduleId: String, body: AddEmployeeRequest) async throws -> EmployeeResponse {
+        recordedScheduleIds.append(scheduleId)
+        return try addEmployeeResult.get()
     }
 
     func createSchedule(tenantId: String, body: CreateScheduleRequest) async throws -> ScheduleResponse {
@@ -315,6 +323,34 @@ final class ScheduleApiServiceTests: XCTestCase {
         mockApi.fetchEmployeesResult = .success([])
         let employees = try await service.fetchEmployees(tenantId: "t1", scheduleId: "s1")
         XCTAssertTrue(employees.isEmpty)
+    }
+
+    // MARK: - addEmployee
+
+    func testAddEmployeeMapsCreatedRow() async throws {
+        mockApi.addEmployeeResult = .success(
+            EmployeeResponse(employeeName: "New Hire", employeeEmail: "new.hire@example.com",
+                             employeePhone: "+15559990000",
+                             role: EmployeeRoleResponse(isCreator: false, isAdmin: false, isWorker: true),
+                             userRef: nil)
+        )
+        let emp = try await service.addEmployee(tenantId: "t1", scheduleId: "s1",
+                                                name: "New Hire", email: "new.hire@example.com", phone: "+15559990000")
+        XCTAssertEqual(emp.id, "new.hire@example.com")   // email = identity
+        XCTAssertEqual(emp.displayName, "New Hire")
+        XCTAssertEqual(emp.role, .worker)
+        XCTAssertTrue(mockApi.recordedScheduleIds.contains("s1"))
+    }
+
+    func testAddEmployeeSurfacesError() async {
+        struct AddErr: Error {}
+        mockApi.addEmployeeResult = .failure(AddErr())
+        do {
+            _ = try await service.addEmployee(tenantId: "t1", scheduleId: "s1", name: "X", email: "x@x.com", phone: "")
+            XCTFail("Expected error")
+        } catch {
+            // expected (e.g. 409 duplicate email surfaces to the caller)
+        }
     }
 
     // MARK: - createSchedule

@@ -69,6 +69,36 @@ struct EmployeeRoleResponse: Decodable {
     }
 }
 
+// Add-employee request body (snake_case, role object), mirroring the server's
+// employeeInput. is_worker:true matches the server default for invited staff.
+struct AddEmployeeRequest: Encodable {
+    let employeeName: String
+    let employeeEmail: String
+    let employeePhone: String
+    let role: AddEmployeeRole
+
+    init(name: String, email: String, phone: String) {
+        self.employeeName = name
+        self.employeeEmail = email
+        self.employeePhone = phone
+        self.role = AddEmployeeRole(isWorker: true)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case employeeName = "employee_name"
+        case employeeEmail = "employee_email"
+        case employeePhone = "employee_phone"
+        case role
+    }
+}
+
+struct AddEmployeeRole: Encodable {
+    let isWorker: Bool
+    enum CodingKeys: String, CodingKey {
+        case isWorker = "is_worker"
+    }
+}
+
 struct AvailabilityRequest: Encodable {
     let availability: [String: String]
 }

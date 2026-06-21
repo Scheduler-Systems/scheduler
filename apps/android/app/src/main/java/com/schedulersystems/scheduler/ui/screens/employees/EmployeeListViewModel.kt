@@ -64,6 +64,12 @@ class EmployeeListViewModel @Inject constructor(
         }
     }
 
+    // Reset the add-employee form (called when the dialog opens/closes) so a prior
+    // success (isAdded=true) doesn't immediately re-close a freshly opened dialog.
+    fun dismissAdd() {
+        _addState.value = AddEmployeeState()
+    }
+
     fun setEmail(email: String) {
         _addState.update { it.copy(email = email) }
     }

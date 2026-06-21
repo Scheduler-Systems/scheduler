@@ -32,6 +32,10 @@ final class MockScheduleDataService: ScheduleDataServiceProtocol {
         return try fetchEmployeesResult.get()
     }
 
+    func addEmployee(tenantId: String, scheduleId: String, name: String, email: String, phone: String) async throws -> Employee {
+        Employee(id: email, tenantId: tenantId, userId: "", displayName: name, email: email, phone: phone, role: .worker, stations: [], isActive: true, createdAt: Date())
+    }
+
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule {
         createdSchedules.append(schedule)
         return try createScheduleResult.get()

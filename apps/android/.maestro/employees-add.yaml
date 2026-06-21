@@ -1,0 +1,49 @@
+# Maestro GUI e2e for the Android employees-add flow (Flutter→native consolidation).
+# login → My Schedules → schedule → Employee List → "+" → add a UNIQUE-email employee
+# → POST /employees → appears in the roster.
+# Unique email per run because the API 409s on duplicate email; seed.sh prunes e2e-added emps.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 25000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- tapOn: "Employee List & Add Requests"
+- extendedWaitUntil:
+    visible: "Alex Worker"                               # roster loaded
+    timeout: 15000
+- evalScript: ${output.emp = 'e2e' + Math.floor(Math.random() * 1000000) + '@example.com'}
+- tapOn: "Add"                                           # "+" icon (contentDescription="Add")
+- extendedWaitUntil:
+    visible: "Add Employee"                              # dialog title
+    timeout: 10000
+- tapOn: "Name"
+- inputText: "E2E Hire"
+- tapOn: "Email"
+- inputText: ${output.emp}
+- hideKeyboard
+- tapOn: "Save"                                          # dialog confirm
+- extendedWaitUntil:
+    visible: ${output.emp}                               # new employee in the roster (POST persisted)
+    timeout: 15000
+- takeScreenshot: 01-employees-add

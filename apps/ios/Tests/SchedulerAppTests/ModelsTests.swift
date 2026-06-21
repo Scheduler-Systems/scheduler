@@ -156,6 +156,9 @@ final class MockScheduleApiService: ScheduleDataServiceProtocol {
         Schedule(id: scheduleId, tenantId: tenantId, name: "Mock", startDate: Date(), endDate: Date(), shifts: [], status: .draft, createdAt: Date(), updatedAt: Date())
     }
     func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [Employee] { [] }
+    func addEmployee(tenantId: String, scheduleId: String, name: String, email: String, phone: String) async throws -> Employee {
+        Employee(id: email, tenantId: tenantId, userId: "", displayName: name, email: email, phone: phone, role: .worker, stations: [], isActive: true, createdAt: Date())
+    }
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule { schedule }
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule { schedule }
     func deleteSchedule(tenantId: String, scheduleId: String) async throws {}
