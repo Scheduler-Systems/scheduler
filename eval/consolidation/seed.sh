@@ -29,7 +29,23 @@ idt="$(curl -s -X POST "$EMU/accounts:signInWithPassword?key=$KEY" -H 'Content-T
   -d "{\"email\":\"$EMAIL\",\"password\":\"$PW\",\"returnSecureToken\":true}" | sed -n 's/.*"idToken":"\([^"]*\)".*/\1/p')"
 if curl -s -X POST "$EMU/accounts:lookup?key=$KEY" -H 'Content-Type: application/json' \
      -d "{\"idToken\":\"$idt\"}" | grep -q '"emailVerified":true'; then
-  echo "seed: $EMAIL verified ✓"
+  echo "seed: $EMAIL verified ✓ (tenant_id+role claims set)"
 else
   echo "seed: verify FAILED for $EMAIL"; exit 1
+fi
+
+# Data pages: if the Go API is up, ensure a schedule exists for this tenant (uid) so the
+# my-schedules e2e has data to render. No-op if the API isn't running.
+API=${SCHEDULER_API:-http://127.0.0.1:4180}
+if curl -s -m 3 -o /dev/null "$API" 2>/dev/null || curl -s -m 3 -o /dev/null "$API/healthz" 2>/dev/null; then
+  has=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" "$API/v1/tenants/$localId/schedules" 2>/dev/null | grep -o 'QA Demo Schedule')
+  if [ -z "$has" ]; then
+    curl -s -X POST -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" -H 'Content-Type: application/json' \
+      -d '{"name":"QA Demo Schedule","status":"active"}' "$API/v1/tenants/$localId/schedules" >/dev/null
+    echo "seed: created QA Demo Schedule"
+  else
+    echo "seed: QA Demo Schedule present"
+  fi
+else
+  echo "seed: (Go API not up — schedule data pages will be empty)"
 fi

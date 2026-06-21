@@ -203,10 +203,10 @@ class ScheduleDtoTest {
         assertEquals("s-1", dto.id)
         assertEquals("Test", dto.name)
         assertEquals("t-1", dto.tenantId)
-        assertEquals(1, dto.employees.size)
-        assertEquals("Alice", dto.employees[0].name)
-        assertEquals("EMPLOYER", dto.employees[0].role)
-        assertEquals(1, dto.nextSchedule.size)
+        assertEquals(1, dto.employees!!.size)
+        assertEquals("Alice", dto.employees!![0].name)
+        assertEquals("EMPLOYER", dto.employees!![0].role)
+        assertEquals(1, dto.nextSchedule!!.size)
     }
 
     @Test

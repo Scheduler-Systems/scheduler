@@ -39,7 +39,7 @@ AREAS=(
 "auth-get-name|-|-|-|-|-|todo(needs-signoff)"
 "auth-choose-role|-|-|-|-|-|todo(needs-signoff)"
 "onboarding|-|-|testOnboarding|-|-|todo"
-"my-schedules|-|-|-|-|-|todo"
+"my-schedules|ScheduleListViewModelTest|my-schedules.yaml|testHomeViewModel|my-schedules.yaml|-|done (android+ios; login→Go-API data)"
 "schedule-dashboard|-|-|-|-|-|todo(merge)"
 "new-schedule-create|-|-|-|-|-|todo(needs-signoff)"
 "schedule-build|-|-|-|-|-|todo(needs-signoff,merge)"
