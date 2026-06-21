@@ -33,7 +33,7 @@ AREAS=(
 "home|-|-|testHomeViewModel|-|-|keep-native"
 "auth-password-reset|AuthViewModelPasswordResetTest|password-reset.yaml|testSendPasswordReset|password-reset.yaml|-|done (android+ios, unit+e2e)"
 "auth-create-account|AuthViewModelSignUpTest|create-account.yaml|testCreateAccount|create-account.yaml|-|done (android+ios, unit+e2e)"
-"auth-verify-email|-|-|-|-|-|todo"
+"auth-verify-email|AuthViewModelVerifyEmailTest|verify-email.yaml|testVerifyEmail|verify-email.yaml|-|done (android+ios, unit+e2e)"
 "auth-get-name|-|-|-|-|-|todo(needs-signoff)"
 "auth-choose-role|-|-|-|-|-|todo(needs-signoff)"
 "onboarding|-|-|testOnboarding|-|-|todo"

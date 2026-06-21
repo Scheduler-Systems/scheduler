@@ -29,6 +29,6 @@ appId: com.schedulersystems.scheduler
     text: "Create Account"
     index: 1                                            # index 0 = title, index 1 = the button
 - extendedWaitUntil:
-    notVisible: "Confirm Password"                      # signup succeeded → left the create-account screen
+    visible: "Verify Your Email"                        # signup → verify-email screen (new accounts are unverified)
     timeout: 10000
 - takeScreenshot: 02-after-signup

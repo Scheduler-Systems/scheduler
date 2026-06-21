@@ -37,7 +37,17 @@ struct VerifyEmailView: View {
             .padding(.horizontal)
 
             Button("I've verified my email") {
-                router.replace(with: .home)
+                Task {
+                    if await vm.checkEmailVerified() {
+                        router.replace(with: .home)
+                    }
+                }
+            }
+
+            if let error = vm.errorMessage {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red)
             }
 
             Spacer()

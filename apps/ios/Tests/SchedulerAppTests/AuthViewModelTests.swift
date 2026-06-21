@@ -21,9 +21,11 @@ final class MockAuthService: AuthServiceProtocol {
     var updateEmailCalled = false
     var updatePasswordCalled = false
     var sendEmailVerificationCalled = false
-    
+    var reloadAndCheckEmailVerifiedCalled = false
+
     var shouldThrow: Error?
     var beginPhoneAuthResult: String = "test-verification-id"
+    var emailVerifiedResult: Bool = false
     
     func signInWithEmail(email: String, password: String) async throws {
         signInWithEmailCalled = true
@@ -84,6 +86,12 @@ final class MockAuthService: AuthServiceProtocol {
     func sendEmailVerification() async throws {
         sendEmailVerificationCalled = true
         if let error = shouldThrow { throw error }
+    }
+
+    func reloadAndCheckEmailVerified() async throws -> Bool {
+        reloadAndCheckEmailVerifiedCalled = true
+        if let error = shouldThrow { throw error }
+        return emailVerifiedResult
     }
 }
 
@@ -634,5 +642,30 @@ final class AuthViewModelTests: XCTestCase {
         sut.phoneNumber = "2125551234"
         await sut.beginPhoneAuth()
         XCTAssertTrue(sut.phoneAuthState.isCodeSent)
+    }
+
+    // MARK: - verify-email
+
+    @MainActor
+    func testVerifyEmailSendsVerification() async {
+        await sut.sendEmailVerification()
+        XCTAssertTrue(mockService.sendEmailVerificationCalled)
+    }
+
+    @MainActor
+    func testVerifyEmailCheckReturnsTrueWhenVerified() async {
+        mockService.emailVerifiedResult = true
+        let verified = await sut.checkEmailVerified()
+        XCTAssertTrue(mockService.reloadAndCheckEmailVerifiedCalled)
+        XCTAssertTrue(verified)
+        XCTAssertNil(sut.errorMessage)
+    }
+
+    @MainActor
+    func testVerifyEmailCheckSetsErrorWhenNotVerified() async {
+        mockService.emailVerifiedResult = false
+        let verified = await sut.checkEmailVerified()
+        XCTAssertFalse(verified)
+        XCTAssertEqual(sut.errorMessage, "Email is not verified")
     }
 }

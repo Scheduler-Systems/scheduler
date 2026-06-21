@@ -7,5 +7,6 @@ data class User(
     val displayName: String?,
     val role: Role?,
     val isPremium: Boolean,
-    val tenantId: String?
+    val tenantId: String?,
+    val isEmailVerified: Boolean = false
 )

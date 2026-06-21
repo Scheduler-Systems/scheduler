@@ -44,6 +44,8 @@ class FakeAuthRepository : AuthRepository {
     override suspend fun signInWithApple(identityToken: String): Result<User> = appleSignInResult
     override suspend fun signOut(): Result<Unit> = signOutResult
     override suspend fun sendPasswordResetEmail(email: String): Result<Unit> = resetPasswordResult
+    override suspend fun sendEmailVerification(): Result<Unit> = Result.success(Unit)
+    override suspend fun reloadAndCheckEmailVerified(): Result<Boolean> = Result.success(false)
     override suspend fun updateUserProfile(displayName: String): Result<Unit> = updateProfileResult
 }
 

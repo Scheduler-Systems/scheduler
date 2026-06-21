@@ -2,7 +2,6 @@ import SwiftUI
 
 struct CreateAccountView: View {
     @StateObject private var vm: AuthViewModel
-    @EnvironmentObject private var router: Router
 
     init(authService: AuthServiceProtocol = AuthService.shared) {
         _vm = StateObject(wrappedValue: AuthViewModel(authService: authService))
@@ -61,10 +60,7 @@ struct CreateAccountView: View {
             .padding(.horizontal)
             .disabled(vm.isLoading)
         }
-        .onChange(of: vm.isAuthenticated) { authenticated in
-            if authenticated {
-                router.replace(with: .home)
-            }
-        }
+        // Post-auth routing (new unverified accounts → verify-email) is handled once,
+        // centrally, by the root LoginView auth observer — no per-screen redirect here.
     }
 }

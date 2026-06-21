@@ -1,0 +1,35 @@
+# Maestro GUI e2e for the iOS verify-email page (Flutter→native consolidation).
+# Zero-account: create a fresh (unverified) account → land on verify-email → the
+# "I've verified my email" gate correctly rejects the still-unverified user.
+#   maestro test --device <ios-udid> apps/ios/.maestro/verify-email.yaml
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- assertVisible: "Sign in to manage your schedules"
+- tapOn:
+    text: "Create Account"
+    index: 0                                            # login-screen "Create Account" button
+- assertVisible: "Create Account"
+- evalScript: ${output.signupEmail = 'qa-ios-verify-' + Date.now() + '@example.com'}
+- tapOn: "Email"
+- inputText: ${output.signupEmail}
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Confirm Password"
+- inputText: "Password123!"
+- tapOn:
+    text: "Create Account"
+    index: 0                                            # tap the title to dismiss the keyboard
+- tapOn:
+    text: "Create Account"
+    index: 1                                            # the button
+- assertVisible: "Verify Your Email"                    # new account → verify-email screen
+- takeScreenshot: 01-verify-email
+- tapOn: "I've verified my email"
+- assertVisible: "Email is not verified"               # the gate rejects the still-unverified user
+- takeScreenshot: 02-not-verified

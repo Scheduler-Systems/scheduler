@@ -98,7 +98,14 @@ struct LoginView: View {
         }
         .onChange(of: vm.isAuthenticated) { authenticated in
             if authenticated {
-                router.replace(with: .home)
+                // Single post-auth gate for the whole stack (login OR signup, since this root
+                // view observes the shared auth state). Parity with Flutter login → verify-email
+                // → home: unverified users must verify their email before reaching home.
+                if vm.currentUser?.isEmailVerified == true {
+                    router.replace(with: .home)
+                } else {
+                    router.replace(with: .verifyEmail)
+                }
             }
         }
     }

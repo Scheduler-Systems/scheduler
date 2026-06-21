@@ -51,6 +51,7 @@ import com.schedulersystems.scheduler.viewmodels.AuthViewModel
 fun CreateAccountScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHome: () -> Unit,
+    onNavigateToVerifyEmail: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -58,16 +59,19 @@ fun CreateAccountScreen(
     var showPassword by remember { mutableStateOf(false) }
     var confirmPassword by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        viewModel.navigation.collect { if (it == "home") onNavigateToHome() }
-    }
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.onEvent(AuthEvent.ClearError)
         }
     }
-    if (uiState.isAuthenticated) onNavigateToHome()
+    // New accounts are unverified → go to verify-email; verified → home
+    // (parity with the Flutter post-signup → verify-email-waiting flow + the iOS LoginView gate).
+    LaunchedEffect(uiState.isAuthenticated, uiState.user?.isEmailVerified) {
+        if (uiState.isAuthenticated) {
+            if (uiState.user?.isEmailVerified == true) onNavigateToHome() else onNavigateToVerifyEmail()
+        }
+    }
 
     val mismatch = confirmPassword.isNotEmpty() && confirmPassword != uiState.password
 

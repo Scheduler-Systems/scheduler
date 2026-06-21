@@ -144,6 +144,26 @@ class FirebaseAuthRepository @Inject constructor(
         }
     }
 
+    override suspend fun sendEmailVerification(): Result<Unit> {
+        return try {
+            val user = firebaseAuth.currentUser ?: return Result.failure(IllegalStateException("No signed-in user"))
+            user.sendEmailVerification().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun reloadAndCheckEmailVerified(): Result<Boolean> {
+        return try {
+            val user = firebaseAuth.currentUser ?: return Result.failure(IllegalStateException("No signed-in user"))
+            user.reload().await()
+            Result.success(firebaseAuth.currentUser?.isEmailVerified ?: false)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun updateUserProfile(displayName: String): Result<Unit> {
         return try {
             val user = firebaseAuth.currentUser
@@ -171,7 +191,8 @@ class FirebaseAuthRepository @Inject constructor(
             displayName = displayName,
             role = null,
             isPremium = false,
-            tenantId = null
+            tenantId = null,
+            isEmailVerified = isEmailVerified
         )
     }
 

@@ -16,6 +16,7 @@ import com.schedulersystems.scheduler.ui.screens.auth.CreateAccountScreen
 import com.schedulersystems.scheduler.ui.screens.auth.LoginScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PasswordResetScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PhoneSignInScreen
+import com.schedulersystems.scheduler.ui.screens.auth.VerifyEmailScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleDetailScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleListScreen
@@ -83,6 +84,22 @@ fun SchedulerNavHost(
 
         composable("createAccount") {
             CreateAccountScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToHome = {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                onNavigateToVerifyEmail = {
+                    navController.navigate("verifyEmail") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable("verifyEmail") {
+            VerifyEmailScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToHome = {
                     navController.navigate("home") {

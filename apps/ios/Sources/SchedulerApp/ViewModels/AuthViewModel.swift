@@ -229,6 +229,21 @@ final class AuthViewModel: ObservableObject {
             handleError(error)
         }
     }
+
+    /// Reloads the user and returns whether their email is now verified. Sets an error
+    /// message when it is not, so the view can surface "Email is not verified" (parity
+    /// with the Flutter verify-email-waiting "continue" gate).
+    func checkEmailVerified() async -> Bool {
+        errorMessage = nil
+        do {
+            let verified = try await authService.reloadAndCheckEmailVerified()
+            if !verified { errorMessage = "Email is not verified" }
+            return verified
+        } catch {
+            handleError(error)
+            return false
+        }
+    }
     
     func clearError() {
         errorMessage = nil

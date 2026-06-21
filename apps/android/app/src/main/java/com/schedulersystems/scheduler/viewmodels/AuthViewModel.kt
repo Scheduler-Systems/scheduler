@@ -90,6 +90,47 @@ class AuthViewModel @Inject constructor(
             is AuthEvent.SendPasswordReset -> {
                 sendPasswordReset(event.email)
             }
+            is AuthEvent.SendEmailVerification -> {
+                sendEmailVerification()
+            }
+            is AuthEvent.CheckEmailVerified -> {
+                checkEmailVerified()
+            }
+        }
+    }
+
+    private fun sendEmailVerification() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null, emailVerificationSent = false) }
+            val result = authRepository.sendEmailVerification()
+            result.fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isLoading = false, emailVerificationSent = true) }
+                },
+                onFailure = { error ->
+                    _uiState.update { it.copy(isLoading = false, error = error.message) }
+                }
+            )
+        }
+    }
+
+    private fun checkEmailVerified() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            val result = authRepository.reloadAndCheckEmailVerified()
+            result.fold(
+                onSuccess = { verified ->
+                    if (verified) {
+                        _uiState.update { it.copy(isLoading = false) }
+                        _navigation.emit("home")
+                    } else {
+                        _uiState.update { it.copy(isLoading = false, error = "Email is not verified") }
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update { it.copy(isLoading = false, error = error.message) }
+                }
+            )
         }
     }
 

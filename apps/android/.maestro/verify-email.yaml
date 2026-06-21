@@ -1,0 +1,29 @@
+# Maestro GUI e2e for the Android verify-email page (Flutter→native consolidation).
+# Zero-account: create a fresh (unverified) account → land on verify-email → the
+# "I've verified my email" gate correctly rejects the still-unverified user.
+#   maestro test apps/android/.maestro/verify-email.yaml
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Welcome Back"            # login screen
+- tapOn: "Sign Up"
+- assertVisible: "Create Account"
+- evalScript: ${output.signupEmail = 'qa-verify-' + Date.now() + '@example.com'}  # unique per run
+- tapOn: "Email"
+- inputText: ${output.signupEmail}
+- tapOn:
+    text: "Password"
+    index: 0                               # the Password field (Confirm Password matches separately)
+- inputText: "Password123!"
+- tapOn: "Confirm Password"
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn:
+    text: "Create Account"
+    index: 1                               # index 0 = title, index 1 = the button
+- assertVisible: "Verify Your Email"       # new account → verify-email screen
+- takeScreenshot: 01-verify-email
+- tapOn: "I've verified my email"
+- assertVisible: "Email is not verified"   # the gate rejects the still-unverified user
+- takeScreenshot: 02-not-verified

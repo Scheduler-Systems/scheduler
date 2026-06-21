@@ -23,6 +23,7 @@ protocol AuthServiceProtocol {
     func updateEmail(newEmail: String) async throws
     func updatePassword(newPassword: String) async throws
     func sendEmailVerification() async throws
+    func reloadAndCheckEmailVerified() async throws -> Bool
 }
 
 final class AuthService: AuthServiceProtocol {
@@ -262,7 +263,19 @@ final class AuthService: AuthServiceProtocol {
             throw mapFirebaseError(error)
         }
     }
-    
+
+    func reloadAndCheckEmailVerified() async throws -> Bool {
+        guard let user = auth.currentUser else {
+            throw AuthError.userNotFound
+        }
+        do {
+            try await user.reload()
+            return user.isEmailVerified
+        } catch {
+            throw mapFirebaseError(error)
+        }
+    }
+
     private func mapFirebaseError(_ error: Error) -> AuthError {
         guard let errorCode = AuthErrorCode(rawValue: (error as NSError).code) else {
             return .serverError(error.localizedDescription)
