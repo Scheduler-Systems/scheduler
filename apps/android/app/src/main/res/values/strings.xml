@@ -22,4 +22,8 @@
     <string name="enter_phone_number_hint">Enter your phone number to receive a verification code</string>
     <string name="verify_phone_number">Verify Phone Number</string>
     <string name="enter_sms_code_hint">Enter the SMS code sent to %s</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="reset_password_subtitle">Enter your email and we\'ll send you a reset link</string>
+    <string name="send_reset_email">Send Reset Email</string>
+    <string name="reset_email_sent">Check your email for the reset link</string>
 </resources>

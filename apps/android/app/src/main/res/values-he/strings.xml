@@ -123,4 +123,8 @@
     <string name="ask_gemini">שאל את ג\u0027מיני</string>
     <string name="fill_manually">מילוי ידני</string>
     <string name="my_chats">הצ\u0027אטים שלי</string>
+    <string name="reset_password">איפוס סיסמה</string>
+    <string name="reset_password_subtitle">הזינו את כתובת האימייל שלכם ונשלח לכם קישור לאיפוס</string>
+    <string name="send_reset_email">שליחת אימייל לאיפוס</string>
+    <string name="reset_email_sent">בדקו את האימייל שלכם לקבלת קישור האיפוס</string>
 </resources>

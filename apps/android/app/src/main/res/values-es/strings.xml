@@ -123,4 +123,8 @@
     <string name="ask_gemini">Preguntar a Gemini</string>
     <string name="fill_manually">Completar manualmente</string>
     <string name="my_chats">Mis Chats</string>
+    <string name="reset_password">Restablecer contraseña</string>
+    <string name="reset_password_subtitle">Ingresa tu correo y te enviaremos un enlace para restablecerla</string>
+    <string name="send_reset_email">Enviar correo de restablecimiento</string>
+    <string name="reset_email_sent">Revisa tu correo para ver el enlace de restablecimiento</string>
 </resources>
