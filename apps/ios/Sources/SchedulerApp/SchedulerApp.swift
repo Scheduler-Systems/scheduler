@@ -80,6 +80,8 @@ struct SchedulerApp: App {
             HomeView(scheduleService: scheduleService, authViewModel: auth)
         case .scheduleList:
             ScheduleListView(scheduleService: scheduleService, authViewModel: auth)
+        case .archivedSchedules:
+            ArchivedSchedulesView(scheduleService: scheduleService)
         case .scheduleDetail(let id):
             ScheduleDetailView(scheduleId: id, scheduleService: scheduleService)
         case .scheduleBuilder:

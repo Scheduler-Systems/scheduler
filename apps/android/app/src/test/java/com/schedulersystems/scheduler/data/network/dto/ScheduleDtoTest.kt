@@ -257,4 +257,28 @@ class ScheduleDtoTest {
         assertEquals(false, dto.enabledShifts.evenings)
         assertEquals("UTC", dto.timezone)
     }
+
+    @Test
+    fun `toDomain maps archived status (drives the Archived Schedules view)`() {
+        val dto = ScheduleDto(name = "Archived Demo", tenantId = "t1", status = "archived")
+        assertEquals("archived", dto.toDomain().status)
+    }
+
+    @Test
+    fun `toDomain defaults missing status to active`() {
+        val dto = ScheduleDto(name = "S", tenantId = "t1")
+        assertEquals("active", dto.toDomain().status)
+    }
+
+    @Test
+    fun `toDto round-trips status`() {
+        val schedule = Schedule(
+            id = "s1", name = "Archived Demo", tenantId = "t1",
+            employees = emptyList(), currentPriorities = emptyList(),
+            settings = ScheduleSettings(null, EnabledShifts(false, false, false), "UTC"),
+            nextSchedule = emptyList(), createdAt = Instant.now(), updatedAt = Instant.now(),
+            status = "archived"
+        )
+        assertEquals("archived", schedule.toDto().status)
+    }
 }

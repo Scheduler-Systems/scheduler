@@ -49,7 +49,7 @@ AREAS=(
 "employees-add|EmployeeListViewModelTest|employees-add.yaml|testAddEmployee|employees-add.yaml|-|done (android+ios; +employee → POST /employees → roster)"
 "priorities-submission|-|-|-|-|-|todo(needs-signoff)"
 "priorities-current|-|-|-|-|-|todo(needs-signoff)"
-"archived-schedules|-|-|-|-|-|todo(needs-signoff)"
+"archived-schedules|ScheduleDtoTest|archived-schedules.yaml|testFetchSchedulesMapping|archived-schedules.yaml|-|done (android+ios; Home→Archived→status=archived filtered list)"
 "export-shifts|-|-|-|-|-|todo(needs-signoff)"
 "share-pdf|-|-|-|-|-|todo"
 "chat-threads|-|-|-|-|-|todo(needs-signoff,merge)"

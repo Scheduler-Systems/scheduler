@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     onNavigateToMySchedules: () -> Unit,
     onNavigateToNewSchedule: () -> Unit,
+    onNavigateToArchived: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -110,7 +111,8 @@ fun HomeScreen(
                     ActionButtons(
                         userRole = state.userRole,
                         onMySchedulesClick = onNavigateToMySchedules,
-                        onNewScheduleClick = onNavigateToNewSchedule
+                        onNewScheduleClick = onNavigateToNewSchedule,
+                        onArchivedClick = onNavigateToArchived
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -135,7 +137,8 @@ private fun GreetingSection(displayName: String?) {
 private fun ActionButtons(
     userRole: Role?,
     onMySchedulesClick: () -> Unit,
-    onNewScheduleClick: () -> Unit
+    onNewScheduleClick: () -> Unit,
+    onArchivedClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -172,6 +175,19 @@ private fun ActionButtons(
             shape = MaterialTheme.shapes.medium
         ) {
             Text("Create New Schedule", fontSize = 18.sp)
+        }
+
+        Button(
+            onClick = onArchivedClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF6A0DAD)
+            ),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Text("Archived Schedules", fontSize = 18.sp)
         }
     }
 }

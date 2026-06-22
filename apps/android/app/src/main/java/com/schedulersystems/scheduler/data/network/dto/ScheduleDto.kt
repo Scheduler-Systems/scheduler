@@ -25,6 +25,7 @@ data class ScheduleDto(
     @SerializedName("current_priorities") val currentPriorities: List<String>? = null,
     @SerializedName("settings") val settings: ScheduleSettingsDto? = null,
     @SerializedName("next_schedule") val nextSchedule: List<ShiftRowDto>? = null,
+    @SerializedName("status") val status: String? = null,
     @SerializedName("created_at") val createdAt: String? = null,
     @SerializedName("updated_at") val updatedAt: String? = null
 )
@@ -69,6 +70,7 @@ fun ScheduleDto.toDomain(): Schedule {
         currentPriorities = currentPriorities ?: emptyList(),
         settings = (settings ?: ScheduleSettingsDto()).toDomain(),
         nextSchedule = nextSchedule?.map { it.toDomain() } ?: emptyList(),
+        status = status ?: "active",
         createdAt = parseInstantOrNow(createdAt),
         updatedAt = parseInstantOrNow(updatedAt)
     )
@@ -83,6 +85,7 @@ fun Schedule.toDto(): ScheduleDto {
         currentPriorities = currentPriorities,
         settings = settings.toDto(),
         nextSchedule = nextSchedule.map { it.toDto() },
+        status = status,
         createdAt = createdAt.toString(),
         updatedAt = updatedAt.toString()
     )

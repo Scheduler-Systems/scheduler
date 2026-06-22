@@ -1,0 +1,26 @@
+# Maestro GUI e2e for the Android archived-schedules page (Flutter→native consolidation).
+# login → Home → "Archived Schedules" → list filtered to status==archived (from the Go API).
+# Preconditions: Go API :4180 + seed.sh (seeds an "Archived Demo" schedule with status=archived).
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 25000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "Archived Schedules"                        # home button
+    timeout: 15000
+- tapOn: "Archived Schedules"
+- extendedWaitUntil:
+    visible: "Archived Demo"                             # the seeded archived schedule (status=archived)
+    timeout: 15000
+- takeScreenshot: 01-archived-schedules

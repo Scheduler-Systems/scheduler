@@ -48,6 +48,15 @@ if curl -s -m 3 -o /dev/null "$API" 2>/dev/null || curl -s -m 3 -o /dev/null "$A
     echo "seed: QA Demo Schedule present"
   fi
 
+  # An archived schedule for the archived-schedules page (status=archived).
+  if ! echo "$schedules" | grep -q 'Archived Demo'; then
+    curl -s -X POST -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" -H 'Content-Type: application/json' \
+      -d '{"name":"Archived Demo","status":"archived"}' "$API/v1/tenants/$localId/schedules" >/dev/null
+    echo "seed: created Archived Demo (archived)"
+  else
+    echo "seed: Archived Demo present"
+  fi
+
   # Resolve the schedule id: it's random per API start (memory store), so parse it
   # from the listing rather than hardcoding. There's exactly one QA Demo Schedule,
   # so grab the first schedule_ id token.

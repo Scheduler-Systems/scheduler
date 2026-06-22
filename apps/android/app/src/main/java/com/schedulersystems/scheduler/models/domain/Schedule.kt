@@ -12,7 +12,10 @@ data class Schedule(
     val settings: ScheduleSettings,
     val nextSchedule: List<ShiftRow>,
     val createdAt: Instant,
-    val updatedAt: Instant
+    val updatedAt: Instant,
+    // "active" | "archived" — mirrors the Go API schedule status. Defaulted so existing
+    // constructors keep working; used to split My Schedules (active) from Archived.
+    val status: String = "active"
 )
 
 data class Employee(

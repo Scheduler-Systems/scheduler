@@ -12,6 +12,7 @@ enum Route: Hashable {
     case verifyEmail
     case home
     case scheduleList
+    case archivedSchedules
     case scheduleDetail(Schedule.ID)
     case scheduleBuilder
     case employeeList(Schedule.ID)

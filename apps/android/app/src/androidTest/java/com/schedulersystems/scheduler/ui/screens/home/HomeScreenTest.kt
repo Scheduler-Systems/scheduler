@@ -40,6 +40,7 @@ class HomeScreenTest {
                 viewModel = HomeViewModel(authRepository),
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
+                onNavigateToArchived = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -54,6 +55,7 @@ class HomeScreenTest {
                 viewModel = HomeViewModel(authRepository),
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
+                onNavigateToArchived = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -68,6 +70,7 @@ class HomeScreenTest {
                 viewModel = HomeViewModel(authRepository),
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
+                onNavigateToArchived = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -82,6 +85,7 @@ class HomeScreenTest {
                 viewModel = HomeViewModel(authRepository),
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
+                onNavigateToArchived = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -96,6 +100,7 @@ class HomeScreenTest {
                 viewModel = HomeViewModel(authRepository),
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
+                onNavigateToArchived = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -112,6 +117,7 @@ class HomeScreenTest {
                 viewModel = HomeViewModel(authRepository),
                 onNavigateToMySchedules = { onMySchedulesCalled = true },
                 onNavigateToNewSchedule = {},
+                onNavigateToArchived = {},
                 onNavigateToNotifications = {}
             )
         }
