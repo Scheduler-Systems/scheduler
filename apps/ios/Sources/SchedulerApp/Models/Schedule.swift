@@ -10,6 +10,15 @@ struct Schedule: Identifiable, Codable, Hashable {
     let status: ScheduleStatus
     let createdAt: Date
     let updatedAt: Date
+    // Defaulted so existing constructions keep compiling; "evenings" maps to the API's "night".
+    var settings: ScheduleSettings = ScheduleSettings()
+}
+
+struct ScheduleSettings: Codable, Hashable {
+    var mornings: Bool = false
+    var afternoons: Bool = false
+    var evenings: Bool = false
+    var timezone: String = "UTC"
 }
 
 struct Shift: Identifiable, Codable, Hashable {

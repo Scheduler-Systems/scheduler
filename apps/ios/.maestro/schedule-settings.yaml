@@ -1,0 +1,41 @@
+# Maestro GUI e2e for the iOS schedule-settings page (Flutter→native consolidation).
+# login → My Schedules → schedule → dashboard → "Schedule Settings" → toggle a shift → Save
+# → persists via the Go API (PUT /schedules/{id} nested settings).
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- tapOn: "Schedule Settings"
+- extendedWaitUntil:
+    visible: "Enabled Shifts"
+    timeout: 15000
+- tapOn: "Mornings"                                      # flip a shift toggle
+- tapOn: "Save Settings"
+- extendedWaitUntil:
+    visible: "Settings saved"                            # persisted via PUT
+    timeout: 15000
+- takeScreenshot: 01-schedule-settings

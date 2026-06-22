@@ -325,6 +325,36 @@ final class ScheduleApiServiceTests: XCTestCase {
         XCTAssertTrue(employees.isEmpty)
     }
 
+    // MARK: - schedule settings
+
+    func testFetchScheduleMapsNestedSettings() async throws {
+        mockApi.fetchScheduleResult = .success(
+            ScheduleResponse(
+                id: "s1", tenantId: "t1", name: "S",
+                settings: ScheduleSettingsPayload(
+                    enabledShifts: EnabledShiftsPayload(morning: true, afternoon: false, night: true),
+                    timezone: "UTC"),
+                status: "active", createdBy: nil, createdAt: nil, updatedAt: nil)
+        )
+        let s = try await service.fetchSchedule(tenantId: "t1", scheduleId: "s1")
+        // API morning/afternoon/night → domain mornings/afternoons/evenings
+        XCTAssertTrue(s.settings.mornings)
+        XCTAssertFalse(s.settings.afternoons)
+        XCTAssertTrue(s.settings.evenings)
+        XCTAssertEqual(s.settings.timezone, "UTC")
+    }
+
+    func testFetchScheduleDefaultsMissingSettings() async throws {
+        mockApi.fetchScheduleResult = .success(
+            ScheduleResponse(id: "s1", tenantId: "t1", name: "S", settings: nil,
+                             status: "active", createdBy: nil, createdAt: nil, updatedAt: nil)
+        )
+        let s = try await service.fetchSchedule(tenantId: "t1", scheduleId: "s1")
+        XCTAssertFalse(s.settings.mornings)
+        XCTAssertFalse(s.settings.afternoons)
+        XCTAssertFalse(s.settings.evenings)
+    }
+
     // MARK: - addEmployee
 
     func testAddEmployeeMapsCreatedRow() async throws {

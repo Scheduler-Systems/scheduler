@@ -24,6 +24,7 @@ import com.schedulersystems.scheduler.ui.screens.schedule.ArchivedSchedulesScree
 import com.schedulersystems.scheduler.ui.screens.schedule.NewScheduleScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleDetailScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleListScreen
+import com.schedulersystems.scheduler.ui.screens.settings.ScheduleSettingsScreen
 import com.schedulersystems.scheduler.ui.theme.SchedulerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -162,7 +163,16 @@ fun SchedulerNavHost(
             ScheduleDetailScreen(
                 scheduleId = scheduleId,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToEmployeeList = { navController.navigate("employeeList/$scheduleId") }
+                onNavigateToEmployeeList = { navController.navigate("employeeList/$scheduleId") },
+                onNavigateToSettings = { navController.navigate("scheduleSettings/$scheduleId") }
+            )
+        }
+
+        composable("scheduleSettings/{scheduleId}") { backStackEntry ->
+            val scheduleId = backStackEntry.arguments?.getString("scheduleId") ?: ""
+            ScheduleSettingsScreen(
+                scheduleId = scheduleId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

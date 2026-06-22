@@ -1,10 +1,30 @@
 import Foundation
 
+// The Go API serves/accepts schedule settings as a nested object:
+//   { "enabled_shifts": { "morning": bool, "afternoon": bool, "night": bool }, "timezone": str }
+// (Previously iOS typed this as [String:String]?, which would FAIL to decode any schedule
+// that actually has settings set — only the empty {} happened to decode.)
+struct ScheduleSettingsPayload: Codable {
+    let enabledShifts: EnabledShiftsPayload?
+    let timezone: String?
+
+    enum CodingKeys: String, CodingKey {
+        case enabledShifts = "enabled_shifts"
+        case timezone
+    }
+}
+
+struct EnabledShiftsPayload: Codable {
+    let morning: Bool?
+    let afternoon: Bool?
+    let night: Bool?
+}
+
 struct ScheduleResponse: Decodable {
     let id: String
     let tenantId: String
     let name: String
-    let settings: [String: String]?
+    let settings: ScheduleSettingsPayload?
     let status: String
     let createdBy: String?
     let createdAt: String?
@@ -29,7 +49,7 @@ struct UpdateScheduleRequest: Encodable {
 
 struct ScheduleUpdates: Encodable {
     let name: String?
-    let settings: [String: String]?
+    let settings: ScheduleSettingsPayload?
     let status: String?
 }
 

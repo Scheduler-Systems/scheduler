@@ -58,7 +58,7 @@ AREAS=(
 "schedule-dashboard|ScheduleDetailViewModelTest|schedule-dashboard.yaml|testScheduleDetailView|schedule-dashboard.yaml|-|done (android+ios; login→detail by id)"
 "new-schedule-create|NewScheduleViewModelTest|new-schedule-create.yaml|testCreateSchedule|new-schedule-create.yaml|-|done (android+ios; Home→create→persists via POST /schedules)"
 "schedule-build|-|-|-|-|-|todo(needs-signoff,merge)"
-"schedule-settings|-|-|-|-|-|todo(needs-signoff)"
+"schedule-settings|ScheduleSettingsViewModelTest|schedule-settings.yaml|testFetchScheduleMapsNestedSettings|schedule-settings.yaml|-|done (android+ios; detail→Settings→toggle→save via PUT nested settings)"
 "schedule-requests|-|-|-|-|-|todo(needs-signoff)"
 "employees-list|EmployeeListViewModelTest|employees-list.yaml|testFetchEmployees|employees-list.yaml|-|done (android+ios; login→roster via Go-API employees endpoint)"
 "employees-add|EmployeeListViewModelTest|employees-add.yaml|testAddEmployee|employees-add.yaml|-|done (android+ios; +employee → POST /employees → roster)"

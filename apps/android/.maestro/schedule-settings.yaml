@@ -1,0 +1,40 @@
+# Maestro GUI e2e for the Android schedule-settings page (Flutter→native consolidation).
+# login → My Schedules → schedule → detail → "Schedule Settings" → Save
+# → persists via the Go API (PUT /schedules/{id} nested settings).
+# (Tapping Save without flipping a switch is a valid idempotent save; the Android Switch
+# node is awkward to tap reliably, and the save round-trip is what we're proving.)
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- tapOn: "Schedule Settings"
+- extendedWaitUntil:
+    visible: "Enabled Shifts"
+    timeout: 15000
+- tapOn: "Save Settings"
+- extendedWaitUntil:
+    visible: "Settings saved successfully!"              # persisted via PUT
+    timeout: 15000
+- takeScreenshot: 01-schedule-settings

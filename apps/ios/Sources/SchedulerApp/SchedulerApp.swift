@@ -84,6 +84,8 @@ struct SchedulerApp: App {
             ArchivedSchedulesView(scheduleService: scheduleService)
         case .scheduleDetail(let id):
             ScheduleDetailView(scheduleId: id, scheduleService: scheduleService)
+        case .scheduleSettings(let id):
+            ScheduleSettingsView(scheduleId: id, scheduleService: scheduleService)
         case .scheduleBuilder:
             ScheduleBuilderView(scheduleService: scheduleService)
         case .employeeList(let id):

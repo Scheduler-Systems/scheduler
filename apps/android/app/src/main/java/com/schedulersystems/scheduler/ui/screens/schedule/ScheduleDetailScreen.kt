@@ -26,6 +26,7 @@ fun ScheduleDetailScreen(
     scheduleId: String,
     onNavigateBack: () -> Unit,
     onNavigateToEmployeeList: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     viewModel: ScheduleDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -100,6 +101,7 @@ fun ScheduleDetailScreen(
                         onEmployeeListClick = onNavigateToEmployeeList,
                         onPrioritiesClick = { },
                         onBuildClick = { },
+                        onSettingsClick = onNavigateToSettings,
                         modifier = Modifier.padding(padding)
                     )
                 }
@@ -115,6 +117,7 @@ private fun ScheduleDetailContent(
     onEmployeeListClick: () -> Unit,
     onPrioritiesClick: () -> Unit,
     onBuildClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -135,7 +138,8 @@ private fun ScheduleDetailContent(
             userRole = userRole,
             onEmployeeListClick = onEmployeeListClick,
             onPrioritiesClick = onPrioritiesClick,
-            onBuildClick = onBuildClick
+            onBuildClick = onBuildClick,
+            onSettingsClick = onSettingsClick
         )
     }
 }
@@ -199,7 +203,8 @@ private fun ActionButtonsSection(
     userRole: Role?,
     onEmployeeListClick: () -> Unit,
     onPrioritiesClick: () -> Unit,
-    onBuildClick: () -> Unit
+    onBuildClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Button(
@@ -211,6 +216,17 @@ private fun ActionButtonsSection(
             shape = MaterialTheme.shapes.small
         ) {
             Text("Employee List & Add Requests", fontSize = 16.sp)
+        }
+
+        Button(
+            onClick = onSettingsClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0DAD)),
+            shape = MaterialTheme.shapes.small
+        ) {
+            Text("Schedule Settings", fontSize = 16.sp)
         }
 
         Button(

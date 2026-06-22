@@ -70,7 +70,14 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule {
         let body = UpdateScheduleRequest(updates: ScheduleUpdates(
             name: schedule.name,
-            settings: nil,
+            settings: ScheduleSettingsPayload(
+                enabledShifts: EnabledShiftsPayload(
+                    morning: schedule.settings.mornings,
+                    afternoon: schedule.settings.afternoons,
+                    night: schedule.settings.evenings
+                ),
+                timezone: schedule.settings.timezone
+            ),
             status: schedule.status.rawValue
         ))
         let result = try await api.updateSchedule(tenantId: tenantId, scheduleId: schedule.id, body: body)
@@ -83,6 +90,13 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
 
     private static func map(_ response: ScheduleResponse) -> Schedule {
         let status = ScheduleStatus(rawValue: response.status) ?? .draft
+        let shifts = response.settings?.enabledShifts
+        let settings = ScheduleSettings(
+            mornings: shifts?.morning ?? false,
+            afternoons: shifts?.afternoon ?? false,
+            evenings: shifts?.night ?? false,
+            timezone: response.settings?.timezone ?? "UTC"
+        )
         return Schedule(
             id: response.id,
             tenantId: response.tenantId,
@@ -92,7 +106,8 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
             shifts: [],
             status: status,
             createdAt: parseISO(response.createdAt),
-            updatedAt: parseISO(response.updatedAt)
+            updatedAt: parseISO(response.updatedAt),
+            settings: settings
         )
     }
 
