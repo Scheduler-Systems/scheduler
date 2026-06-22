@@ -11,6 +11,12 @@
 #
 #   bash run.sh           # full: android unit + ios unit (xcodebuild) + e2e
 #   bash run.sh --quick   # unit attribution only (skip e2e + iOS rebuild)
+#   bash run.sh --ios     # iOS only (boot iOS sim, shut Android emulator first)
+#   bash run.sh --android # Android only (boot Android emulator, shut iOS sim first)
+# Per-platform mode preserves the OTHER platform's cached results, so to get a clean
+# combined scorecard on a RAM-constrained host (only ONE device booted at a time):
+#   shut android emulator; boot iphone sim;  bash run.sh --ios
+#   shut iphone sim; cold-boot android emu;  bash run.sh --android   # <- prints combined E1
 # ============================================================================
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -23,8 +29,17 @@ IOS_DD="$IOS/build/dd"                       # iOS derivedData (shared by unit +
 IOS_DEST='platform=iOS Simulator,name=iPhone 17'
 IOS_UDID=""                                  # resolved/booted below when e2e runs
 E2E_CACHE=/tmp/eval-e2e-cache                 # per-run memo of e2e results (run each flow once)
-rm -rf "$E2E_CACHE" 2>/dev/null; mkdir -p "$E2E_CACHE"
-QUICK=0; [ "${1:-}" = "--quick" ] && QUICK=1
+QUICK=0; RUN_IOS=1; RUN_AND=1
+for a in "$@"; do case "$a" in
+  --quick) QUICK=1;;
+  --ios) RUN_AND=0;;
+  --android) RUN_IOS=0;;
+esac; done
+mkdir -p "$E2E_CACHE"
+# Clear only the cache for the platform(s) we're about to (re)run, so a per-platform
+# invocation keeps the other platform's results for the combined scorecard.
+[ $RUN_IOS -eq 1 ] && rm -f "$E2E_CACHE"/i-* 2>/dev/null
+[ $RUN_AND -eq 1 ] && rm -f "$E2E_CACHE"/a-* 2>/dev/null
 : "${JAVA_HOME:=/Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home}"
 : "${ANDROID_HOME:=$HOME/Library/Android/sdk}"; export JAVA_HOME ANDROID_HOME
 
@@ -66,9 +81,11 @@ echo "▶ consolidation eval — $INSCOPE in-scope areas (per-platform)"
 AND_SERIAL="$("$ANDROID_HOME/platform-tools/adb" devices 2>/dev/null | awk '/emulator-|device$/ && $2=="device"{print $1; exit}')"
 # Seed a verified user in the Auth emulator so the login→home e2e can reach home (idempotent).
 [ $QUICK -eq 0 ] && { echo "▶ seeding verified login user…"; bash "$(dirname "$0")/seed.sh" 2>&1 | sed 's/^/  /'; }
-echo "▶ Android unit suite…"; ( cd "$ANDROID" && ./gradlew :app:testDebugUnitTest --console=plain >/tmp/eval-a-unit.log 2>&1 ) \
-  && echo "  android unit: GREEN" || echo "  android unit: RED (/tmp/eval-a-unit.log)"
-if [ $QUICK -eq 0 ]; then
+if [ $RUN_AND -eq 1 ]; then
+  echo "▶ Android unit suite…"; ( cd "$ANDROID" && ./gradlew :app:testDebugUnitTest --console=plain >/tmp/eval-a-unit.log 2>&1 ) \
+    && echo "  android unit: GREEN" || echo "  android unit: RED (/tmp/eval-a-unit.log)"
+fi
+if [ $QUICK -eq 0 ] && [ $RUN_IOS -eq 1 ]; then
   echo "▶ iOS unit + e2e setup (xcodebuild — slow)…"
   # iOS e2e precondition: the Firebase Auth emulator must be running on 127.0.0.1:9099.
   # One simulator serves unit + e2e: reuse a booted iPhone, else boot iPhone 17.
@@ -96,13 +113,18 @@ i_unit_pass(){ [ "$1" = "-" ] && return 1; [ -f "$IOS_LOG" ] || return 1
 # (a cold start after clearState can lose the render race under load; the 2nd attempt is warm).
 a_e2e_pass(){ [ "$1" = "-" ] && return 1; [ -f "$MAESTRO_DIR/$1" ] || return 1; [ $QUICK -eq 1 ] && return 1
   local m="$E2E_CACHE/a-$1"; [ -f "$m.pass" ] && return 0; [ -f "$m.fail" ] && return 1
+  # No cached result: only RUN if Android is active this invocation (in --ios mode the
+  # report reads the Android cache from the prior --android run).
+  [ $RUN_AND -eq 0 ] && return 1
   local rc=1 a; for a in 1 2; do
     ( cd "$ANDROID" && maestro ${AND_SERIAL:+--device "$AND_SERIAL"} test ".maestro/$1" >/tmp/eval-ae2e-"$1".log 2>&1 ) && { rc=0; break; }
   done
   [ $rc -eq 0 ] && touch "$m.pass" || touch "$m.fail"; return $rc; }
 i_e2e_pass(){ [ "$1" = "-" ] && return 1; [ -f "$IOS_MAESTRO_DIR/$1" ] || return 1; [ $QUICK -eq 1 ] && return 1
-  [ -n "$IOS_UDID" ] || return 1
   local m="$E2E_CACHE/i-$1"; [ -f "$m.pass" ] && return 0; [ -f "$m.fail" ] && return 1
+  # No cached result: only RUN if iOS is active this invocation and a sim is up
+  # (in --android mode the report reads the iOS cache from the prior --ios run).
+  { [ $RUN_IOS -eq 0 ] || [ -z "$IOS_UDID" ]; } && return 1
   local rc=1 a; for a in 1 2; do
     ( cd "$IOS" && maestro --device "$IOS_UDID" test ".maestro/$1" >/tmp/eval-ie2e-"$1".log 2>&1 ) && { rc=0; break; }
   done
@@ -116,21 +138,21 @@ i_e2e_pass(){ [ "$1" = "-" ] && return 1; [ -f "$IOS_MAESTRO_DIR/$1" ] || return
 # machine, but fail once the machine is already exhausted by a prior block. Android
 # is resilient (its repo polls/self-heals) and passes even when run last. The runners
 # memoize per flow, so this just pre-populates the cache; the report loop reads it.
-if [ $QUICK -ne 1 ]; then
-  echo "▶ e2e phase 1/2: iOS e2e (block first, on the freshest machine state)…"
+if [ $QUICK -ne 1 ] && [ $RUN_IOS -eq 1 ]; then
+  echo "▶ e2e phase: iOS e2e block…"
   for row in "${AREAS[@]}"; do IFS='|' read -r _ _ _ _ ie _ _ <<< "$row"
     [ "$ie" != "-" ] && { i_e2e_pass "$ie" && echo "  ✓ ios $ie" || echo "  ✗ ios $ie"; }
   done
-  # Free the iOS simulator's RAM before the Android phase. On this memory-constrained
-  # host the second phase runs on an already-hot machine; with the iOS sim still booted
-  # (~2GB) the Android app couldn't even render its login screen within 25s under the
-  # pressure. iOS e2e is done by now (results cached), so the sim is safe to shut down.
-  if [ -n "$IOS_UDID" ]; then
+  # Combined-mode only: free the iOS sim's RAM before the Android phase in the SAME run.
+  # In --ios mode the caller manages devices (shuts the sim before booting the emulator),
+  # so don't shut it here.
+  if [ $RUN_AND -eq 1 ] && [ -n "$IOS_UDID" ]; then
     xcrun simctl shutdown "$IOS_UDID" >/dev/null 2>&1 && echo "  (iOS sim shut down to free RAM for the Android phase)"
-    sleep 20   # let the OS reclaim the freed RAM + memory pressure subside before Android
+    sleep 20
   fi
-
-  echo "▶ e2e phase 2/2: Android e2e (block, no concurrent iOS Maestro)…"
+fi
+if [ $QUICK -ne 1 ] && [ $RUN_AND -eq 1 ]; then
+  echo "▶ e2e phase: Android e2e block…"
   for row in "${AREAS[@]}"; do IFS='|' read -r _ _ ae _ _ _ _ <<< "$row"
     [ "$ae" != "-" ] && { a_e2e_pass "$ae" && echo "  ✓ android $ae" || echo "  ✗ android $ae"; }
   done

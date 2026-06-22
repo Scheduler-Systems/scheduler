@@ -47,6 +47,10 @@ appId: com.schedulersystems.scheduler
 - tapOn: "Add Employee"                                  # sheet nav title → dismiss keyboard
 - tapOn: "Save Employee"
 - extendedWaitUntil:
-    visible: ${output.emp}                               # new employee in the roster (POST persisted)
+    visible: "Alex Worker"                               # roster reloaded after the add (sheet dismissed)
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: ${output.emp}                               # new employee is appended at the end → scroll to it
     timeout: 30000
 - takeScreenshot: 01-employees-add
