@@ -29,6 +29,15 @@ struct ScheduleResponse: Decodable {
     let createdBy: String?
     let createdAt: String?
     let updatedAt: String?
+    // Go emits snake_case "current_priorities" (matches the web/Android); the other keys
+    // are already camelCase, so they keep their default raw values. Defaulted so the many
+    // existing memberwise constructions (tests) keep compiling; still decoded when present.
+    var currentPriorities: [String]? = nil
+
+    enum CodingKeys: String, CodingKey {
+        case id, tenantId, name, settings, status, createdBy, createdAt, updatedAt
+        case currentPriorities = "current_priorities"
+    }
 }
 
 struct CreateScheduleRequest: Encodable {

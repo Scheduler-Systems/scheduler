@@ -14,4 +14,5 @@ interface ScheduleRepository {
     suspend fun deleteSchedule(scheduleId: String): Result<Unit>
     suspend fun addEmployee(scheduleId: String, employee: Employee): Result<Unit>
     suspend fun removeEmployee(scheduleId: String, employeeId: String): Result<Unit>
+    suspend fun submitAvailability(scheduleId: String, availability: Map<String, Any>): Result<Unit>
 }

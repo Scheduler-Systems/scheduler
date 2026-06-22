@@ -36,10 +36,11 @@ func CreateHandler(st store.Store) http.HandlerFunc {
 		actor := httputil.ActorFromContext(r.Context())
 
 		var body struct {
-			ID       string                 `json:"id"`
-			Name     string                 `json:"name"`
-			Settings map[string]interface{} `json:"settings"`
-			Status   string                 `json:"status"`
+			ID                string                 `json:"id"`
+			Name              string                 `json:"name"`
+			Settings          map[string]interface{} `json:"settings"`
+			Status            string                 `json:"status"`
+			CurrentPriorities []string               `json:"current_priorities"`
 		}
 		if err := httputil.ReadJSON(r, &body); err != nil {
 			httputil.WriteJSON(w, http.StatusBadRequest, map[string]string{
@@ -88,14 +89,15 @@ func CreateHandler(st store.Store) http.HandlerFunc {
 		// identical and cannot diverge on a nanosecond boundary.
 		t := now()
 		s := store.Schedule{
-			ID:        id,
-			TenantID:  params["tenantId"],
-			Name:      name,
-			Settings:  settings,
-			Status:    status,
-			CreatedBy: actor.UserID,
-			CreatedAt: t,
-			UpdatedAt: t,
+			ID:                id,
+			TenantID:          params["tenantId"],
+			Name:              name,
+			Settings:          settings,
+			Status:            status,
+			CurrentPriorities: body.CurrentPriorities,
+			CreatedBy:         actor.UserID,
+			CreatedAt:         t,
+			UpdatedAt:         t,
 		}
 		created := st.PutSchedule(s)
 		httputil.WriteJSON(w, http.StatusCreated, created)
@@ -182,9 +184,32 @@ func PatchHandler(st store.Store) http.HandlerFunc {
 		if v, ok := body.Updates["status"].(string); ok {
 			existing.Status = v
 		}
+		// JSON arrays decode into []interface{}; coerce to []string.
+		if v, ok := body.Updates["current_priorities"]; ok {
+			existing.CurrentPriorities = toStringSlice(v)
+		}
 
 		updated := st.PutSchedule(*existing)
 		httputil.WriteJSON(w, http.StatusOK, updated)
+	}
+}
+
+// toStringSlice coerces a JSON-decoded value (typically []interface{} of strings,
+// but also a native []string) into []string, skipping non-string elements.
+func toStringSlice(v interface{}) []string {
+	switch t := v.(type) {
+	case []string:
+		return t
+	case []interface{}:
+		out := make([]string, 0, len(t))
+		for _, e := range t {
+			if s, ok := e.(string); ok {
+				out = append(out, s)
+			}
+		}
+		return out
+	default:
+		return nil
 	}
 }
 
@@ -194,9 +219,10 @@ func PutHandler(st store.Store) http.HandlerFunc {
 		params := httputil.ParamsFromContext(r.Context())
 
 		var body struct {
-			Name     *string                `json:"name"`
-			Settings map[string]interface{} `json:"settings"`
-			Status   *string                `json:"status"`
+			Name              *string                `json:"name"`
+			Settings          map[string]interface{} `json:"settings"`
+			Status            *string                `json:"status"`
+			CurrentPriorities *[]string              `json:"current_priorities"`
 		}
 		if err := httputil.ReadJSON(r, &body); err != nil {
 			httputil.WriteJSON(w, http.StatusBadRequest, map[string]string{
@@ -223,6 +249,9 @@ func PutHandler(st store.Store) http.HandlerFunc {
 		}
 		if body.Status != nil {
 			existing.Status = *body.Status
+		}
+		if body.CurrentPriorities != nil {
+			existing.CurrentPriorities = *body.CurrentPriorities
 		}
 
 		updated := st.PutSchedule(*existing)

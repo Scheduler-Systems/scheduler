@@ -63,7 +63,20 @@ class PrioritiesViewModel @Inject constructor(
     fun submitPriorities(scheduleId: String) {
         viewModelScope.launch {
             _state.update { it.copy(isSubmitting = true, error = null) }
-            _state.update { it.copy(isSubmitting = false, isSubmitted = true) }
+            val current = _state.value
+            val selected = current.priorities.filterIndexed { i, _ ->
+                current.submittedPriorities.getOrElse(i) { false }
+            }
+            val availability = mapOf<String, Any>(
+                "priorities" to current.priorities,
+                "selected" to selected
+            )
+            scheduleRepository.submitAvailability(scheduleId, availability).fold(
+                onSuccess = { _state.update { it.copy(isSubmitting = false, isSubmitted = true) } },
+                onFailure = { e ->
+                    _state.update { it.copy(isSubmitting = false, error = e.message ?: "Failed to submit priorities") }
+                }
+            )
         }
     }
 }

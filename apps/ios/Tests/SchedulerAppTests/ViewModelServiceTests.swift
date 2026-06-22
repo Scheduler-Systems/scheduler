@@ -52,6 +52,8 @@ final class MockScheduleDataService: ScheduleDataServiceProtocol {
         if let error = deleteScheduleError { throw error }
         deletedScheduleIds.append(scheduleId)
     }
+
+    func submitAvailability(tenantId: String, scheduleId: String, availability: [String: String]) async throws {}
 }
 
 // MARK: - BaseViewModel Tests

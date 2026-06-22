@@ -62,7 +62,7 @@ AREAS=(
 "schedule-requests|InvitationDtoTest|schedule-requests.yaml|testFetchInvitationsMapsAndLabelsStatus|schedule-requests.yaml|-|done (android+ios; detail→Requests→list invitations from Go API)"
 "employees-list|EmployeeListViewModelTest|employees-list.yaml|testFetchEmployees|employees-list.yaml|-|done (android+ios; login→roster via Go-API employees endpoint)"
 "employees-add|EmployeeListViewModelTest|employees-add.yaml|testAddEmployee|employees-add.yaml|-|done (android+ios; +employee → POST /employees → roster)"
-"priorities-submission|-|-|-|-|-|todo(needs-signoff)"
+"priorities-submission|PrioritiesViewModelTest|priorities-submission.yaml|testSubmitPriorities|priorities-submission.yaml|-|done (android+ios; detail→Submit Priorities→list current_priorities→Submit via POST /availability)"
 "priorities-current|-|-|-|-|-|todo(needs-signoff)"
 "archived-schedules|ScheduleDtoTest|archived-schedules.yaml|testFetchSchedulesMapping|archived-schedules.yaml|-|done (android+ios; Home→Archived→status=archived filtered list)"
 "export-shifts|-|-|-|-|-|todo(needs-signoff)"

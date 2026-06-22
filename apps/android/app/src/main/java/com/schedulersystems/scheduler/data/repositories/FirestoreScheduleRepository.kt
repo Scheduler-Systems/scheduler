@@ -94,7 +94,7 @@ class FirestoreScheduleRepository @Inject constructor(
     override suspend fun removeEmployee(scheduleId: String, employeeId: String): Result<Unit> {
         return try {
             val schedule = getScheduleById(scheduleId) ?: return Result.failure(Exception("Schedule not found"))
-            val employee = schedule.employees.find { it.id == employeeId } 
+            val employee = schedule.employees.find { it.id == employeeId }
                 ?: return Result.failure(Exception("Employee not found"))
             firestore.collection("schedules").document(scheduleId)
                 .update("employees", FieldValue.arrayRemove(employee.toMap()))
@@ -104,6 +104,11 @@ class FirestoreScheduleRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    // Availability submission is served by the Go API (ApiScheduleRepository); the legacy
+    // Firestore path is unused for this and succeeds as a no-op.
+    override suspend fun submitAvailability(scheduleId: String, availability: Map<String, Any>): Result<Unit> =
+        Result.success(Unit)
 
     suspend fun getScheduleByName(scheduleName: String): Schedule? {
         val snapshot = firestore.collection("schedules")

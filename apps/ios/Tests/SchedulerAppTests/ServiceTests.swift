@@ -166,6 +166,7 @@ final class MockApiClient: ApiClientProtocol {
     
     var recordedTenantIds: [String] = []
     var recordedScheduleIds: [String] = []
+    var recordedAvailability: [String: String]?
     
     func fetchSchedules(tenantId: String) async throws -> [ScheduleResponse] {
         recordedTenantIds.append(tenantId)
@@ -205,6 +206,8 @@ final class MockApiClient: ApiClientProtocol {
     }
     
     func putAvailability(tenantId: String, scheduleId: String, body: AvailabilityRequest) async throws -> AvailabilityResponse {
+        recordedScheduleIds.append(scheduleId)
+        recordedAvailability = body.availability
         return try putAvailabilityResult.get()
     }
     
@@ -400,6 +403,45 @@ final class ScheduleApiServiceTests: XCTestCase {
         } catch {
             // expected (e.g. 409 duplicate email surfaces to the caller)
         }
+    }
+
+    // MARK: - priorities submission (POST /availability)
+
+    func testSubmitPriorities() async throws {
+        try await service.submitAvailability(
+            tenantId: "t1", scheduleId: "s1",
+            availability: ["priorities": "Alex Worker,QA Verified", "selected": "Alex Worker"]
+        )
+        // The service posts to the schedule's availability endpoint with the selection.
+        XCTAssertTrue(mockApi.recordedScheduleIds.contains("s1"))
+        XCTAssertEqual(mockApi.recordedAvailability?["priorities"], "Alex Worker,QA Verified")
+        XCTAssertEqual(mockApi.recordedAvailability?["selected"], "Alex Worker")
+    }
+
+    func testSubmitPrioritiesSurfacesError() async {
+        struct SubmitErr: Error {}
+        mockApi.putAvailabilityResult = .failure(SubmitErr())
+        do {
+            try await service.submitAvailability(tenantId: "t1", scheduleId: "s1", availability: [:])
+            XCTFail("Expected error")
+        } catch {
+            // expected — a failed submit surfaces to the caller (screen shows the error)
+        }
+    }
+
+    // The Go API serves current_priorities (snake_case); ScheduleResponse must decode it
+    // and the service must map it onto Schedule.currentPriorities (drives the screen).
+    func testFetchScheduleMapsCurrentPriorities() async throws {
+        let json = """
+        {"id":"s1","tenantId":"t1","name":"QA","settings":null,"status":"active",
+         "current_priorities":["Alex Worker","QA Verified"]}
+        """.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(ScheduleResponse.self, from: json)
+        XCTAssertEqual(decoded.currentPriorities, ["Alex Worker", "QA Verified"])
+
+        mockApi.fetchScheduleResult = .success(decoded)
+        let schedule = try await service.fetchSchedule(tenantId: "t1", scheduleId: "s1")
+        XCTAssertEqual(schedule.currentPriorities, ["Alex Worker", "QA Verified"])
     }
 
     // MARK: - createSchedule

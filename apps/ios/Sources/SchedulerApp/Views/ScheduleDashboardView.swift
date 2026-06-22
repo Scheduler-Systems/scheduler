@@ -70,6 +70,15 @@ struct ScheduleDashboardView: View {
                             .foregroundColor(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+
+                    Button(action: { router.push(.prioritiesSubmission(schedule.id)) }) {
+                        Label("Submit Priorities", systemImage: "list.number")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.purple)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
                 }
             }
             .padding()

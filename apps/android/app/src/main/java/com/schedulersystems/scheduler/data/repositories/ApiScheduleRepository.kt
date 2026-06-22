@@ -1,6 +1,7 @@
 package com.schedulersystems.scheduler.data.repositories
 
 import com.schedulersystems.scheduler.data.network.SchedulerApi
+import com.schedulersystems.scheduler.data.network.dto.AvailabilityRequestDto
 import com.schedulersystems.scheduler.data.network.dto.toAddRequest
 import com.schedulersystems.scheduler.data.network.dto.toDomain
 import com.schedulersystems.scheduler.data.network.dto.toDto
@@ -144,6 +145,21 @@ class ApiScheduleRepository @Inject constructor(
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("Failed to remove employee: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun submitAvailability(scheduleId: String, availability: Map<String, Any>): Result<Unit> {
+        return try {
+            val response = api.service.submitAvailability(
+                currentTenant(), scheduleId, AvailabilityRequestDto(availability)
+            )
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to submit availability: ${response.code()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

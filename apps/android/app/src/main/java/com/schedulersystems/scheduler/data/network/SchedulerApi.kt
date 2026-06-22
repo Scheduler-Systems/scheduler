@@ -3,6 +3,7 @@ package com.schedulersystems.scheduler.data.network
 import com.google.firebase.auth.FirebaseAuth
 import com.schedulersystems.scheduler.data.network.dto.AddEmployeeApiRequest
 import com.schedulersystems.scheduler.data.network.dto.ApiEmployeeDto
+import com.schedulersystems.scheduler.data.network.dto.AvailabilityRequestDto
 import com.schedulersystems.scheduler.data.network.dto.EmployeeListApiResponse
 import com.schedulersystems.scheduler.data.network.dto.InvitationListResponse
 import com.schedulersystems.scheduler.data.network.dto.ScheduleDto
@@ -81,6 +82,14 @@ interface SchedulerApiService {
         @Path("tid") tenantId: String,
         @Path("sid") scheduleId: String
     ): retrofit2.Response<InvitationListResponse>
+
+    // Priorities/availability submission — the server records a pending approval (202).
+    @POST("v1/tenants/{tid}/schedules/{sid}/availability")
+    suspend fun submitAvailability(
+        @Path("tid") tenantId: String,
+        @Path("sid") scheduleId: String,
+        @Body body: AvailabilityRequestDto
+    ): retrofit2.Response<Unit>
 }
 
 class AuthInterceptor(private val firebaseAuth: FirebaseAuth) : Interceptor {

@@ -163,6 +163,7 @@ final class MockScheduleApiService: ScheduleDataServiceProtocol {
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule { schedule }
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule { schedule }
     func deleteSchedule(tenantId: String, scheduleId: String) async throws {}
+    func submitAvailability(tenantId: String, scheduleId: String, availability: [String: String]) async throws {}
 }
 
 final class AuthModelTests: XCTestCase {

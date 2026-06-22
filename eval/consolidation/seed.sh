@@ -105,6 +105,14 @@ print(next((s["id"] for s in d.get("items",[]) if s.get("name")=="QA Demo Schedu
         "$API/v1/tenants/$localId/schedules/$sid/employees/invitations" >/dev/null
       echo "seed: created invitation for invitee@example.com"
     fi
+
+    # Priority order for the priorities-submission page. PATCH is idempotent — always
+    # sets the same ordered list so the screen renders "1. Alex Worker / 2. QA Verified"
+    # (non-empty -> Submit button shows; empty -> "No priorities configured").
+    curl -s -X PATCH -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" -H 'Content-Type: application/json' \
+      -d '{"updates":{"current_priorities":["Alex Worker","QA Verified"]}}' \
+      "$API/v1/tenants/$localId/schedules/$sid" >/dev/null
+    echo "seed: set current_priorities on QA Demo Schedule ($sid)"
   else
     echo "seed: WARN could not resolve QA Demo Schedule id — employee not seeded"
   fi

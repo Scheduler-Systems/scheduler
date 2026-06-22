@@ -57,6 +57,8 @@ class FakeScheduleRepository : ScheduleRepository {
     var deleteResult: Result<Unit> = Result.success(Unit)
     var addEmployeeResult: Result<Unit> = Result.success(Unit)
     var removeEmployeeResult: Result<Unit> = Result.success(Unit)
+    var submitAvailabilityResult: Result<Unit> = Result.success(Unit)
+    var lastSubmittedAvailability: Map<String, Any>? = null
 
     override fun getSchedulesForUser(userId: String): Flow<List<Schedule>> = flowOf(schedules)
     override suspend fun getScheduleById(scheduleId: String): Schedule? = schedules.firstOrNull { it.id == scheduleId }
@@ -68,4 +70,8 @@ class FakeScheduleRepository : ScheduleRepository {
     override suspend fun deleteSchedule(scheduleId: String): Result<Unit> = deleteResult
     override suspend fun addEmployee(scheduleId: String, employee: Employee): Result<Unit> = addEmployeeResult
     override suspend fun removeEmployee(scheduleId: String, employeeId: String): Result<Unit> = removeEmployeeResult
+    override suspend fun submitAvailability(scheduleId: String, availability: Map<String, Any>): Result<Unit> {
+        lastSubmittedAvailability = availability
+        return submitAvailabilityResult
+    }
 }

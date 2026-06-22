@@ -137,6 +137,22 @@ func jsonBody(t *testing.T, w *httptest.ResponseRecorder) map[string]interface{}
 	return m
 }
 
+// jsonStringSlice coerces a decoded JSON value (a []interface{} of strings) to []string.
+func jsonStringSlice(t *testing.T, v interface{}) []string {
+	t.Helper()
+	arr, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	out := make([]string, 0, len(arr))
+	for _, e := range arr {
+		if s, ok := e.(string); ok {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
 // assertStatus is a convenience assertion.
 func assertStatus(t *testing.T, w *httptest.ResponseRecorder, want int) {
 	t.Helper()
@@ -429,6 +445,39 @@ func TestScheduleWorkflows(t *testing.T) {
 		id, _ := b["id"].(string)
 		if !strings.HasPrefix(id, "approval_") {
 			t.Errorf("auto-generated id should start with 'approval_', got %q", id)
+		}
+	})
+
+	t.Run("current_priorities round-trips through create, GET, and PATCH", func(t *testing.T) {
+		st := store.NewMemoryStore()
+		app := newApp(st)
+
+		create := do(app, "POST", "/v1/tenants/tenant_security_demo/schedules",
+			managerHeaders, map[string]interface{}{
+				"id":                 "sp",
+				"name":               "Priorities Roster",
+				"settings":           map[string]interface{}{},
+				"current_priorities": []interface{}{"Alex Worker", "QA Verified"},
+			})
+		assertStatus(t, create, http.StatusCreated)
+
+		read := do(app, "GET", "/v1/tenants/tenant_security_demo/schedules/sp", managerHeaders, nil)
+		assertStatus(t, read, http.StatusOK)
+		got := jsonStringSlice(t, jsonBody(t, read)["current_priorities"])
+		if len(got) != 2 || got[0] != "Alex Worker" || got[1] != "QA Verified" {
+			t.Errorf("current_priorities after create = %v, want [Alex Worker QA Verified]", got)
+		}
+
+		patch := do(app, "PATCH", "/v1/tenants/tenant_security_demo/schedules/sp",
+			managerHeaders, map[string]interface{}{
+				"updates": map[string]interface{}{"current_priorities": []interface{}{"Solo"}},
+			})
+		assertStatus(t, patch, http.StatusOK)
+
+		read2 := do(app, "GET", "/v1/tenants/tenant_security_demo/schedules/sp", managerHeaders, nil)
+		got2 := jsonStringSlice(t, jsonBody(t, read2)["current_priorities"])
+		if len(got2) != 1 || got2[0] != "Solo" {
+			t.Errorf("current_priorities after PATCH = %v, want [Solo]", got2)
 		}
 	})
 

@@ -9,6 +9,7 @@ protocol ScheduleDataServiceProtocol {
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func deleteSchedule(tenantId: String, scheduleId: String) async throws
+    func submitAvailability(tenantId: String, scheduleId: String, availability: [String: String]) async throws
 }
 
 final class ScheduleApiService: ScheduleDataServiceProtocol {
@@ -101,6 +102,14 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
         _ = try await api.deleteSchedule(tenantId: tenantId, scheduleId: scheduleId)
     }
 
+    // Priorities/availability submission → POST /availability (202). Not retried (side effect).
+    func submitAvailability(tenantId: String, scheduleId: String, availability: [String: String]) async throws {
+        _ = try await api.putAvailability(
+            tenantId: tenantId, scheduleId: scheduleId,
+            body: AvailabilityRequest(availability: availability)
+        )
+    }
+
     private static func map(_ response: ScheduleResponse) -> Schedule {
         let status = ScheduleStatus(rawValue: response.status) ?? .draft
         let shifts = response.settings?.enabledShifts
@@ -120,7 +129,8 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
             status: status,
             createdAt: parseISO(response.createdAt),
             updatedAt: parseISO(response.updatedAt),
-            settings: settings
+            settings: settings,
+            currentPriorities: response.currentPriorities ?? []
         )
     }
 

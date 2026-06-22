@@ -12,6 +12,8 @@ struct Schedule: Identifiable, Codable, Hashable {
     let updatedAt: Date
     // Defaulted so existing constructions keep compiling; "evenings" maps to the API's "night".
     var settings: ScheduleSettings = ScheduleSettings()
+    // Ordered employee priority slots employees submit against (API "current_priorities").
+    var currentPriorities: [String] = []
 }
 
 struct ScheduleSettings: Codable, Hashable {

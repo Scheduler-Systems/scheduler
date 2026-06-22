@@ -4,16 +4,20 @@ package store
 
 // Schedule represents a tenant-scoped scheduling configuration.
 type Schedule struct {
-	ID          string                 `json:"id"`
-	TenantID    string                 `json:"tenantId"`
-	Name        string                 `json:"name"`
-	Settings    map[string]interface{} `json:"settings"`
-	Status      string                 `json:"status"`
-	CreatedBy   string                 `json:"createdBy,omitempty"`
-	CreatedAt   string                 `json:"createdAt,omitempty"`
-	UpdatedAt   string                 `json:"updatedAt,omitempty"`
-	PublishedAt string                 `json:"publishedAt,omitempty"`
-	PublishedBy string                 `json:"publishedBy,omitempty"`
+	ID       string                 `json:"id"`
+	TenantID string                 `json:"tenantId"`
+	Name     string                 `json:"name"`
+	Settings map[string]interface{} `json:"settings"`
+	Status   string                 `json:"status"`
+	// CurrentPriorities is the ordered list of employee priority slots (by display
+	// name) that employees submit against. Snake_case on the wire to match the
+	// iOS/Android clients and the web's Firestore "current_priorities" field.
+	CurrentPriorities []string `json:"current_priorities,omitempty"`
+	CreatedBy         string   `json:"createdBy,omitempty"`
+	CreatedAt         string   `json:"createdAt,omitempty"`
+	UpdatedAt         string   `json:"updatedAt,omitempty"`
+	PublishedAt       string   `json:"publishedAt,omitempty"`
+	PublishedBy       string   `json:"publishedBy,omitempty"`
 }
 
 // Availability is a submitted availability entry for a schedule.

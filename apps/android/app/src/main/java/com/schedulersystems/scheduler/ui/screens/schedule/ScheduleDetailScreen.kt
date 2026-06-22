@@ -28,6 +28,7 @@ fun ScheduleDetailScreen(
     onNavigateToEmployeeList: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToRequests: () -> Unit = {},
+    onNavigateToPriorities: () -> Unit = {},
     viewModel: ScheduleDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -100,7 +101,7 @@ fun ScheduleDetailScreen(
                         schedule = state.schedule!!,
                         userRole = state.userRole,
                         onEmployeeListClick = onNavigateToEmployeeList,
-                        onPrioritiesClick = { },
+                        onPrioritiesClick = onNavigateToPriorities,
                         onBuildClick = { },
                         onSettingsClick = onNavigateToSettings,
                         onRequestsClick = onNavigateToRequests,

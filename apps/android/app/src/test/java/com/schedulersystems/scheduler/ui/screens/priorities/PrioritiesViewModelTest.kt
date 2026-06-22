@@ -10,7 +10,9 @@ import com.schedulersystems.scheduler.models.domain.Role
 import com.schedulersystems.scheduler.models.domain.Schedule
 import com.schedulersystems.scheduler.models.domain.ScheduleSettings
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -175,9 +177,16 @@ class PrioritiesViewModelTest {
     }
 
     @Test
-    fun `submitPriorities should set isSubmitted flag`() = runTest {
-        val vm = PrioritiesViewModel(scheduleRepository, authRepository)
+    fun `submitPriorities submits selected priorities and sets isSubmitted on success`() = runTest {
+        val priorities = listOf("Alex Worker", "QA Verified")
+        coEvery { scheduleRepository.getScheduleById("s-1") } returns createMockSchedule(priorities)
+        val captured = slot<Map<String, Any>>()
+        coEvery { scheduleRepository.submitAvailability(eq("s-1"), capture(captured)) } returns Result.success(Unit)
 
+        val vm = PrioritiesViewModel(scheduleRepository, authRepository)
+        vm.loadPriorities("s-1")
+        advanceUntilIdle()
+        vm.togglePriority(0) // select "Alex Worker"
         vm.submitPriorities("s-1")
         advanceUntilIdle()
 
@@ -185,5 +194,27 @@ class PrioritiesViewModelTest {
         assertFalse(state.isSubmitting)
         assertTrue(state.isSubmitted)
         assertNull(state.error)
+        // The real availability call was made with the full order + the selected slot.
+        coVerify(exactly = 1) { scheduleRepository.submitAvailability(eq("s-1"), any()) }
+        assertEquals(listOf("Alex Worker", "QA Verified"), captured.captured["priorities"])
+        assertEquals(listOf("Alex Worker"), captured.captured["selected"])
+    }
+
+    @Test
+    fun `submitPriorities surfaces error and does not mark submitted on failure`() = runTest {
+        coEvery { scheduleRepository.getScheduleById("s-1") } returns createMockSchedule(listOf("Alex Worker"))
+        coEvery { scheduleRepository.submitAvailability(any(), any()) } returns
+            Result.failure(Exception("network down"))
+
+        val vm = PrioritiesViewModel(scheduleRepository, authRepository)
+        vm.loadPriorities("s-1")
+        advanceUntilIdle()
+        vm.submitPriorities("s-1")
+        advanceUntilIdle()
+
+        val state = vm.state.value
+        assertFalse(state.isSubmitting)
+        assertFalse(state.isSubmitted)
+        assertEquals("network down", state.error)
     }
 }
