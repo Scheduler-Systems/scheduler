@@ -166,6 +166,16 @@ final class MockScheduleApiService: ScheduleDataServiceProtocol {
     func submitAvailability(tenantId: String, scheduleId: String, availability: [String: String]) async throws {}
 }
 
+final class LegalDocumentsTests: XCTestCase {
+    // Privacy Policy + Terms & Conditions both open the external Legal Center (parity
+    // with Flutter's LegalDocumentsHelper). The policies screen drives this URL.
+    func testLegalDocumentsURL() {
+        XCTAssertEqual(LegalDocuments.legalCenterURLString, "https://scheduler-systems.com/legal")
+        XCTAssertEqual(LegalDocuments.legalCenterURL.scheme, "https")
+        XCTAssertEqual(LegalDocuments.legalCenterURL.host, "scheduler-systems.com")
+    }
+}
+
 final class AuthModelTests: XCTestCase {
     func testAuthState() {
         XCTAssertFalse(AuthState.unauthenticated.isAuthenticated)

@@ -102,6 +102,8 @@ struct SchedulerApp: App {
             SettingsView()
         case .profile:
             ProfileView()
+        case .policies:
+            PoliciesView()
         }
     }
 }

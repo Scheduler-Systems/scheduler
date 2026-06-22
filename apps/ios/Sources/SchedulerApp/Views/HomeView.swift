@@ -71,6 +71,15 @@ struct HomeView: View {
                             .foregroundColor(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+
+                    Button(action: { router.push(.policies) }) {
+                        Label("Policies", systemImage: "doc.text")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.purple)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
                 }
                 .padding(.horizontal)
 

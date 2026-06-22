@@ -21,6 +21,7 @@ import com.schedulersystems.scheduler.ui.screens.employees.EmployeeListScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
 import com.schedulersystems.scheduler.ui.screens.profile.ProfileSettingsScreen
 import com.schedulersystems.scheduler.ui.screens.priorities.PrioritiesSubmissionScreen
+import com.schedulersystems.scheduler.ui.screens.policies.PoliciesScreen
 import com.schedulersystems.scheduler.ui.screens.priority.CurrentPrioritiesScreen
 import com.schedulersystems.scheduler.ui.screens.requests.ScheduleRequestsScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ArchivedSchedulesScreen
@@ -123,6 +124,7 @@ fun SchedulerNavHost(
                 onNavigateToNewSchedule = { navController.navigate("newSchedule") },
                 onNavigateToArchived = { navController.navigate("archivedSchedules") },
                 onNavigateToProfile = { navController.navigate("profile") },
+                onNavigateToPolicies = { navController.navigate("policies") },
                 onNavigateToNotifications = { }
             )
         }
@@ -212,6 +214,10 @@ fun SchedulerNavHost(
                 scheduleId = scheduleId,
                 onNavigateBack = { navController.popBackStack() }
             )
+        }
+
+        composable("policies") {
+            PoliciesScreen(onNavigateBack = { navController.popBackStack() })
         }
     }
 }

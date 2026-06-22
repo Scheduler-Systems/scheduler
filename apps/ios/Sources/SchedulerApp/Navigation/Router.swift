@@ -23,6 +23,7 @@ enum Route: Hashable {
     case employeeDetail(Employee.ID)
     case settings
     case profile
+    case policies
 }
 
 @MainActor

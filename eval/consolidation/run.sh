@@ -70,7 +70,7 @@ AREAS=(
 "chat-threads|-|-|-|-|-|todo(needs-signoff,merge)"
 "notifications|-|-|-|-|-|todo(needs-signoff)"
 "profile-settings|ProfileSettingsViewModelTest|profile-settings.yaml|testAuthStateObservationAuthenticated|profile-settings.yaml|-|done (android+ios; Home→Profile shows account email)"
-"policies|-|-|-|-|-|todo"
+"policies|LegalDocumentsTest|policies.yaml|testLegalDocumentsURL|policies.yaml|-|done (android+ios; Home→Policies→Privacy Policy + Terms open external Legal Center)"
 "walkthroughs|-|-|-|-|-|todo"
 )
 INSCOPE=${#AREAS[@]}   # 27 (gemini-ai + billing-revenuecat excluded)
