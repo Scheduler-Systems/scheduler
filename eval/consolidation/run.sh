@@ -64,32 +64,10 @@ echo "▶ consolidation eval — $INSCOPE in-scope areas (per-platform)"
 # Resolve the Android emulator serial so Maestro targets it explicitly (an iOS sim may be
 # co-booted for iOS e2e — without --device, Maestro can grab the wrong device).
 AND_SERIAL="$("$ANDROID_HOME/platform-tools/adb" devices 2>/dev/null | awk '/emulator-|device$/ && $2=="device"{print $1; exit}')"
-# Capture the AVD name so we can shut the Android emulator during the iOS e2e phase and
-# reboot it for the Android phase — only ONE device (iOS sim OR Android emulator) is ever
-# booted at a time. On this RAM-constrained host, both up at once causes rotating app
-# cold-start flakes. The installed debug APK persists in the AVD across reboot; we also
-# reinstall it after boot for safety.
-ADB="$ANDROID_HOME/platform-tools/adb"
-AND_AVD="$([ -n "$AND_SERIAL" ] && "$ADB" -s "$AND_SERIAL" emu avd name 2>/dev/null | head -1 | tr -d '\r\n')"
-AND_APK="$ANDROID/app/build/outputs/apk/debug/app-debug.apk"
-boot_android(){ # reboot the AVD and wait for it to be ready, then reinstall the app
-  [ -z "$AND_AVD" ] && { echo "  (no AVD name — skipping Android reboot)"; return 1; }
-  "$ANDROID_HOME/emulator/emulator" -avd "$AND_AVD" -no-boot-anim -netdelay none -netspeed full >/tmp/eval-emu-boot.log 2>&1 &
-  "$ADB" wait-for-device >/dev/null 2>&1
-  local i=0; while [ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" != "1" ] && [ $i -lt 90 ]; do sleep 2; i=$((i+1)); done
-  AND_SERIAL="$("$ADB" devices 2>/dev/null | awk '/emulator-/ && $2=="device"{print $1; exit}')"
-  [ -f "$AND_APK" ] && "$ADB" -s "$AND_SERIAL" install -r "$AND_APK" >/dev/null 2>&1
-  echo "  (Android emulator rebooted for its phase: $AND_SERIAL)"
-}
 # Seed a verified user in the Auth emulator so the login→home e2e can reach home (idempotent).
 [ $QUICK -eq 0 ] && { echo "▶ seeding verified login user…"; bash "$(dirname "$0")/seed.sh" 2>&1 | sed 's/^/  /'; }
 echo "▶ Android unit suite…"; ( cd "$ANDROID" && ./gradlew :app:testDebugUnitTest --console=plain >/tmp/eval-a-unit.log 2>&1 ) \
   && echo "  android unit: GREEN" || echo "  android unit: RED (/tmp/eval-a-unit.log)"
-# Android unit tests are JVM (no emulator); shut the Android emulator now so the iOS e2e
-# phase has the whole machine. It's rebooted just before the Android e2e phase.
-if [ $QUICK -eq 0 ] && [ -n "$AND_SERIAL" ]; then
-  "$ADB" -s "$AND_SERIAL" emu kill >/dev/null 2>&1 && echo "  (Android emulator shut down for the iOS phase)"; sleep 5
-fi
 if [ $QUICK -eq 0 ]; then
   echo "▶ iOS unit + e2e setup (xcodebuild — slow)…"
   # iOS e2e precondition: the Firebase Auth emulator must be running on 127.0.0.1:9099.
@@ -149,11 +127,8 @@ if [ $QUICK -ne 1 ]; then
   # pressure. iOS e2e is done by now (results cached), so the sim is safe to shut down.
   if [ -n "$IOS_UDID" ]; then
     xcrun simctl shutdown "$IOS_UDID" >/dev/null 2>&1 && echo "  (iOS sim shut down to free RAM for the Android phase)"
-    sleep 10   # let the OS reclaim the freed RAM before booting the Android emulator
+    sleep 20   # let the OS reclaim the freed RAM + memory pressure subside before Android
   fi
-  # Boot the Android emulator now (it was shut for the iOS phase) so the Android e2e runs
-  # with ONLY the Android emulator up (iOS sim down) — never both at once.
-  boot_android
 
   echo "▶ e2e phase 2/2: Android e2e (block, no concurrent iOS Maestro)…"
   for row in "${AREAS[@]}"; do IFS='|' read -r _ _ ae _ _ _ _ <<< "$row"
