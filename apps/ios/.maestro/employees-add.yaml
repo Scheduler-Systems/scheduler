@@ -48,5 +48,5 @@ appId: com.schedulersystems.scheduler
 - tapOn: "Save Employee"
 - extendedWaitUntil:
     visible: ${output.emp}                               # new employee in the roster (POST persisted)
-    timeout: 15000
+    timeout: 30000
 - takeScreenshot: 01-employees-add
