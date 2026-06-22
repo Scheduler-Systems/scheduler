@@ -19,7 +19,8 @@ class CreateAccountScreenTest {
         composeRule.setContent {
             CreateAccountScreen(
                 onNavigateBack = {},
-                onNavigateToHome = {}
+                onNavigateToHome = {},
+                onNavigateToVerifyEmail = {}
             )
         }
 
@@ -31,7 +32,8 @@ class CreateAccountScreenTest {
         composeRule.setContent {
             CreateAccountScreen(
                 onNavigateBack = {},
-                onNavigateToHome = {}
+                onNavigateToHome = {},
+                onNavigateToVerifyEmail = {}
             )
         }
 

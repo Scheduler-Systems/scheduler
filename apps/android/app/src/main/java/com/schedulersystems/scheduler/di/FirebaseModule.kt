@@ -26,6 +26,10 @@ object FirebaseModule {
         // Zero-account local dev / e2e: route Auth to the local emulator (real Firebase otherwise).
         if (BuildConfig.USE_FIREBASE_EMULATOR) {
             useEmulator(BuildConfig.FIREBASE_EMULATOR_HOST, 9099)
+            // Phone auth on an emulator/CI has no Play Integrity/reCAPTCHA — disable app
+            // verification so the Auth emulator issues a retrievable code instead of
+            // requiring a real device challenge. EMULATOR-ONLY (never in prod builds).
+            firebaseAuthSettings.setAppVerificationDisabledForTesting(true)
         }
     }
 

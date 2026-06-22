@@ -28,7 +28,17 @@ protocol AuthServiceProtocol {
 
 final class AuthService: AuthServiceProtocol {
     static let shared = AuthService()
-    
+
+    /// Whether the app was launched pointing Auth at the local Firebase emulator (same
+    /// detection as SchedulerApp). Used to enable phone-auth test mode at the call site —
+    /// setting the flag only in App.init proved unreliable (Auth.settings can be nil that early).
+    static var isFirebaseEmulatorEnabled: Bool {
+        let env = ProcessInfo.processInfo.environment
+        return env["USE_FIREBASE_EMULATOR"] == "true"
+            || UserDefaults.standard.bool(forKey: "useFirebaseEmulator")
+            || ProcessInfo.processInfo.arguments.contains { $0.localizedCaseInsensitiveContains("useFirebaseEmulator") }
+    }
+
     private let auth = Auth.auth()
     private let authStateSubject = CurrentValueSubject<AuthState, Never>(.unauthenticated)
     private var cancellables = Set<AnyCancellable>()
@@ -143,9 +153,18 @@ final class AuthService: AuthServiceProtocol {
     
     func beginPhoneAuth(phoneNumber: String) async throws -> String {
         authStateSubject.send(.authenticating)
+        #if DEBUG
+        // On the Auth emulator, disable app verification right before the call so phone auth
+        // skips the reCAPTCHA config fetch (not implemented in the emulator) and the emulator
+        // issues a retrievable code instead. DEBUG-ONLY + emulator-gated: compiled out of Release
+        // builds, so it can never weaken real SMS verification in production.
+        if AuthService.isFirebaseEmulatorEnabled {
+            auth.settings?.isAppVerificationDisabledForTesting = true
+        }
+        #endif
         var verificationID: String?
         var verificationError: Error?
-        
+
         await withCheckedContinuation { continuation in
             PhoneAuthProvider.provider().verifyPhoneNumber(
                 phoneNumber,

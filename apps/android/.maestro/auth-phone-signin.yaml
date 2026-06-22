@@ -1,0 +1,36 @@
+# Maestro GUI e2e for the Android phone-sign-in page (Flutter→native consolidation).
+# Zero-account against the Firebase Auth emulator with app-verification-disabled-for-testing:
+# enter phone → emulator issues a retrievable code → fetch it host-side → verify → home.
+# Single-screen flow (phone→code in one screen, one VM) — the old two-route split lost the
+# verificationId and never wired the code route.
+#   maestro test apps/android/.maestro/auth-phone-signin.yaml
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:                       # cold start after clearState can be slow under load
+    visible: "Welcome Back"
+    timeout: 45000
+- tapOn: "Sign in with Phone"              # login-screen entry button
+- assertVisible: "Enter your phone number to receive a verification code"   # phone-entry screen
+- takeScreenshot: 01-phone-entry
+- tapOn: "Phone Number"                    # the OutlinedTextField label (empty field)
+- inputText: "+15555550100"
+- hideKeyboard
+- tapOn: "Send Verification Code"
+- extendedWaitUntil:
+    visible: "Verify Phone Number"         # same screen flips to code entry (isCodeSent=true)
+    timeout: 15000
+- takeScreenshot: 02-code-entry
+- evalScript: ${output.phoneNumber = '+15555550100'}
+- runScript: fetch-phone-code.js           # host-side: read the emulator's issued code
+- assertTrue: ${output.smsCode != null && output.smsCode.length >= 6}
+- tapOn: "Verification Code"               # the code field label
+- inputText: ${output.smsCode}
+- hideKeyboard
+- tapOn:
+    text: "^Verify$"                       # the button (not the "Verify Phone Number" header)
+- extendedWaitUntil:
+    visible: "My Schedules"                # phone auth → home content
+    timeout: 15000
+- takeScreenshot: 03-phone-home

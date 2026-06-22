@@ -35,6 +35,7 @@ struct PhoneSignInView: View {
     private var phoneEntryStep: some View {
         VStack(spacing: 16) {
             TextField("+1 (555) 555-5555", text: $vm.phoneNumber)
+                .accessibilityIdentifier("phoneField")   // deterministic e2e target (placeholder is regex-hostile)
                 .textContentType(.telephoneNumber)
                 #if os(iOS)
                 .keyboardType(.phonePad)
@@ -66,6 +67,7 @@ struct PhoneSignInView: View {
                 .multilineTextAlignment(.center)
 
             TextField("Verification Code", text: $vm.verificationCode)
+                .accessibilityIdentifier("codeField")
                 .textContentType(.oneTimeCode)
                 #if os(iOS)
                 .keyboardType(.numberPad)

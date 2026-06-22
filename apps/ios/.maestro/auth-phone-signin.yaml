@@ -1,0 +1,39 @@
+# Maestro GUI e2e for the iOS phone-sign-in page (Flutter→native consolidation).
+# Zero-account against the Firebase Auth emulator with isAppVerificationDisabledForTesting:
+# enter phone → emulator issues a retrievable code → fetch it host-side → verify → home.
+# A DIFFERENT phone number than Android so concurrent emulator state never collides.
+#   maestro test --device <ios-udid> apps/ios/.maestro/auth-phone-signin.yaml
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:                                   # cold start after clearState can be slow under load
+    visible: "Sign in to manage your schedules"
+    timeout: 45000
+- tapOn: "Sign in with Phone"                          # login-screen entry button
+- assertVisible: "Phone Sign In"                       # phone screen header
+- takeScreenshot: 01-phone-entry
+- tapOn:
+    id: "phoneField"
+- inputText: "+15555550111"
+- tapOn: "Phone Sign In"                               # tap title to dismiss keyboard (hideKeyboard flaky on iOS sim)
+- tapOn: "Send Code"
+- extendedWaitUntil:
+    visible: "Change Number"                            # verification step only (Maestro matches full
+    timeout: 15000                                      # element text, so don't use the "…sent to +1…" line)
+- takeScreenshot: 02-code-entry
+- evalScript: ${output.phoneNumber = '+15555550111'}
+- runScript: fetch-phone-code.js                       # host-side: read the emulator's issued code
+- assertTrue: ${output.smsCode != null && output.smsCode.length >= 6}
+- tapOn:
+    id: "codeField"
+- inputText: ${output.smsCode}
+- tapOn: "Phone Sign In"                               # dismiss keyboard
+- tapOn:
+    text: "^Verify$"                                   # the button (not "Verify Phone Number")
+- extendedWaitUntil:
+    visible: "My Schedules"                            # phone auth → home content
+    timeout: 15000
+- takeScreenshot: 03-phone-home

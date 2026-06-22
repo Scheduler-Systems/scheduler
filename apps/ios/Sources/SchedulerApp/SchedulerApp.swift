@@ -1,38 +1,25 @@
 import FirebaseAuth
 import FirebaseCore
 import SwiftUI
+import UIKit
 
 @main
 struct SchedulerApp: App {
+    // Forwards remote notifications to FirebaseAuth (phone-number sign-in). Required on a pure
+    // SwiftUI lifecycle where the default app-delegate swizzling doesn't reliably forward them.
+    @UIApplicationDelegateAdaptor(SchedulerAppDelegate.self) private var appDelegate
     @StateObject private var router = Router()
     @StateObject private var auth = AuthViewModel()
 
     private let scheduleService: ScheduleDataServiceProtocol
 
     init() {
-        // Firebase must be configured before any Auth/Firestore use. This was
-        // missing from the native migration, which crashed/failed Firebase at
-        // launch. Requires GoogleService-Info.plist in the app bundle.
-        FirebaseApp.configure()
-
-        // Zero-account e2e: point Auth at the local Firebase Auth emulator when launched for
-        // testing. Triggered by env USE_FIREBASE_EMULATOR=true, UserDefaults `-useFirebaseEmulator`,
-        // or ANY process launch argument mentioning useFirebaseEmulator (Maestro passes its
-        // launchArguments map in a form that doesn't always reach NSUserDefaults, so match the
-        // raw argv too). iOS Simulator reaches the host machine via 127.0.0.1 (Android uses 10.0.2.2).
-        let env = ProcessInfo.processInfo.environment
-        let emulatorOn = env["USE_FIREBASE_EMULATOR"] == "true"
-            || UserDefaults.standard.bool(forKey: "useFirebaseEmulator")
-            || ProcessInfo.processInfo.arguments.contains { $0.localizedCaseInsensitiveContains("useFirebaseEmulator") }
-        if emulatorOn {
-            let host = env["FIREBASE_EMULATOR_HOST"] ?? "127.0.0.1"
-            Auth.auth().useEmulator(withHost: host, port: 9099)
-            // Zero-account e2e must start logged out. Maestro's clearState wipes the app
-            // container but NOT the iOS keychain, so a prior sign-in (e.g. create-account)
-            // persists and the app would launch straight to home. Clear it for a deterministic start.
-            try? Auth.auth().signOut()
-        }
-
+        // NOTE: Firebase is configured in SchedulerAppDelegate.didFinishLaunchingWithOptions,
+        // NOT here. FirebaseAuth installs app-delegate notification swizzling during configure();
+        // running it from App.init (before the app delegate is installed) leaves phone-auth's
+        // notification forwarding unwired ("remote notifications … forwarded to canHandleNotification").
+        // The auth/router StateObjects are lazily created at body time (after didFinishLaunching),
+        // so nothing touches Auth before it's configured.
         let baseURL = Bundle.main.object(forInfoDictionaryKey: "SCHEDULER_API_URL") as? String
             ?? ProcessInfo.processInfo.environment["SCHEDULER_API_URL"]
             ?? "http://127.0.0.1:4180"
@@ -107,6 +94,58 @@ struct SchedulerApp: App {
         case .notifications:
             NotificationsView(scheduleService: scheduleService)
         }
+    }
+}
+
+/// Forwards remote notifications to FirebaseAuth. Firebase Auth phone-number sign-in sends a
+/// silent "prober" push (and, on real devices, the verification push) that MUST reach
+/// `Auth.canHandleNotification(_:)` — otherwise `verifyPhoneNumber` throws
+/// "remote notifications … forwarded to FirebaseAuth's canHandleNotification". A pure SwiftUI
+/// lifecycle has no app delegate forwarding these, so we forward explicitly. This is the
+/// standard, production-correct phone-auth wiring (needed for real SMS too), not test-only.
+final class SchedulerAppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        // Configure Firebase HERE (not App.init) so it runs after this app delegate is installed —
+        // FirebaseAuth's notification swizzling needs the real delegate present to forward phone-auth
+        // pushes. Requires GoogleService-Info.plist in the app bundle.
+        FirebaseApp.configure()
+
+        // Zero-account e2e: point Auth at the local Firebase Auth emulator when launched for testing.
+        // Triggered by env USE_FIREBASE_EMULATOR=true, UserDefaults `-useFirebaseEmulator`, or any
+        // launch argument mentioning useFirebaseEmulator (Maestro passes its launchArguments in a form
+        // that doesn't always reach NSUserDefaults, so match raw argv too). iOS Simulator reaches the
+        // host at 127.0.0.1 (Android uses 10.0.2.2).
+        if AuthService.isFirebaseEmulatorEnabled {
+            let host = ProcessInfo.processInfo.environment["FIREBASE_EMULATOR_HOST"] ?? "127.0.0.1"
+            Auth.auth().useEmulator(withHost: host, port: 9099)
+            #if DEBUG
+            // Phone auth on the emulator has no reCAPTCHA (not implemented there) — disable app
+            // verification so the Auth emulator issues a retrievable code instead. DEBUG-ONLY:
+            // compiled out of Release builds so it can NEVER weaken real SMS verification in prod.
+            Auth.auth().settings?.isAppVerificationDisabledForTesting = true
+            #endif
+            // Zero-account e2e must start logged out. Maestro's clearState wipes the app container
+            // but NOT the iOS keychain, so a prior sign-in persists and the app would launch straight
+            // to home. Clear it for a deterministic start.
+            try? Auth.auth().signOut()
+        }
+        return true
+    }
+
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        if Auth.auth().canHandleNotification(userInfo) {
+            completionHandler(.noData)
+            return
+        }
+        completionHandler(.newData)
+    }
+
+    func application(_ application: UIApplication,
+                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Auth.auth().setAPNSToken(deviceToken, type: .unknown)
     }
 }
 

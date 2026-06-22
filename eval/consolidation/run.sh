@@ -46,7 +46,7 @@ mkdir -p "$E2E_CACHE"
 # id | a_unit(class) | a_e2e(flow) | i_unit(iOS test-method substr) | i_e2e(flow) | w_e2e(spec) | verdict
 AREAS=(
 "auth-email-login|AuthViewModelTest|email-login.yaml|testSignInWithEmail|email-login.yaml|-|done (android+ios, unit+e2e)"
-"auth-phone-signin|-|-|testBeginPhoneAuth|-|-|keep-native"
+"auth-phone-signin|AuthViewModelPhoneTest|auth-phone-signin.yaml|testBeginPhoneAuth|auth-phone-signin.yaml|-|done (android+ios; phone→emulator-issued code→home, app-verification-disabled-for-testing)"
 "home|HomeViewModelTest|email-login.yaml|testHomeViewModel|email-login.yaml|-|done (android+ios; login→home content)"
 "auth-password-reset|AuthViewModelPasswordResetTest|password-reset.yaml|testSendPasswordReset|password-reset.yaml|-|done (android+ios, unit+e2e)"
 "auth-create-account|AuthViewModelSignUpTest|create-account.yaml|testCreateAccount|create-account.yaml|-|done (android+ios, unit+e2e)"

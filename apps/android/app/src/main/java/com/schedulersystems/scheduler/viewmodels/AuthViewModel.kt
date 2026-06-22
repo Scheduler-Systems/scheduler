@@ -188,14 +188,15 @@ class AuthViewModel @Inject constructor(
             result.fold(
                 onSuccess = { verificationId ->
                     pendingVerificationId = verificationId
-                    _uiState.update { 
+                    // The single phone-sign-in screen switches to code entry off isCodeSent;
+                    // no cross-route navigation (which previously dropped the verificationId).
+                    _uiState.update {
                         it.copy(
-                            isLoading = false, 
+                            isLoading = false,
                             verificationId = verificationId,
                             isCodeSent = true
                         )
                     }
-                    _navigation.emit("phoneCode")
                 },
                 onFailure = { error ->
                     _uiState.update { it.copy(isLoading = false, error = error.message) }

@@ -36,7 +36,7 @@ class VerifyEmailScreenTest {
     @Test
     fun shouldDisplayVerifyEmailTitle() {
         composeRule.setContent {
-            VerifyEmailScreen(onNavigateBack = {})
+            VerifyEmailScreen(onNavigateBack = {}, onNavigateToHome = {})
         }
 
         composeRule.onNodeWithText("Verify Email").assertIsDisplayed()
@@ -45,7 +45,7 @@ class VerifyEmailScreenTest {
     @Test
     fun shouldDisplayBackButton() {
         composeRule.setContent {
-            VerifyEmailScreen(onNavigateBack = {})
+            VerifyEmailScreen(onNavigateBack = {}, onNavigateToHome = {})
         }
 
         composeRule.onNodeWithText("Back").assertIsDisplayed()
@@ -55,7 +55,7 @@ class VerifyEmailScreenTest {
     fun shouldNavigateBackOnBackClick() {
         var navigatedBack = false
         composeRule.setContent {
-            VerifyEmailScreen(onNavigateBack = { navigatedBack = true })
+            VerifyEmailScreen(onNavigateBack = { navigatedBack = true }, onNavigateToHome = {})
         }
 
         composeRule.onNodeWithText("Back").performClick()

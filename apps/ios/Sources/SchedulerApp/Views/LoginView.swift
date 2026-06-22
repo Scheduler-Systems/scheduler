@@ -66,6 +66,11 @@ struct LoginView: View {
                         .fontWeight(.medium)
                 }
 
+                Button(action: { router.push(.phoneSignIn) }) {
+                    Label("Sign in with Phone", systemImage: "phone")
+                        .font(.subheadline)
+                }
+
                 Button(action: { router.push(.passwordReset) }) {
                     Text("Forgot Password?")
                         .font(.caption)
@@ -100,12 +105,12 @@ struct LoginView: View {
             if authenticated {
                 // Single post-auth gate for the whole stack (login OR signup, since this root
                 // view observes the shared auth state). Parity with Flutter login → verify-email
-                // → home: unverified users must verify their email before reaching home.
-                if vm.currentUser?.isEmailVerified == true {
-                    router.replace(with: .home)
-                } else {
-                    router.replace(with: .verifyEmail)
-                }
+                // → home: only EMAIL accounts with an unverified email are gated. Phone sign-in
+                // (no email) and verified email accounts go straight home — otherwise a phone
+                // user, who has no email to verify, would be stuck on the verify-email screen.
+                let user = vm.currentUser
+                let hasUnverifiedEmail = !(user?.email ?? "").isEmpty && user?.isEmailVerified != true
+                router.replace(with: hasUnverifiedEmail ? .verifyEmail : .home)
             }
         }
     }

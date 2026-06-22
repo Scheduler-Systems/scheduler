@@ -40,7 +40,6 @@ class PhoneSignInScreenTest {
         composeRule.setContent {
             PhoneSignInScreen(
                 onNavigateBack = {},
-                onNavigateToPhoneCode = {},
                 onNavigateToHome = {},
                 viewModel = AuthViewModel(authRepository)
             )
@@ -54,7 +53,6 @@ class PhoneSignInScreenTest {
         composeRule.setContent {
             PhoneSignInScreen(
                 onNavigateBack = {},
-                onNavigateToPhoneCode = {},
                 onNavigateToHome = {},
                 viewModel = AuthViewModel(authRepository)
             )
@@ -68,7 +66,6 @@ class PhoneSignInScreenTest {
         composeRule.setContent {
             PhoneSignInScreen(
                 onNavigateBack = {},
-                onNavigateToPhoneCode = {},
                 onNavigateToHome = {},
                 viewModel = AuthViewModel(authRepository)
             )
@@ -82,7 +79,6 @@ class PhoneSignInScreenTest {
         composeRule.setContent {
             PhoneSignInScreen(
                 onNavigateBack = {},
-                onNavigateToPhoneCode = {},
                 onNavigateToHome = {},
                 viewModel = AuthViewModel(authRepository)
             )
@@ -96,7 +92,6 @@ class PhoneSignInScreenTest {
         composeRule.setContent {
             PhoneSignInScreen(
                 onNavigateBack = {},
-                onNavigateToPhoneCode = {},
                 onNavigateToHome = {},
                 viewModel = AuthViewModel(authRepository)
             )
@@ -113,7 +108,6 @@ class PhoneSignInScreenTest {
         composeRule.setContent {
             PhoneSignInScreen(
                 onNavigateBack = {},
-                onNavigateToPhoneCode = {},
                 onNavigateToHome = {},
                 viewModel = viewModel
             )
@@ -128,7 +122,6 @@ class PhoneSignInScreenTest {
         composeRule.setContent {
             PhoneSignInScreen(
                 onNavigateBack = { navigatedBack = true },
-                onNavigateToPhoneCode = {},
                 onNavigateToHome = {},
                 viewModel = AuthViewModel(authRepository)
             )

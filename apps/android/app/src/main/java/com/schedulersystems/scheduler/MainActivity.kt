@@ -79,7 +79,6 @@ fun SchedulerNavHost(
         composable("phoneSignIn") {
             PhoneSignInScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToPhoneCode = { },
                 onNavigateToHome = {
                     navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
