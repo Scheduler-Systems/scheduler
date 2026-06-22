@@ -19,6 +19,7 @@ import com.schedulersystems.scheduler.ui.screens.auth.PhoneSignInScreen
 import com.schedulersystems.scheduler.ui.screens.auth.VerifyEmailScreen
 import com.schedulersystems.scheduler.ui.screens.employees.EmployeeListScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
+import com.schedulersystems.scheduler.ui.screens.profile.ProfileSettingsScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ArchivedSchedulesScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.NewScheduleScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleDetailScreen
@@ -117,12 +118,19 @@ fun SchedulerNavHost(
                 onNavigateToMySchedules = { navController.navigate("scheduleList") },
                 onNavigateToNewSchedule = { navController.navigate("newSchedule") },
                 onNavigateToArchived = { navController.navigate("archivedSchedules") },
+                onNavigateToProfile = { navController.navigate("profile") },
                 onNavigateToNotifications = { }
             )
         }
 
         composable("archivedSchedules") {
             ArchivedSchedulesScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("profile") {
+            ProfileSettingsScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

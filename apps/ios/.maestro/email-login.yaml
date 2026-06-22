@@ -9,7 +9,7 @@ appId: com.schedulersystems.scheduler
       useFirebaseEmulator: true
 - extendedWaitUntil:                               # cold start after clearState can be slow under load
     visible: "Sign in to manage your schedules"
-    timeout: 25000
+    timeout: 45000
 - tapOn: "Email"
 - inputText: "qa-verified@example.com"
 - tapOn:

@@ -1,0 +1,29 @@
+# Maestro GUI e2e for the Android profile-settings page (Flutter→native consolidation).
+# login → Home → "Profile" → profile screen showing the signed-in account's email.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      text: "Profile"
+    timeout: 15000
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "qa-verified@example.com"                   # the signed-in account's email
+    timeout: 15000
+- takeScreenshot: 01-profile-settings

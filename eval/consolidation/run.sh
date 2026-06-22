@@ -54,7 +54,7 @@ AREAS=(
 "share-pdf|-|-|-|-|-|todo"
 "chat-threads|-|-|-|-|-|todo(needs-signoff,merge)"
 "notifications|-|-|-|-|-|todo(needs-signoff)"
-"profile-settings|-|-|-|-|-|todo(needs-signoff,merge)"
+"profile-settings|ProfileSettingsViewModelTest|profile-settings.yaml|testAuthStateObservationAuthenticated|profile-settings.yaml|-|done (android+ios; Home→Profile shows account email)"
 "policies|-|-|-|-|-|todo"
 "walkthroughs|-|-|-|-|-|todo"
 )
@@ -121,6 +121,15 @@ if [ $QUICK -ne 1 ]; then
   for row in "${AREAS[@]}"; do IFS='|' read -r _ _ _ _ ie _ _ <<< "$row"
     [ "$ie" != "-" ] && { i_e2e_pass "$ie" && echo "  ✓ ios $ie" || echo "  ✗ ios $ie"; }
   done
+  # Free the iOS simulator's RAM before the Android phase. On this memory-constrained
+  # host the second phase runs on an already-hot machine; with the iOS sim still booted
+  # (~2GB) the Android app couldn't even render its login screen within 25s under the
+  # pressure. iOS e2e is done by now (results cached), so the sim is safe to shut down.
+  if [ -n "$IOS_UDID" ]; then
+    xcrun simctl shutdown "$IOS_UDID" >/dev/null 2>&1 && echo "  (iOS sim shut down to free RAM for the Android phase)"
+    sleep 20   # let the OS reclaim the freed RAM + memory pressure subside before Android
+  fi
+
   echo "▶ e2e phase 2/2: Android e2e (block, no concurrent iOS Maestro)…"
   for row in "${AREAS[@]}"; do IFS='|' read -r _ _ ae _ _ _ _ <<< "$row"
     [ "$ae" != "-" ] && { a_e2e_pass "$ae" && echo "  ✓ android $ae" || echo "  ✗ android $ae"; }

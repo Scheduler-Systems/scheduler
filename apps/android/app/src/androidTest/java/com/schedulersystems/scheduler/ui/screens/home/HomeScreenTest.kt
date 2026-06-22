@@ -41,6 +41,7 @@ class HomeScreenTest {
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
                 onNavigateToArchived = {},
+                onNavigateToProfile = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -56,6 +57,7 @@ class HomeScreenTest {
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
                 onNavigateToArchived = {},
+                onNavigateToProfile = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -71,6 +73,7 @@ class HomeScreenTest {
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
                 onNavigateToArchived = {},
+                onNavigateToProfile = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -86,6 +89,7 @@ class HomeScreenTest {
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
                 onNavigateToArchived = {},
+                onNavigateToProfile = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -101,6 +105,7 @@ class HomeScreenTest {
                 onNavigateToMySchedules = {},
                 onNavigateToNewSchedule = {},
                 onNavigateToArchived = {},
+                onNavigateToProfile = {},
                 onNavigateToNotifications = {}
             )
         }
@@ -118,6 +123,7 @@ class HomeScreenTest {
                 onNavigateToMySchedules = { onMySchedulesCalled = true },
                 onNavigateToNewSchedule = {},
                 onNavigateToArchived = {},
+                onNavigateToProfile = {},
                 onNavigateToNotifications = {}
             )
         }

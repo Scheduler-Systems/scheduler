@@ -26,6 +26,7 @@ fun HomeScreen(
     onNavigateToMySchedules: () -> Unit,
     onNavigateToNewSchedule: () -> Unit,
     onNavigateToArchived: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -112,7 +113,8 @@ fun HomeScreen(
                         userRole = state.userRole,
                         onMySchedulesClick = onNavigateToMySchedules,
                         onNewScheduleClick = onNavigateToNewSchedule,
-                        onArchivedClick = onNavigateToArchived
+                        onArchivedClick = onNavigateToArchived,
+                        onProfileClick = onNavigateToProfile
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -138,7 +140,8 @@ private fun ActionButtons(
     userRole: Role?,
     onMySchedulesClick: () -> Unit,
     onNewScheduleClick: () -> Unit,
-    onArchivedClick: () -> Unit
+    onArchivedClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -188,6 +191,19 @@ private fun ActionButtons(
             shape = MaterialTheme.shapes.medium
         ) {
             Text("Archived Schedules", fontSize = 18.sp)
+        }
+
+        Button(
+            onClick = onProfileClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF6A0DAD)
+            ),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Text("Profile", fontSize = 18.sp)
         }
     }
 }

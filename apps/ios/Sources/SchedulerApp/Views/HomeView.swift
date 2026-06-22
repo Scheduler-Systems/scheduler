@@ -62,6 +62,15 @@ struct HomeView: View {
                             .foregroundColor(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+
+                    Button(action: { router.push(.profile) }) {
+                        Label("Profile", systemImage: "person.crop.circle")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.purple)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
                 }
                 .padding(.horizontal)
 

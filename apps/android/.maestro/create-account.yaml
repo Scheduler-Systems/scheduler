@@ -6,7 +6,7 @@ appId: com.schedulersystems.scheduler
     clearState: true
 - extendedWaitUntil:                       # cold start after clearState can be slow under load
     visible: "Welcome Back"
-    timeout: 25000
+    timeout: 45000
 - tapOn: "Sign Up"                         # bottom "Don't have an account? Sign Up" link
 - assertVisible: "Create Account"          # navigated to the (previously stub) create-account screen
 - takeScreenshot: 01-create-account
