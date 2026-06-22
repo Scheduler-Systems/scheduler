@@ -29,6 +29,7 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToPolicies: () -> Unit = {},
+    onNavigateToGetName: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -116,7 +117,8 @@ fun HomeScreen(
                         onNewScheduleClick = onNavigateToNewSchedule,
                         onArchivedClick = onNavigateToArchived,
                         onProfileClick = onNavigateToProfile,
-                        onPoliciesClick = onNavigateToPolicies
+                        onPoliciesClick = onNavigateToPolicies,
+                        onCompleteProfileClick = onNavigateToGetName
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -144,7 +146,8 @@ private fun ActionButtons(
     onNewScheduleClick: () -> Unit,
     onArchivedClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onPoliciesClick: () -> Unit = {}
+    onPoliciesClick: () -> Unit = {},
+    onCompleteProfileClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -220,6 +223,19 @@ private fun ActionButtons(
             shape = MaterialTheme.shapes.medium
         ) {
             Text("Policies", fontSize = 18.sp)
+        }
+
+        Button(
+            onClick = onCompleteProfileClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF6A0DAD)
+            ),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Text("Complete Profile", fontSize = 18.sp)
         }
     }
 }

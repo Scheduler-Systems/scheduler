@@ -67,9 +67,9 @@ struct SchedulerApp: App {
         case .createAccount:
             CreateAccountView()
         case .getName:
-            GetNameView()
+            GetNameView(scheduleService: scheduleService)
         case .chooseRole:
-            ChooseRoleView()
+            ChooseRoleView(scheduleService: scheduleService)
         case .phoneSignIn:
             PhoneSignInView()
         case .passwordReset:

@@ -34,6 +34,8 @@ protocol ApiClientProtocol {
     func createDraft(tenantId: String, scheduleId: String, body: DraftRequest) async throws -> DraftResponse
     func publishSchedule(tenantId: String, scheduleId: String, body: PublishRequest) async throws -> PublishResponse
     func createRequest(tenantId: String, scheduleId: String, body: ScheduleRequest) async throws -> ScheduleRequestResponse
+    func upsertProfile(tenantId: String, uid: String, body: UpsertProfileRequest) async throws -> UserProfileResponse
+    func upsertRole(tenantId: String, uid: String, body: UpsertRoleRequest) async throws -> UserProfileResponse
 }
 
 final class ApiClient: ApiClientProtocol {
@@ -147,6 +149,16 @@ final class ApiClient: ApiClientProtocol {
 
     func createRequest(tenantId: String, scheduleId: String, body: ScheduleRequest) async throws -> ScheduleRequestResponse {
         let req = try await makeRequest(path: "v1/tenants/\(tenantId)/schedules/\(scheduleId)/requests", method: "POST", tenantId: tenantId, body: body)
+        return try await execute(req)
+    }
+
+    func upsertProfile(tenantId: String, uid: String, body: UpsertProfileRequest) async throws -> UserProfileResponse {
+        let req = try await makeRequest(path: "v1/tenants/\(tenantId)/users/\(uid)", method: "PUT", tenantId: tenantId, body: body)
+        return try await execute(req)
+    }
+
+    func upsertRole(tenantId: String, uid: String, body: UpsertRoleRequest) async throws -> UserProfileResponse {
+        let req = try await makeRequest(path: "v1/tenants/\(tenantId)/users/\(uid)/role", method: "PUT", tenantId: tenantId, body: body)
         return try await execute(req)
     }
 

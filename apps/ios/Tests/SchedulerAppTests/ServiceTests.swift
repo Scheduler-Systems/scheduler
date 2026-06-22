@@ -167,6 +167,10 @@ final class MockApiClient: ApiClientProtocol {
     var recordedTenantIds: [String] = []
     var recordedScheduleIds: [String] = []
     var recordedAvailability: [String: String]?
+    var recordedDisplayName: String?
+    var recordedRole: RoleStructPayload?
+    var upsertProfileResult: Result<UserProfileResponse, Error> = .success(UserProfileResponse(id: "u1", displayName: "Set", role: nil))
+    var upsertRoleResult: Result<UserProfileResponse, Error> = .success(UserProfileResponse(id: "u1", displayName: nil, role: "employer"))
     
     func fetchSchedules(tenantId: String) async throws -> [ScheduleResponse] {
         recordedTenantIds.append(tenantId)
@@ -209,6 +213,16 @@ final class MockApiClient: ApiClientProtocol {
         recordedScheduleIds.append(scheduleId)
         recordedAvailability = body.availability
         return try putAvailabilityResult.get()
+    }
+
+    func upsertProfile(tenantId: String, uid: String, body: UpsertProfileRequest) async throws -> UserProfileResponse {
+        recordedDisplayName = body.displayName
+        return try upsertProfileResult.get()
+    }
+
+    func upsertRole(tenantId: String, uid: String, body: UpsertRoleRequest) async throws -> UserProfileResponse {
+        recordedRole = body.role
+        return try upsertRoleResult.get()
     }
     
     func createDraft(tenantId: String, scheduleId: String, body: DraftRequest) async throws -> DraftResponse {
@@ -426,6 +440,36 @@ final class ScheduleApiServiceTests: XCTestCase {
             XCTFail("Expected error")
         } catch {
             // expected — a failed submit surfaces to the caller (screen shows the error)
+        }
+    }
+
+    // MARK: - auth onboarding (get-name PUT /users, choose-role PUT /users/{uid}/role)
+
+    func testUpdateDisplayName() async throws {
+        try await service.updateDisplayName(tenantId: "u1", uid: "u1", email: "u@x.com", name: "Dana")
+        XCTAssertEqual(mockApi.recordedDisplayName, "Dana")
+    }
+
+    func testUpdateRole() async throws {
+        try await service.updateRole(tenantId: "u1", uid: "u1", email: "u@x.com", isManager: true)
+        // Manager → creator+admin, not worker (parity with roleStructToFlutterString).
+        XCTAssertEqual(mockApi.recordedRole?.isCreator, true)
+        XCTAssertEqual(mockApi.recordedRole?.isAdmin, true)
+        XCTAssertEqual(mockApi.recordedRole?.isWorker, false)
+
+        try await service.updateRole(tenantId: "u1", uid: "u1", email: "u@x.com", isManager: false)
+        XCTAssertEqual(mockApi.recordedRole?.isWorker, true)
+        XCTAssertEqual(mockApi.recordedRole?.isCreator, false)
+    }
+
+    func testUpdateRoleSurfacesError() async {
+        struct RoleErr: Error {}
+        mockApi.upsertRoleResult = .failure(RoleErr())
+        do {
+            try await service.updateRole(tenantId: "u1", uid: "u1", email: "u@x.com", isManager: true)
+            XCTFail("Expected error")
+        } catch {
+            // expected — surfaced to the screen
         }
     }
 

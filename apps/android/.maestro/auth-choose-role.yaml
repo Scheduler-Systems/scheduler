@@ -1,0 +1,43 @@
+# Maestro GUI e2e for the Android auth-choose-role page (Flutter→native consolidation).
+# login → Home → "Complete Profile" → name → Continue → Choose Your Role → Log In as Manager
+# (PUT /users/{uid}/role) → home.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      text: "Complete Profile"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Complete Profile"
+- extendedWaitUntil:
+    visible: "What's your name?"
+    timeout: 15000
+- tapOn:
+    text: "Your name"
+- inputText: "QA Tester"
+- hideKeyboard
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Choose Your Role"
+    timeout: 15000
+- tapOn: "Log In as Manager"
+- extendedWaitUntil:
+    visible: "My Schedules"                              # role persisted, returned home
+    timeout: 15000
+- takeScreenshot: 01-choose-role

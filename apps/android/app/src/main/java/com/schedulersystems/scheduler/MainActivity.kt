@@ -12,7 +12,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.schedulersystems.scheduler.ui.screens.auth.ChooseRoleScreen
 import com.schedulersystems.scheduler.ui.screens.auth.CreateAccountScreen
+import com.schedulersystems.scheduler.ui.screens.auth.GetNameScreen
 import com.schedulersystems.scheduler.ui.screens.auth.LoginScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PasswordResetScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PhoneSignInScreen
@@ -125,6 +127,7 @@ fun SchedulerNavHost(
                 onNavigateToArchived = { navController.navigate("archivedSchedules") },
                 onNavigateToProfile = { navController.navigate("profile") },
                 onNavigateToPolicies = { navController.navigate("policies") },
+                onNavigateToGetName = { navController.navigate("getName") },
                 onNavigateToNotifications = { }
             )
         }
@@ -218,6 +221,22 @@ fun SchedulerNavHost(
 
         composable("policies") {
             PoliciesScreen(onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable("getName") {
+            GetNameScreen(
+                onNavigateToChooseRole = { navController.navigate("chooseRole") },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("chooseRole") {
+            ChooseRoleScreen(
+                onNavigateToHome = {
+                    navController.navigate("home") { popUpTo("home") { inclusive = true } }
+                },
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }

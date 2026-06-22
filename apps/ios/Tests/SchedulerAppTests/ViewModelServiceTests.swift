@@ -54,6 +54,8 @@ final class MockScheduleDataService: ScheduleDataServiceProtocol {
     }
 
     func submitAvailability(tenantId: String, scheduleId: String, availability: [String: String]) async throws {}
+    func updateDisplayName(tenantId: String, uid: String, email: String, name: String) async throws {}
+    func updateRole(tenantId: String, uid: String, email: String, isManager: Bool) async throws {}
 }
 
 // MARK: - BaseViewModel Tests

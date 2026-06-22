@@ -187,6 +187,44 @@ struct PublishResponse: Decodable {
     let publishedAt: String?
 }
 
+// User-profile (users/{uid}) — Privacy/role onboarding. Role is computed server-side
+// from the RoleStruct (snake_case), parity with scheduler-web's roleStructToFlutterString.
+struct RoleStructPayload: Encodable {
+    let isCreator: Bool
+    let isAdmin: Bool
+    let isWorker: Bool
+    enum CodingKeys: String, CodingKey {
+        case isCreator = "is_creator"
+        case isAdmin = "is_admin"
+        case isWorker = "is_worker"
+    }
+}
+
+struct UpsertProfileRequest: Encodable {
+    let email: String
+    let displayName: String
+    enum CodingKeys: String, CodingKey {
+        case email
+        case displayName = "display_name"
+    }
+}
+
+struct UpsertRoleRequest: Encodable {
+    let email: String
+    let role: RoleStructPayload
+}
+
+struct UserProfileResponse: Decodable {
+    let id: String?
+    let displayName: String?
+    let role: String?
+    enum CodingKeys: String, CodingKey {
+        case id
+        case displayName = "display_name"
+        case role
+    }
+}
+
 struct ScheduleRequest: Encodable {
     let type: String
     let details: [String: String]?

@@ -10,6 +10,8 @@ protocol ScheduleDataServiceProtocol {
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func deleteSchedule(tenantId: String, scheduleId: String) async throws
     func submitAvailability(tenantId: String, scheduleId: String, availability: [String: String]) async throws
+    func updateDisplayName(tenantId: String, uid: String, email: String, name: String) async throws
+    func updateRole(tenantId: String, uid: String, email: String, isManager: Bool) async throws
 }
 
 final class ScheduleApiService: ScheduleDataServiceProtocol {
@@ -107,6 +109,25 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
         _ = try await api.putAvailability(
             tenantId: tenantId, scheduleId: scheduleId,
             body: AvailabilityRequest(availability: availability)
+        )
+    }
+
+    // Auth onboarding: get-name persists display_name (PUT /users/{uid}); choose-role
+    // persists the role (PUT /users/{uid}/role). Server computes the role string from the
+    // RoleStruct. Not retried (side effects).
+    func updateDisplayName(tenantId: String, uid: String, email: String, name: String) async throws {
+        _ = try await api.upsertProfile(
+            tenantId: tenantId, uid: uid,
+            body: UpsertProfileRequest(email: email, displayName: name)
+        )
+    }
+
+    func updateRole(tenantId: String, uid: String, email: String, isManager: Bool) async throws {
+        // Manager → creator+admin; employee → worker (parity with roleStructToFlutterString).
+        let role = RoleStructPayload(isCreator: isManager, isAdmin: isManager, isWorker: !isManager)
+        _ = try await api.upsertRole(
+            tenantId: tenantId, uid: uid,
+            body: UpsertRoleRequest(email: email, role: role)
         )
     }
 

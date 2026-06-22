@@ -8,6 +8,8 @@ import com.schedulersystems.scheduler.data.network.dto.EmployeeListApiResponse
 import com.schedulersystems.scheduler.data.network.dto.InvitationListResponse
 import com.schedulersystems.scheduler.data.network.dto.ScheduleDto
 import com.schedulersystems.scheduler.data.network.dto.ScheduleListResponse
+import com.schedulersystems.scheduler.data.network.dto.UpsertProfileRequestDto
+import com.schedulersystems.scheduler.data.network.dto.UpsertRoleRequestDto
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -89,6 +91,21 @@ interface SchedulerApiService {
         @Path("tid") tenantId: String,
         @Path("sid") scheduleId: String,
         @Body body: AvailabilityRequestDto
+    ): retrofit2.Response<Unit>
+
+    // User-profile auth onboarding: name (PUT /users/{uid}) + role (PUT /users/{uid}/role).
+    @PUT("v1/tenants/{tid}/users/{uid}")
+    suspend fun upsertProfile(
+        @Path("tid") tenantId: String,
+        @Path("uid") uid: String,
+        @Body body: UpsertProfileRequestDto
+    ): retrofit2.Response<Unit>
+
+    @PUT("v1/tenants/{tid}/users/{uid}/role")
+    suspend fun upsertRole(
+        @Path("tid") tenantId: String,
+        @Path("uid") uid: String,
+        @Body body: UpsertRoleRequestDto
     ): retrofit2.Response<Unit>
 }
 
