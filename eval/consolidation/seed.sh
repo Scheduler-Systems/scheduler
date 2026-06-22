@@ -57,13 +57,15 @@ if curl -s -m 3 -o /dev/null "$API" 2>/dev/null || curl -s -m 3 -o /dev/null "$A
     echo "seed: Archived Demo present"
   fi
 
-  # Resolve the schedule id: it's random per API start (memory store), so parse it
-  # from the listing rather than hardcoding. There's exactly one QA Demo Schedule,
-  # so grab the first schedule_ id token.
-  sid=$(echo "$schedules" | grep -o '"id":"schedule_[^"]*"' | head -1 | sed 's/.*"id":"\([^"]*\)"/\1/')
+  # Resolve QA Demo Schedule's id BY NAME — the Go API lists schedules in map (random)
+  # order, so head -1 can return a different schedule (e.g. "Archived Demo"), which would
+  # seed employees/invitations onto the wrong schedule.
+  resolve_qa_sid(){ python3 -c 'import sys,json
+d=json.load(sys.stdin)
+print(next((s["id"] for s in d.get("items",[]) if s.get("name")=="QA Demo Schedule"),""))' 2>/dev/null; }
+  sid=$(echo "$schedules" | resolve_qa_sid)
   if [ -z "$sid" ]; then
-    sid=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" "$API/v1/tenants/$localId/schedules" \
-      | grep -o '"id":"schedule_[^"]*"' | head -1 | sed 's/.*"id":"\([^"]*\)"/\1/')
+    sid=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" "$API/v1/tenants/$localId/schedules" | resolve_qa_sid)
   fi
   if [ -n "$sid" ]; then
     emps=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" \
@@ -89,6 +91,19 @@ if curl -s -m 3 -o /dev/null "$API" 2>/dev/null || curl -s -m 3 -o /dev/null "$A
           "$API/v1/tenants/$localId/schedules/$sid/employees/$em" >/dev/null && ne=$((ne+1))
       done
       echo "seed: pruned $ne e2e-added employee(s)"
+    fi
+
+    # An invitation for the schedule-requests page (manager invites invitee@example.com).
+    # Idempotent: only create if that invitee isn't already pending (the API appends).
+    invs=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" \
+      "$API/v1/tenants/$localId/schedules/$sid/employees/invitations" 2>/dev/null)
+    if echo "$invs" | grep -q 'invitee@example.com'; then
+      echo "seed: invitation present"
+    else
+      curl -s -X POST -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" -H 'Content-Type: application/json' \
+        -d '{"toUserIdentification":"invitee@example.com"}' \
+        "$API/v1/tenants/$localId/schedules/$sid/employees/invitations" >/dev/null
+      echo "seed: created invitation for invitee@example.com"
     fi
   else
     echo "seed: WARN could not resolve QA Demo Schedule id — employee not seeded"

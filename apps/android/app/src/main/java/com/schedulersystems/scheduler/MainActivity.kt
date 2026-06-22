@@ -20,6 +20,7 @@ import com.schedulersystems.scheduler.ui.screens.auth.VerifyEmailScreen
 import com.schedulersystems.scheduler.ui.screens.employees.EmployeeListScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
 import com.schedulersystems.scheduler.ui.screens.profile.ProfileSettingsScreen
+import com.schedulersystems.scheduler.ui.screens.requests.ScheduleRequestsScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ArchivedSchedulesScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.NewScheduleScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleDetailScreen
@@ -164,13 +165,22 @@ fun SchedulerNavHost(
                 scheduleId = scheduleId,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEmployeeList = { navController.navigate("employeeList/$scheduleId") },
-                onNavigateToSettings = { navController.navigate("scheduleSettings/$scheduleId") }
+                onNavigateToSettings = { navController.navigate("scheduleSettings/$scheduleId") },
+                onNavigateToRequests = { navController.navigate("scheduleRequests/$scheduleId") }
             )
         }
 
         composable("scheduleSettings/{scheduleId}") { backStackEntry ->
             val scheduleId = backStackEntry.arguments?.getString("scheduleId") ?: ""
             ScheduleSettingsScreen(
+                scheduleId = scheduleId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("scheduleRequests/{scheduleId}") { backStackEntry ->
+            val scheduleId = backStackEntry.arguments?.getString("scheduleId") ?: ""
+            ScheduleRequestsScreen(
                 scheduleId = scheduleId,
                 onNavigateBack = { navController.popBackStack() }
             )

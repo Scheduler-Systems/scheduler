@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.schedulersystems.scheduler.data.network.dto.AddEmployeeApiRequest
 import com.schedulersystems.scheduler.data.network.dto.ApiEmployeeDto
 import com.schedulersystems.scheduler.data.network.dto.EmployeeListApiResponse
+import com.schedulersystems.scheduler.data.network.dto.InvitationListResponse
 import com.schedulersystems.scheduler.data.network.dto.ScheduleDto
 import com.schedulersystems.scheduler.data.network.dto.ScheduleListResponse
 import okhttp3.Interceptor
@@ -74,6 +75,12 @@ interface SchedulerApiService {
         @Path("sid") scheduleId: String,
         @Path("email") employeeEmail: String
     ): retrofit2.Response<Unit>
+
+    @GET("v1/tenants/{tid}/schedules/{sid}/employees/invitations")
+    suspend fun listInvitations(
+        @Path("tid") tenantId: String,
+        @Path("sid") scheduleId: String
+    ): retrofit2.Response<InvitationListResponse>
 }
 
 class AuthInterceptor(private val firebaseAuth: FirebaseAuth) : Interceptor {

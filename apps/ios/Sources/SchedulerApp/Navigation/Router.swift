@@ -15,6 +15,7 @@ enum Route: Hashable {
     case archivedSchedules
     case scheduleDetail(Schedule.ID)
     case scheduleSettings(Schedule.ID)
+    case scheduleRequests(Schedule.ID)
     case scheduleBuilder
     case employeeList(Schedule.ID)
     case employeeDetail(Employee.ID)

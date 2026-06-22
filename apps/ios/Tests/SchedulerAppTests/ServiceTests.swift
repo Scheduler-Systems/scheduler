@@ -143,6 +143,7 @@ final class MockApiClient: ApiClientProtocol {
     var addEmployeeResult: Result<EmployeeResponse, Error> = .success(
         EmployeeResponse(employeeName: "Added", employeeEmail: "added@example.com", employeePhone: nil, role: nil, userRef: nil)
     )
+    var fetchInvitationsResult: Result<[InvitationResponse], Error> = .success([])
     var createScheduleResult: Result<ScheduleResponse, Error> = .success(
         ScheduleResponse(id: "new", tenantId: "t1", name: "New", settings: nil, status: "draft", createdBy: nil, createdAt: nil, updatedAt: nil)
     )
@@ -183,6 +184,11 @@ final class MockApiClient: ApiClientProtocol {
     func addEmployee(tenantId: String, scheduleId: String, body: AddEmployeeRequest) async throws -> EmployeeResponse {
         recordedScheduleIds.append(scheduleId)
         return try addEmployeeResult.get()
+    }
+
+    func fetchInvitations(tenantId: String, scheduleId: String) async throws -> [InvitationResponse] {
+        recordedScheduleIds.append(scheduleId)
+        return try fetchInvitationsResult.get()
     }
 
     func createSchedule(tenantId: String, body: CreateScheduleRequest) async throws -> ScheduleResponse {
@@ -370,6 +376,19 @@ final class ScheduleApiServiceTests: XCTestCase {
         XCTAssertEqual(emp.displayName, "New Hire")
         XCTAssertEqual(emp.role, .worker)
         XCTAssertTrue(mockApi.recordedScheduleIds.contains("s1"))
+    }
+
+    func testFetchInvitationsMapsAndLabelsStatus() async throws {
+        mockApi.fetchInvitationsResult = .success([
+            InvitationResponse(id: "i1", scheduleId: "s1", scheduleName: "QA Demo Schedule",
+                               toUserIdentification: "invitee@example.com",
+                               status: "ADD_RQUEST_PENDING", isAddRequest: true, createdAt: nil)
+        ])
+        let invites = try await service.fetchInvitations(tenantId: "t1", scheduleId: "s1")
+        XCTAssertEqual(invites.count, 1)
+        XCTAssertEqual(invites[0].invitee, "invitee@example.com")
+        XCTAssertEqual(invites[0].scheduleName, "QA Demo Schedule")
+        XCTAssertEqual(invites[0].statusLabel, "Pending")   // ADD_RQUEST_PENDING → Pending
     }
 
     func testAddEmployeeSurfacesError() async {

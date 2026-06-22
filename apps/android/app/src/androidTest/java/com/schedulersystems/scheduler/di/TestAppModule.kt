@@ -79,6 +79,7 @@ class TestFakeScheduleRepository : ScheduleRepository {
     override suspend fun getScheduleById(scheduleId: String): Schedule? = schedules.firstOrNull { it.id == scheduleId }
     override suspend fun getEmployees(scheduleId: String): List<com.schedulersystems.scheduler.models.domain.Employee> =
         schedules.firstOrNull { it.id == scheduleId }?.employees ?: emptyList()
+    override suspend fun getInvitations(scheduleId: String): List<com.schedulersystems.scheduler.models.domain.ScheduleRequest> = emptyList()
     override suspend fun createSchedule(schedule: Schedule): Result<String> = Result.success("new-id")
     override suspend fun updateSchedule(schedule: Schedule): Result<Unit> = Result.success(Unit)
     override suspend fun deleteSchedule(scheduleId: String): Result<Unit> = Result.success(Unit)

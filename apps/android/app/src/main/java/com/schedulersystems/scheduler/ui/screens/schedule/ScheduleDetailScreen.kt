@@ -27,6 +27,7 @@ fun ScheduleDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEmployeeList: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToRequests: () -> Unit = {},
     viewModel: ScheduleDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -102,6 +103,7 @@ fun ScheduleDetailScreen(
                         onPrioritiesClick = { },
                         onBuildClick = { },
                         onSettingsClick = onNavigateToSettings,
+                        onRequestsClick = onNavigateToRequests,
                         modifier = Modifier.padding(padding)
                     )
                 }
@@ -118,6 +120,7 @@ private fun ScheduleDetailContent(
     onPrioritiesClick: () -> Unit,
     onBuildClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onRequestsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -139,7 +142,8 @@ private fun ScheduleDetailContent(
             onEmployeeListClick = onEmployeeListClick,
             onPrioritiesClick = onPrioritiesClick,
             onBuildClick = onBuildClick,
-            onSettingsClick = onSettingsClick
+            onSettingsClick = onSettingsClick,
+            onRequestsClick = onRequestsClick
         )
     }
 }
@@ -204,9 +208,21 @@ private fun ActionButtonsSection(
     onEmployeeListClick: () -> Unit,
     onPrioritiesClick: () -> Unit,
     onBuildClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onRequestsClick: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Button(
+            onClick = onRequestsClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0DAD)),
+            shape = MaterialTheme.shapes.small
+        ) {
+            Text("Schedule Requests", fontSize = 16.sp)
+        }
+
         Button(
             onClick = onEmployeeListClick,
             modifier = Modifier

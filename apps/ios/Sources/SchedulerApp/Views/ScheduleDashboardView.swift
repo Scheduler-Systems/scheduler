@@ -61,6 +61,15 @@ struct ScheduleDashboardView: View {
                             .foregroundColor(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+
+                    Button(action: { router.push(.scheduleRequests(schedule.id)) }) {
+                        Label("Schedule Requests", systemImage: "envelope")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.purple)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
                 }
             }
             .padding()

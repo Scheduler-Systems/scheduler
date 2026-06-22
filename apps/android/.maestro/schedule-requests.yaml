@@ -1,0 +1,35 @@
+# Maestro GUI e2e for the Android schedule-requests page (Flutter→native consolidation).
+# login → My Schedules → schedule → detail → "Schedule Requests" → list invitations
+# (from the Go API), assert the seeded invitee.
+# Preconditions: Go API :4180 + seed.sh (seeds an invitation for invitee@example.com).
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- tapOn: "Schedule Requests"
+- extendedWaitUntil:
+    visible: "invitee@example.com"                       # the seeded invitation (from the Go API)
+    timeout: 15000
+- takeScreenshot: 01-schedule-requests

@@ -44,6 +44,10 @@ class FirestoreScheduleRepository @Inject constructor(
         return getScheduleById(scheduleId)?.employees ?: emptyList()
     }
 
+    // Invitations are served by the Go API (ApiScheduleRepository); the legacy Firestore
+    // path doesn't expose them.
+    override suspend fun getInvitations(scheduleId: String): List<com.schedulersystems.scheduler.models.domain.ScheduleRequest> = emptyList()
+
     override suspend fun createSchedule(schedule: Schedule): Result<String> {
         return try {
             val docRef = firestore.collection("schedules").document()

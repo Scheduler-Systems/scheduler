@@ -119,6 +119,19 @@ struct AddEmployeeRole: Encodable {
     }
 }
 
+// Schedule invitation (manager invites an employee). Served from
+// GET .../schedules/{id}/employees/invitations as {items:[...]}. camelCase keys
+// (the Go Invitation struct uses JSON camelCase, mirroring scheduler-web).
+struct InvitationResponse: Decodable, Identifiable {
+    let id: String
+    let scheduleId: String?
+    let scheduleName: String?
+    let toUserIdentification: String?
+    let status: String?
+    let isAddRequest: Bool?
+    let createdAt: String?
+}
+
 struct AvailabilityRequest: Encodable {
     let availability: [String: String]
 }

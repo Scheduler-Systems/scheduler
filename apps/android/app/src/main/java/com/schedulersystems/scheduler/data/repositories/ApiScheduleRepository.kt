@@ -66,6 +66,21 @@ class ApiScheduleRepository @Inject constructor(
         }
     }
 
+    override suspend fun getInvitations(scheduleId: String): List<com.schedulersystems.scheduler.models.domain.ScheduleRequest> {
+        return try {
+            val response = api.service.listInvitations(currentTenant(), scheduleId)
+            if (response.isSuccessful) {
+                response.body()?.items?.map { it.toDomain() } ?: emptyList()
+            } else {
+                android.util.Log.e("ApiSchedRepo", "listInvitations HTTP ${response.code()}")
+                emptyList()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ApiSchedRepo", "listInvitations failed", e)
+            emptyList()
+        }
+    }
+
     override suspend fun createSchedule(schedule: Schedule): Result<String> {
         return try {
             val response = api.service.createSchedule(currentTenant(), schedule.toDto())

@@ -25,6 +25,7 @@ protocol ApiClientProtocol {
     func fetchSchedules(tenantId: String) async throws -> [ScheduleResponse]
     func fetchSchedule(tenantId: String, scheduleId: String) async throws -> ScheduleResponse
     func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [EmployeeResponse]
+    func fetchInvitations(tenantId: String, scheduleId: String) async throws -> [InvitationResponse]
     func addEmployee(tenantId: String, scheduleId: String, body: AddEmployeeRequest) async throws -> EmployeeResponse
     func createSchedule(tenantId: String, body: CreateScheduleRequest) async throws -> ScheduleResponse
     func updateSchedule(tenantId: String, scheduleId: String, body: UpdateScheduleRequest) async throws -> ScheduleResponse
@@ -106,6 +107,12 @@ final class ApiClient: ApiClientProtocol {
     func addEmployee(tenantId: String, scheduleId: String, body: AddEmployeeRequest) async throws -> EmployeeResponse {
         let req = try await makeRequest(path: "v1/tenants/\(tenantId)/schedules/\(scheduleId)/employees", method: "POST", tenantId: tenantId, body: body)
         return try await execute(req)
+    }
+
+    func fetchInvitations(tenantId: String, scheduleId: String) async throws -> [InvitationResponse] {
+        let req = try await makeRequest(path: "v1/tenants/\(tenantId)/schedules/\(scheduleId)/employees/invitations", method: "GET", tenantId: tenantId)
+        let wrapper: ListResponse<InvitationResponse> = try await execute(req)
+        return wrapper.items
     }
 
     func createSchedule(tenantId: String, body: CreateScheduleRequest) async throws -> ScheduleResponse {

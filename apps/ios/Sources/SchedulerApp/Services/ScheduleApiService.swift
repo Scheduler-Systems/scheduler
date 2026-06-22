@@ -4,6 +4,7 @@ protocol ScheduleDataServiceProtocol {
     func fetchSchedules(tenantId: String) async throws -> [Schedule]
     func fetchSchedule(tenantId: String, scheduleId: String) async throws -> Schedule
     func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [Employee]
+    func fetchInvitations(tenantId: String, scheduleId: String) async throws -> [Invitation]
     func addEmployee(tenantId: String, scheduleId: String, name: String, email: String, phone: String) async throws -> Employee
     func createSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
     func updateSchedule(tenantId: String, schedule: Schedule) async throws -> Schedule
@@ -30,6 +31,18 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
     func fetchEmployees(tenantId: String, scheduleId: String) async throws -> [Employee] {
         let items = try await Self.withRetry { try await self.api.fetchEmployees(tenantId: tenantId, scheduleId: scheduleId) }
         return items.map { Self.map($0, tenantId: tenantId) }
+    }
+
+    func fetchInvitations(tenantId: String, scheduleId: String) async throws -> [Invitation] {
+        let items = try await Self.withRetry { try await self.api.fetchInvitations(tenantId: tenantId, scheduleId: scheduleId) }
+        return items.map {
+            Invitation(
+                id: $0.id,
+                scheduleName: $0.scheduleName ?? "",
+                invitee: $0.toUserIdentification ?? "",
+                status: $0.status ?? ""
+            )
+        }
     }
 
     func addEmployee(tenantId: String, scheduleId: String, name: String, email: String, phone: String) async throws -> Employee {
