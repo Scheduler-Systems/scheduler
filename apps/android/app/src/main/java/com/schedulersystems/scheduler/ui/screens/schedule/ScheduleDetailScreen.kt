@@ -29,6 +29,7 @@ fun ScheduleDetailScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToRequests: () -> Unit = {},
     onNavigateToPriorities: () -> Unit = {},
+    onNavigateToCurrentPriorities: () -> Unit = {},
     viewModel: ScheduleDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -102,6 +103,7 @@ fun ScheduleDetailScreen(
                         userRole = state.userRole,
                         onEmployeeListClick = onNavigateToEmployeeList,
                         onPrioritiesClick = onNavigateToPriorities,
+                        onCurrentPrioritiesClick = onNavigateToCurrentPriorities,
                         onBuildClick = { },
                         onSettingsClick = onNavigateToSettings,
                         onRequestsClick = onNavigateToRequests,
@@ -119,6 +121,7 @@ private fun ScheduleDetailContent(
     userRole: Role?,
     onEmployeeListClick: () -> Unit,
     onPrioritiesClick: () -> Unit,
+    onCurrentPrioritiesClick: () -> Unit,
     onBuildClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRequestsClick: () -> Unit,
@@ -142,6 +145,7 @@ private fun ScheduleDetailContent(
             userRole = userRole,
             onEmployeeListClick = onEmployeeListClick,
             onPrioritiesClick = onPrioritiesClick,
+            onCurrentPrioritiesClick = onCurrentPrioritiesClick,
             onBuildClick = onBuildClick,
             onSettingsClick = onSettingsClick,
             onRequestsClick = onRequestsClick
@@ -208,6 +212,7 @@ private fun ActionButtonsSection(
     userRole: Role?,
     onEmployeeListClick: () -> Unit,
     onPrioritiesClick: () -> Unit,
+    onCurrentPrioritiesClick: () -> Unit,
     onBuildClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRequestsClick: () -> Unit
@@ -255,6 +260,17 @@ private fun ActionButtonsSection(
             shape = MaterialTheme.shapes.small
         ) {
             Text("Submit Priorities", fontSize = 16.sp)
+        }
+
+        Button(
+            onClick = onCurrentPrioritiesClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0DAD)),
+            shape = MaterialTheme.shapes.small
+        ) {
+            Text("Current Priorities", fontSize = 16.sp)
         }
 
         if (userRole == Role.EMPLOYER) {

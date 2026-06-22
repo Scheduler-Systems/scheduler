@@ -90,6 +90,8 @@ struct SchedulerApp: App {
             ScheduleRequestsView(scheduleId: id, scheduleService: scheduleService)
         case .prioritiesSubmission(let id):
             PrioritiesSubmissionView(scheduleId: id, scheduleService: scheduleService)
+        case .currentPriorities(let id):
+            CurrentPrioritiesView(scheduleId: id, scheduleService: scheduleService)
         case .scheduleBuilder:
             ScheduleBuilderView(scheduleService: scheduleService)
         case .employeeList(let id):

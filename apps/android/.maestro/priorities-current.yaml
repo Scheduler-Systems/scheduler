@@ -1,0 +1,40 @@
+# Maestro GUI e2e for the Android priorities-current page (Flutter→native consolidation).
+# login → My Schedules → QA Demo Schedule → detail → "Current Priorities" → read-only
+# standings list (current_priorities from the Go API).
+# Preconditions: Go API :4180 + seed.sh (sets current_priorities on QA Demo Schedule).
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      text: "Current Priorities"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Current Priorities"
+- extendedWaitUntil:
+    visible: "1. Alex Worker"                            # current_priorities standings (Go API)
+    timeout: 15000
+- takeScreenshot: 01-current-priorities

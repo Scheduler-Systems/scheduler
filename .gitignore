@@ -1,3 +1,7 @@
+# Maestro / eval e2e screenshot artifacts (regenerable; written to cwd by takeScreenshot)
+eval/consolidation/*.png
+/*.png
+
 # Dependencies
 node_modules/
 **/node_modules/

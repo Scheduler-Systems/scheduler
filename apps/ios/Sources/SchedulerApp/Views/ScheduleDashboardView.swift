@@ -79,6 +79,15 @@ struct ScheduleDashboardView: View {
                             .foregroundColor(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+
+                    Button(action: { router.push(.currentPriorities(schedule.id)) }) {
+                        Label("Current Priorities", systemImage: "list.star")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.purple)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
                 }
             }
             .padding()

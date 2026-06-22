@@ -63,7 +63,7 @@ AREAS=(
 "employees-list|EmployeeListViewModelTest|employees-list.yaml|testFetchEmployees|employees-list.yaml|-|done (android+ios; login→roster via Go-API employees endpoint)"
 "employees-add|EmployeeListViewModelTest|employees-add.yaml|testAddEmployee|employees-add.yaml|-|done (android+ios; +employee → POST /employees → roster)"
 "priorities-submission|PrioritiesViewModelTest|priorities-submission.yaml|testSubmitPriorities|priorities-submission.yaml|-|done (android+ios; detail→Submit Priorities→list current_priorities→Submit via POST /availability)"
-"priorities-current|-|-|-|-|-|todo(needs-signoff)"
+"priorities-current|CurrentPrioritiesViewModelTest|priorities-current.yaml|testFetchScheduleMapsCurrentPriorities|priorities-current.yaml|-|done (android+ios; detail→Current Priorities→read-only current_priorities standings)"
 "archived-schedules|ScheduleDtoTest|archived-schedules.yaml|testFetchSchedulesMapping|archived-schedules.yaml|-|done (android+ios; Home→Archived→status=archived filtered list)"
 "export-shifts|-|-|-|-|-|todo(needs-signoff)"
 "share-pdf|-|-|-|-|-|todo"

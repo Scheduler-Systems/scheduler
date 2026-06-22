@@ -21,6 +21,7 @@ import com.schedulersystems.scheduler.ui.screens.employees.EmployeeListScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
 import com.schedulersystems.scheduler.ui.screens.profile.ProfileSettingsScreen
 import com.schedulersystems.scheduler.ui.screens.priorities.PrioritiesSubmissionScreen
+import com.schedulersystems.scheduler.ui.screens.priority.CurrentPrioritiesScreen
 import com.schedulersystems.scheduler.ui.screens.requests.ScheduleRequestsScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ArchivedSchedulesScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.NewScheduleScreen
@@ -168,7 +169,8 @@ fun SchedulerNavHost(
                 onNavigateToEmployeeList = { navController.navigate("employeeList/$scheduleId") },
                 onNavigateToSettings = { navController.navigate("scheduleSettings/$scheduleId") },
                 onNavigateToRequests = { navController.navigate("scheduleRequests/$scheduleId") },
-                onNavigateToPriorities = { navController.navigate("prioritiesSubmission/$scheduleId") }
+                onNavigateToPriorities = { navController.navigate("prioritiesSubmission/$scheduleId") },
+                onNavigateToCurrentPriorities = { navController.navigate("currentPriorities/$scheduleId") }
             )
         }
 
@@ -199,6 +201,14 @@ fun SchedulerNavHost(
         composable("prioritiesSubmission/{scheduleId}") { backStackEntry ->
             val scheduleId = backStackEntry.arguments?.getString("scheduleId") ?: ""
             PrioritiesSubmissionScreen(
+                scheduleId = scheduleId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("currentPriorities/{scheduleId}") { backStackEntry ->
+            val scheduleId = backStackEntry.arguments?.getString("scheduleId") ?: ""
+            CurrentPrioritiesScreen(
                 scheduleId = scheduleId,
                 onNavigateBack = { navController.popBackStack() }
             )

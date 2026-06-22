@@ -34,6 +34,15 @@ else
   echo "seed: verify FAILED for $EMAIL"; exit 1
 fi
 
+# password-reset e2e sends a reset to qa-e2e@example.com. The Firebase Auth EMULATOR
+# returns EMAIL_NOT_FOUND for a reset of a non-existent user (prod silently succeeds), so
+# the target must EXIST for the success state to show. Seed it (idempotent) — keeps the
+# flow self-contained instead of relying on accumulated emulator state.
+RESET_EMAIL=qa-e2e@example.com
+curl -s -X POST "$EMU/accounts:signUp?key=$KEY" -H 'Content-Type: application/json' \
+  -d "{\"email\":\"$RESET_EMAIL\",\"password\":\"Password123!\",\"returnSecureToken\":true}" >/dev/null
+echo "seed: ensured $RESET_EMAIL exists (password-reset target)"
+
 # Data pages: if the Go API is up, ensure a schedule exists for this tenant (uid) so the
 # my-schedules e2e has data to render, and seed one employee onto it for the
 # employees-list e2e. No-op if the API isn't running.
