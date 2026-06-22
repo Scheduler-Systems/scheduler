@@ -25,6 +25,15 @@ struct HomeView: View {
             }
         }
         .navigationTitle("Home")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { router.push(.notifications) } label: {
+                    Image(systemName: "bell")
+                }
+                .accessibilityLabel("Notifications")
+                .accessibilityIdentifier("notificationsButton")
+            }
+        }
         .task {
             await vm.initialize()
         }

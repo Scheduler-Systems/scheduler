@@ -24,6 +24,7 @@ enum Route: Hashable {
     case settings
     case profile
     case policies
+    case notifications
 }
 
 @MainActor

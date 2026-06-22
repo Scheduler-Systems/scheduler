@@ -68,7 +68,7 @@ AREAS=(
 "export-shifts|-|-|-|-|-|todo(needs-signoff)"
 "share-pdf|-|-|-|-|-|todo"
 "chat-threads|-|-|-|-|-|todo(needs-signoff,merge)"
-"notifications|-|-|-|-|-|todo(needs-signoff)"
+"notifications|NotificationDtoTest|notifications.yaml|testFetchNotifications|notifications.yaml|-|done (android+ios; Home→bell→feed from new Go GET /notifications endpoint)"
 "profile-settings|ProfileSettingsViewModelTest|profile-settings.yaml|testAuthStateObservationAuthenticated|profile-settings.yaml|-|done (android+ios; Home→Profile shows account email)"
 "policies|LegalDocumentsTest|policies.yaml|testLegalDocumentsURL|policies.yaml|-|done (android+ios; Home→Policies→Privacy Policy + Terms open external Legal Center)"
 "walkthroughs|-|-|-|-|-|todo"

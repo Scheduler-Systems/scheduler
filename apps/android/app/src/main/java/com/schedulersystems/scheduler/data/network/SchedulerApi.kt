@@ -6,6 +6,7 @@ import com.schedulersystems.scheduler.data.network.dto.ApiEmployeeDto
 import com.schedulersystems.scheduler.data.network.dto.AvailabilityRequestDto
 import com.schedulersystems.scheduler.data.network.dto.EmployeeListApiResponse
 import com.schedulersystems.scheduler.data.network.dto.InvitationListResponse
+import com.schedulersystems.scheduler.data.network.dto.NotificationListResponse
 import com.schedulersystems.scheduler.data.network.dto.ScheduleDto
 import com.schedulersystems.scheduler.data.network.dto.ScheduleListResponse
 import com.schedulersystems.scheduler.data.network.dto.UpsertProfileRequestDto
@@ -107,6 +108,11 @@ interface SchedulerApiService {
         @Path("uid") uid: String,
         @Body body: UpsertRoleRequestDto
     ): retrofit2.Response<Unit>
+
+    @GET("v1/tenants/{tid}/notifications")
+    suspend fun listNotifications(
+        @Path("tid") tenantId: String
+    ): retrofit2.Response<NotificationListResponse>
 }
 
 class AuthInterceptor(private val firebaseAuth: FirebaseAuth) : Interceptor {

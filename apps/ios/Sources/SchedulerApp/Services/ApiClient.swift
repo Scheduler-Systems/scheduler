@@ -36,6 +36,7 @@ protocol ApiClientProtocol {
     func createRequest(tenantId: String, scheduleId: String, body: ScheduleRequest) async throws -> ScheduleRequestResponse
     func upsertProfile(tenantId: String, uid: String, body: UpsertProfileRequest) async throws -> UserProfileResponse
     func upsertRole(tenantId: String, uid: String, body: UpsertRoleRequest) async throws -> UserProfileResponse
+    func fetchNotifications(tenantId: String) async throws -> [NotificationResponse]
 }
 
 final class ApiClient: ApiClientProtocol {
@@ -160,6 +161,12 @@ final class ApiClient: ApiClientProtocol {
     func upsertRole(tenantId: String, uid: String, body: UpsertRoleRequest) async throws -> UserProfileResponse {
         let req = try await makeRequest(path: "v1/tenants/\(tenantId)/users/\(uid)/role", method: "PUT", tenantId: tenantId, body: body)
         return try await execute(req)
+    }
+
+    func fetchNotifications(tenantId: String) async throws -> [NotificationResponse] {
+        let req = try await makeRequest(path: "v1/tenants/\(tenantId)/notifications", method: "GET", tenantId: tenantId)
+        let wrapper: ListResponse<NotificationResponse> = try await execute(req)
+        return wrapper.items
     }
 
     private func execute<T: Decodable>(_ request: URLRequest) async throws -> T {

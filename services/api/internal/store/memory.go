@@ -18,6 +18,7 @@ type MemoryStore struct {
 	scheduleChangeRequests map[string]ScheduleChangeRequest // key: "tenantID:requestID"
 	userProfiles           map[string]UserProfile           // key: "tenantID:uid"
 	availability           map[string]Availability
+	notifications          map[string]Notification
 	drafts                 map[string]Draft
 	requests               map[string]Request
 	imports                map[string]Import
@@ -34,6 +35,7 @@ func NewMemoryStore() *MemoryStore {
 		scheduleChangeRequests: make(map[string]ScheduleChangeRequest),
 		userProfiles:           make(map[string]UserProfile),
 		availability:           make(map[string]Availability),
+		notifications:          make(map[string]Notification),
 		drafts:                 make(map[string]Draft),
 		requests:               make(map[string]Request),
 		imports:                make(map[string]Import),
@@ -152,6 +154,28 @@ func (m *MemoryStore) GetAvailability(id string) *Availability {
 	}
 	cp := e
 	return &cp
+}
+
+// PutNotification upserts a notification (keyed by ID).
+func (m *MemoryStore) PutNotification(n Notification) Notification {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.notifications[n.ID] = n
+	return n
+}
+
+// ListNotifications returns a recipient's notifications (tenant + userID), newest first.
+func (m *MemoryStore) ListNotifications(tenantID, userID string) []Notification {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := []Notification{}
+	for _, n := range m.notifications {
+		if n.TenantID == tenantID && n.UserID == userID {
+			out = append(out, n)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt > out[j].CreatedAt })
+	return out
 }
 
 // PutDraft stores a draft.

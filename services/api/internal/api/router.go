@@ -11,6 +11,7 @@ import (
 	"github.com/Scheduler-Systems/scheduler-api/internal/httputil"
 	"github.com/Scheduler-Systems/scheduler-api/internal/requests"
 	"github.com/Scheduler-Systems/scheduler-api/internal/schedgy"
+	"github.com/Scheduler-Systems/scheduler-api/internal/notifications"
 	"github.com/Scheduler-Systems/scheduler-api/internal/schedules"
 	"github.com/Scheduler-Systems/scheduler-api/internal/store"
 	"github.com/Scheduler-Systems/scheduler-api/internal/userprofile"
@@ -136,6 +137,17 @@ func matchRoute(method, pathname string, st store.Store) *route {
 	depth := len(parts)
 
 	switch section {
+
+	// -------------------------------------------------------------------------
+	// Notification routes (the actor's own feed)
+	// -------------------------------------------------------------------------
+	case "notifications":
+		switch {
+		case method == http.MethodGet && depth == 4:
+			return &route{params: p, handler: notifications.ListHandler(st)}
+		case method == http.MethodPost && depth == 4:
+			return &route{params: p, handler: notifications.CreateHandler(st)}
+		}
 
 	// -------------------------------------------------------------------------
 	// Schedule routes

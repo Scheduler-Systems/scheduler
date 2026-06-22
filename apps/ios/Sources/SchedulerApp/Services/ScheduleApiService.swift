@@ -12,6 +12,7 @@ protocol ScheduleDataServiceProtocol {
     func submitAvailability(tenantId: String, scheduleId: String, availability: [String: String]) async throws
     func updateDisplayName(tenantId: String, uid: String, email: String, name: String) async throws
     func updateRole(tenantId: String, uid: String, email: String, isManager: Bool) async throws
+    func fetchNotifications(tenantId: String) async throws -> [NotificationResponse]
 }
 
 final class ScheduleApiService: ScheduleDataServiceProtocol {
@@ -129,6 +130,11 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
             tenantId: tenantId, uid: uid,
             body: UpsertRoleRequest(email: email, role: role)
         )
+    }
+
+    // Notification feed — idempotent GET, retried (parity with the other read paths).
+    func fetchNotifications(tenantId: String) async throws -> [NotificationResponse] {
+        try await Self.withRetry { try await self.api.fetchNotifications(tenantId: tenantId) }
     }
 
     private static func map(_ response: ScheduleResponse) -> Schedule {

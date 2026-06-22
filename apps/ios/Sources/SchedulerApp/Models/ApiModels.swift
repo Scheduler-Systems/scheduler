@@ -225,6 +225,17 @@ struct UserProfileResponse: Decodable {
     }
 }
 
+// Notification feed item (GET .../notifications). Go emits camelCase keys, so the property
+// names match directly (no CodingKeys needed).
+struct NotificationResponse: Decodable, Identifiable {
+    let id: String
+    let content: String?
+    let type: String?
+    let isRead: Bool?
+    let fromUser: String?
+    let createdAt: String?
+}
+
 struct ScheduleRequest: Encodable {
     let type: String
     let details: [String: String]?

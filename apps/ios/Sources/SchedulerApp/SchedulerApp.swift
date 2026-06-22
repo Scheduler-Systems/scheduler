@@ -104,6 +104,8 @@ struct SchedulerApp: App {
             ProfileView()
         case .policies:
             PoliciesView()
+        case .notifications:
+            NotificationsView(scheduleService: scheduleService)
         }
     }
 }

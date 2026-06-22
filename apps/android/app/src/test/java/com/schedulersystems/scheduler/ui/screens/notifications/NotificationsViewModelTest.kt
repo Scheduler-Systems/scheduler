@@ -2,10 +2,23 @@
 
 package com.schedulersystems.scheduler.ui.screens.notifications
 
+import com.schedulersystems.scheduler.data.network.SchedulerApi
+import com.schedulersystems.scheduler.data.network.SchedulerApiService
+import com.schedulersystems.scheduler.data.network.dto.NotificationDto
+import com.schedulersystems.scheduler.data.network.dto.NotificationListResponse
+import com.schedulersystems.scheduler.data.repositories.AuthRepository
+import com.schedulersystems.scheduler.models.domain.Role
+import com.schedulersystems.scheduler.models.domain.User
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -13,14 +26,24 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import retrofit2.Response
 
 class NotificationsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private lateinit var api: SchedulerApi
+    private lateinit var service: SchedulerApiService
+    private lateinit var authRepository: AuthRepository
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        api = mockk()
+        service = mockk()
+        authRepository = mockk()
+        every { api.service } returns service
+        every { authRepository.currentUser } returns
+            flowOf(User("u1", "u@x.com", null, "U", Role.EMPLOYEE, false, null))
     }
 
     @After
@@ -29,69 +52,45 @@ class NotificationsViewModelTest {
     }
 
     @Test
-    fun `initial state should not be loading with 2 unread out of 3 notifications`() {
-        val vm = NotificationsViewModel()
-        val state = vm.state.value
-
-        assertFalse(state.isLoading)
-        assertEquals(3, state.notifications.size)
-        assertEquals(2, state.unreadCount)
-    }
-
-    @Test
-    fun `notifications should include system schedule request and chat types`() {
-        val vm = NotificationsViewModel()
-        val state = vm.state.value
-
-        assertEquals("system", state.notifications[0].fromUser)
-        assertEquals("John", state.notifications[1].fromUser)
-        assertEquals("Team Alpha", state.notifications[2].fromUser)
-        assertEquals(
-            "Your schedule for next week has been published",
-            state.notifications[0].content
+    fun `load populates the feed from the api and counts unread`() = runTest {
+        coEvery { service.listNotifications(any()) } returns Response.success(
+            NotificationListResponse(
+                items = listOf(
+                    NotificationDto(id = "1", content = "Published", type = "SYSTEM", isRead = false),
+                    NotificationDto(id = "2", content = "Read one", type = "SYSTEM", isRead = true)
+                )
+            )
         )
+        val vm = NotificationsViewModel(api, authRepository)
+        advanceUntilIdle()
+
+        val s = vm.state.value
+        assertFalse(s.isLoading)
+        assertEquals(2, s.notifications.size)
+        assertEquals(1, s.unreadCount)
+        assertEquals("Published", s.notifications[0].content)
     }
 
     @Test
-    fun `markAsRead should mark the notification and decrease unread count`() {
-        val vm = NotificationsViewModel()
+    fun `markAsRead marks the notification and decrements unread`() = runTest {
+        coEvery { service.listNotifications(any()) } returns Response.success(
+            NotificationListResponse(items = listOf(NotificationDto(id = "1", content = "A", type = "SYSTEM", isRead = false)))
+        )
+        val vm = NotificationsViewModel(api, authRepository)
+        advanceUntilIdle()
 
         vm.markAsRead("1")
-
-        val state = vm.state.value
-        assertTrue(state.notifications[0].isRead)
-        assertEquals(1, state.unreadCount)
-    }
-
-    @Test
-    fun `markAsRead on already read notification should not change unread count`() {
-        val vm = NotificationsViewModel()
-
-        vm.markAsRead("3")
-
-        val state = vm.state.value
-        assertTrue(state.notifications[2].isRead)
-        assertEquals(2, state.unreadCount)
-    }
-
-    @Test
-    fun `markAsRead with unknown id should not mutate state`() {
-        val vm = NotificationsViewModel()
-
-        vm.markAsRead("non-existent-id")
-
-        val state = vm.state.value
-        assertEquals(3, state.notifications.size)
-        assertEquals(2, state.unreadCount)
-    }
-
-    @Test
-    fun `unread count should drop to zero after marking both unread notifications as read`() {
-        val vm = NotificationsViewModel()
-
-        vm.markAsRead("1")
-        vm.markAsRead("2")
-
+        assertTrue(vm.state.value.notifications[0].isRead)
         assertEquals(0, vm.state.value.unreadCount)
+    }
+
+    @Test
+    fun `api failure yields an empty feed, not a crash`() = runTest {
+        coEvery { service.listNotifications(any()) } throws RuntimeException("network down")
+        val vm = NotificationsViewModel(api, authRepository)
+        advanceUntilIdle()
+
+        assertFalse(vm.state.value.isLoading)
+        assertTrue(vm.state.value.notifications.isEmpty())
     }
 }

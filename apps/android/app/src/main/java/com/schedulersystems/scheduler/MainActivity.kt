@@ -23,6 +23,7 @@ import com.schedulersystems.scheduler.ui.screens.employees.EmployeeListScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
 import com.schedulersystems.scheduler.ui.screens.profile.ProfileSettingsScreen
 import com.schedulersystems.scheduler.ui.screens.priorities.PrioritiesSubmissionScreen
+import com.schedulersystems.scheduler.ui.screens.notifications.NotificationsScreen
 import com.schedulersystems.scheduler.ui.screens.policies.PoliciesScreen
 import com.schedulersystems.scheduler.ui.screens.priority.CurrentPrioritiesScreen
 import com.schedulersystems.scheduler.ui.screens.requests.ScheduleRequestsScreen
@@ -128,7 +129,7 @@ fun SchedulerNavHost(
                 onNavigateToProfile = { navController.navigate("profile") },
                 onNavigateToPolicies = { navController.navigate("policies") },
                 onNavigateToGetName = { navController.navigate("getName") },
-                onNavigateToNotifications = { }
+                onNavigateToNotifications = { navController.navigate("notifications") }
             )
         }
 
@@ -221,6 +222,10 @@ fun SchedulerNavHost(
 
         composable("policies") {
             PoliciesScreen(onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable("notifications") {
+            NotificationsScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         composable("getName") {

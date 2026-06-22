@@ -71,6 +71,7 @@ const (
 	colScheduleChangeReqs    = "schedule_change_requests"
 	colUserProfiles          = "user_profiles"
 	colAvailability          = "availability"
+	colNotifications         = "notifications"
 	colDrafts                = "drafts"
 	colRequests              = "requests"
 	colImports               = "imports"
@@ -708,6 +709,37 @@ func (f *FirestoreStore) GetAvailability(id string) *Availability {
 		return nil
 	}
 	return &e
+}
+
+func (f *FirestoreStore) PutNotification(n Notification) Notification {
+	ctx, cancel := opCtx()
+	defer cancel()
+	if _, err := f.cl.Collection(colNotifications).Doc(n.ID).Set(ctx, n); err != nil {
+		logErr("PutNotification", err)
+	}
+	return n
+}
+
+func (f *FirestoreStore) ListNotifications(tenantID, userID string) []Notification {
+	ctx, cancel := opCtx()
+	defer cancel()
+	snaps, err := f.cl.Collection(colNotifications).
+		Where("TenantID", "==", tenantID).Where("UserID", "==", userID).Documents(ctx).GetAll()
+	if err != nil {
+		logErr("ListNotifications", err)
+		return nil
+	}
+	out := []Notification{}
+	for _, snap := range snaps {
+		var n Notification
+		if err := snap.DataTo(&n); err != nil {
+			logErr("ListNotifications.DataTo", err)
+			continue
+		}
+		out = append(out, n)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt > out[j].CreatedAt })
+	return out
 }
 
 func (f *FirestoreStore) PutDraft(d Draft) Draft {

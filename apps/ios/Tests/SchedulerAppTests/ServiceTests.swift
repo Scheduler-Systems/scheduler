@@ -171,6 +171,7 @@ final class MockApiClient: ApiClientProtocol {
     var recordedRole: RoleStructPayload?
     var upsertProfileResult: Result<UserProfileResponse, Error> = .success(UserProfileResponse(id: "u1", displayName: "Set", role: nil))
     var upsertRoleResult: Result<UserProfileResponse, Error> = .success(UserProfileResponse(id: "u1", displayName: nil, role: "employer"))
+    var fetchNotificationsResult: Result<[NotificationResponse], Error> = .success([])
     
     func fetchSchedules(tenantId: String) async throws -> [ScheduleResponse] {
         recordedTenantIds.append(tenantId)
@@ -223,6 +224,10 @@ final class MockApiClient: ApiClientProtocol {
     func upsertRole(tenantId: String, uid: String, body: UpsertRoleRequest) async throws -> UserProfileResponse {
         recordedRole = body.role
         return try upsertRoleResult.get()
+    }
+
+    func fetchNotifications(tenantId: String) async throws -> [NotificationResponse] {
+        return try fetchNotificationsResult.get()
     }
     
     func createDraft(tenantId: String, scheduleId: String, body: DraftRequest) async throws -> DraftResponse {
@@ -441,6 +446,19 @@ final class ScheduleApiServiceTests: XCTestCase {
         } catch {
             // expected — a failed submit surfaces to the caller (screen shows the error)
         }
+    }
+
+    // MARK: - notifications feed
+
+    func testFetchNotifications() async throws {
+        mockApi.fetchNotificationsResult = .success([
+            NotificationResponse(id: "n1", content: "Your schedule was published",
+                                 type: "SYSTEM", isRead: false, fromUser: "system", createdAt: nil)
+        ])
+        let items = try await service.fetchNotifications(tenantId: "t1")
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(items[0].content, "Your schedule was published")
+        XCTAssertEqual(items[0].isRead, false)
     }
 
     // MARK: - auth onboarding (get-name PUT /users, choose-role PUT /users/{uid}/role)

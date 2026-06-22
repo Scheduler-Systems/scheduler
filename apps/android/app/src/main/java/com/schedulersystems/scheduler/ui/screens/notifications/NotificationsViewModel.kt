@@ -1,13 +1,18 @@
 package com.schedulersystems.scheduler.ui.screens.notifications
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.schedulersystems.scheduler.data.network.SchedulerApi
+import com.schedulersystems.scheduler.data.network.dto.toDomain
+import com.schedulersystems.scheduler.data.repositories.AuthRepository
 import com.schedulersystems.scheduler.models.domain.Notification
-import com.schedulersystems.scheduler.models.domain.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class NotificationsState(
@@ -16,19 +21,38 @@ data class NotificationsState(
     val unreadCount: Int = 0
 )
 
+// Loads the signed-in user's notification feed from the Go API (was hardcoded sample data).
 @HiltViewModel
-class NotificationsViewModel @Inject constructor() : ViewModel() {
+class NotificationsViewModel @Inject constructor(
+    private val api: SchedulerApi,
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(NotificationsState())
     val state: StateFlow<NotificationsState> = _state.asStateFlow()
 
     init {
-        _state.update {
-            it.copy(
-                isLoading = false,
-                notifications = sampleNotifications(),
-                unreadCount = 2
-            )
+        load()
+    }
+
+    fun load() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            val tenant = authRepository.currentUser.first()?.id ?: "default"
+            val items = try {
+                val response = api.service.listNotifications(tenant)
+                if (response.isSuccessful) {
+                    response.body()?.items?.map { it.toDomain() } ?: emptyList()
+                } else {
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                // Surface as an empty feed rather than crashing the screen.
+                emptyList()
+            }
+            _state.update {
+                it.copy(isLoading = false, notifications = items, unreadCount = items.count { n -> !n.isRead })
+            }
         }
     }
 
@@ -43,37 +67,4 @@ class NotificationsViewModel @Inject constructor() : ViewModel() {
             )
         }
     }
-
-    private fun sampleNotifications(): List<Notification> = listOf(
-        Notification(
-            id = "1",
-            isRead = false,
-            fromUser = "system",
-            toUser = null,
-            content = "Your schedule for next week has been published",
-            type = NotificationType.SYSTEM,
-            chatRefId = null,
-            timeCreated = java.time.Instant.now().minus(java.time.Duration.ofHours(2))
-        ),
-        Notification(
-            id = "2",
-            isRead = false,
-            fromUser = "John",
-            toUser = null,
-            content = "You have a new schedule request from John Doe",
-            type = NotificationType.SCHEDULE_REQUEST,
-            chatRefId = null,
-            timeCreated = java.time.Instant.now().minus(java.time.Duration.ofHours(5))
-        ),
-        Notification(
-            id = "3",
-            isRead = true,
-            fromUser = "Team Alpha",
-            toUser = null,
-            content = "New message in Team Alpha chat",
-            type = NotificationType.CHAT_MESSAGE,
-            chatRefId = "1",
-            timeCreated = java.time.Instant.now().minus(java.time.Duration.ofDays(1))
-        )
-    )
 }

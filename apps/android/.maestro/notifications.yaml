@@ -1,0 +1,26 @@
+# Maestro GUI e2e for the Android notifications page (Flutter→native consolidation).
+# login → Home → bell → notification feed (from the Go API; was hardcoded sample data).
+# Preconditions: Go API :4180 + seed.sh (seeds a demo notification for the user).
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "Notifications"                                 # the top-bar bell (contentDescription)
+- extendedWaitUntil:
+    visible: "Your schedule for next week has been published"   # the seeded notification (Go API)
+    timeout: 15000
+- takeScreenshot: 01-notifications

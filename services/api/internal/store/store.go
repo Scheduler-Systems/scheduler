@@ -31,6 +31,20 @@ type Availability struct {
 	CreatedAt    string                 `json:"createdAt"`
 }
 
+// Notification is a user-facing notification (chat, schedule request/change, system).
+// Keyed globally by ID; listed per (tenant, recipient user), newest first.
+type Notification struct {
+	ID        string `json:"id"`
+	TenantID  string `json:"tenantId"`
+	UserID    string `json:"userId"` // recipient
+	FromUser  string `json:"fromUser,omitempty"`
+	Content   string `json:"content"`
+	Type      string `json:"type"` // CHAT_MESSAGE|SCHEDULE_REQUEST|SCHEDULE_CHANGE|SHIFT_CHANGE|SYSTEM
+	ChatRefID string `json:"chatRefId,omitempty"`
+	IsRead    bool   `json:"isRead"`
+	CreatedAt string `json:"createdAt,omitempty"`
+}
+
 // Draft is a schedule draft containing proposed shifts.
 type Draft struct {
 	ID         string        `json:"id"`
@@ -300,6 +314,11 @@ type Store interface {
 
 	PutAvailability(e Availability) Availability
 	GetAvailability(id string) *Availability
+
+	// PutNotification upserts a notification. ListNotifications returns a recipient's
+	// notifications (tenant + userID), newest first.
+	PutNotification(n Notification) Notification
+	ListNotifications(tenantID, userID string) []Notification
 
 	PutDraft(d Draft) Draft
 	GetDraft(id string) *Draft

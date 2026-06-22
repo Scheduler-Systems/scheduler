@@ -1,0 +1,29 @@
+# Maestro GUI e2e for the iOS notifications page (Flutter→native consolidation).
+# login → Home → bell → notification feed (from the Go API).
+# Preconditions: Go API :4180 + seed.sh (seeds a demo notification for the user).
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn:
+    id: "notificationsButton"
+- extendedWaitUntil:
+    visible: "Your schedule for next week has been published"   # the seeded notification (Go API)
+    timeout: 15000
+- takeScreenshot: 01-notifications

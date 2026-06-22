@@ -402,6 +402,67 @@ func TestRoleEnforcement(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// Notification feed tests
+// ---------------------------------------------------------------------------
+
+func TestNotifications(t *testing.T) {
+	t.Run("create then list the actor's notifications", func(t *testing.T) {
+		st := store.NewMemoryStore()
+		app := newApp(st)
+
+		// employeeHeaders' actor is user_emp_1 in tenant_security_demo.
+		c := do(app, "POST", "/v1/tenants/tenant_security_demo/notifications",
+			employeeHeaders, map[string]interface{}{"content": "Your schedule was published", "type": "SYSTEM"})
+		assertStatus(t, c, http.StatusCreated)
+
+		w := do(app, "GET", "/v1/tenants/tenant_security_demo/notifications", employeeHeaders, nil)
+		assertStatus(t, w, http.StatusOK)
+		items, _ := jsonBody(t, w)["items"].([]interface{})
+		if len(items) != 1 {
+			t.Fatalf("items = %d, want 1", len(items))
+		}
+		first, _ := items[0].(map[string]interface{})
+		if first["content"] != "Your schedule was published" {
+			t.Errorf("content = %v", first["content"])
+		}
+		if first["isRead"] != false {
+			t.Errorf("isRead = %v, want false", first["isRead"])
+		}
+	})
+
+	t.Run("list is empty for an actor with no notifications", func(t *testing.T) {
+		st := store.NewMemoryStore()
+		app := newApp(st)
+		w := do(app, "GET", "/v1/tenants/tenant_security_demo/notifications", managerHeaders, nil)
+		assertStatus(t, w, http.StatusOK)
+		items, _ := jsonBody(t, w)["items"].([]interface{})
+		if len(items) != 0 {
+			t.Errorf("items = %d, want 0", len(items))
+		}
+	})
+
+	t.Run("non-manager cannot create a notification for ANOTHER user (IDOR)", func(t *testing.T) {
+		st := store.NewMemoryStore()
+		app := newApp(st)
+		w := do(app, "POST", "/v1/tenants/tenant_security_demo/notifications",
+			employeeHeaders, map[string]interface{}{"userId": "someone_else", "content": "spoofed"})
+		assertStatus(t, w, http.StatusForbidden)
+	})
+
+	t.Run("manager may create a notification for another user; fromUser is server-derived", func(t *testing.T) {
+		st := store.NewMemoryStore()
+		app := newApp(st)
+		c := do(app, "POST", "/v1/tenants/tenant_security_demo/notifications",
+			managerHeaders, map[string]interface{}{"userId": "user_emp_1", "content": "Shift changed", "fromUser": "evil"})
+		assertStatus(t, c, http.StatusCreated)
+		// fromUser must be the actor (user_mgr_1), NOT the spoofed "evil".
+		if fu := jsonBody(t, c)["fromUser"]; fu != "user_mgr_1" {
+			t.Errorf("fromUser = %v, want user_mgr_1 (server-derived)", fu)
+		}
+	})
+}
+
+// ---------------------------------------------------------------------------
 // Schedule workflow tests (availability, drafts, publish, requests)
 // ---------------------------------------------------------------------------
 

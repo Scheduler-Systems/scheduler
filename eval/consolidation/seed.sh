@@ -126,6 +126,19 @@ print(next((s["id"] for s in d.get("items",[]) if s.get("name")=="QA Demo Schedu
     echo "seed: WARN could not resolve QA Demo Schedule id — employee not seeded"
   fi
 
+  # A demo notification for the notifications page (idempotent: only if THIS specific
+  # demo notification is missing — checking for any "content" is too loose if the store
+  # has other notifications).
+  notifs=$(curl -s -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" "$API/v1/tenants/$localId/notifications" 2>/dev/null)
+  if echo "$notifs" | grep -q 'Your schedule for next week has been published'; then
+    echo "seed: notification present"
+  else
+    curl -s -X POST -H "Authorization: Bearer $idt" -H "X-Correlation-Id: seed" -H 'Content-Type: application/json' \
+      -d "{\"userId\":\"$localId\",\"content\":\"Your schedule for next week has been published\",\"type\":\"SYSTEM\"}" \
+      "$API/v1/tenants/$localId/notifications" >/dev/null
+    echo "seed: created demo notification"
+  fi
+
   # Prune leftover E2E-created schedules. The new-schedule-create e2e creates a
   # uniquely-named "E2E ..." schedule each run (the API 409s on duplicate names);
   # delete them so the list stays short and the eval stays re-runnable/deterministic.
