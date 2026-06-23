@@ -97,11 +97,26 @@ struct ScheduleDashboardView: View {
                             .foregroundColor(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+
+                    sharePdfButton
                 }
             }
             .padding()
         }
         .navigationTitle("Schedule Detail")
+    }
+
+    // Extracted to keep the action-button VStack expression small enough for the
+    // Swift type-checker (a 7th inline styled button tipped it over the limit).
+    private var sharePdfButton: some View {
+        Button(action: { router.push(.sharePdf(schedule.id)) }) {
+            Label("Share PDF", systemImage: "square.and.arrow.up")
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.purple)
+                .foregroundColor(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
     }
 
     private var attendancePercent: Int {

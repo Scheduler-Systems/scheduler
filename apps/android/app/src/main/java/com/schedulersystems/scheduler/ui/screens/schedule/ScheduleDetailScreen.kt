@@ -31,6 +31,7 @@ fun ScheduleDetailScreen(
     onNavigateToPriorities: () -> Unit = {},
     onNavigateToCurrentPriorities: () -> Unit = {},
     onNavigateToBuild: () -> Unit = {},
+    onNavigateToSharePdf: () -> Unit = {},
     viewModel: ScheduleDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -106,6 +107,7 @@ fun ScheduleDetailScreen(
                         onPrioritiesClick = onNavigateToPriorities,
                         onCurrentPrioritiesClick = onNavigateToCurrentPriorities,
                         onBuildClick = onNavigateToBuild,
+                        onSharePdfClick = onNavigateToSharePdf,
                         onSettingsClick = onNavigateToSettings,
                         onRequestsClick = onNavigateToRequests,
                         modifier = Modifier.padding(padding)
@@ -124,6 +126,7 @@ private fun ScheduleDetailContent(
     onPrioritiesClick: () -> Unit,
     onCurrentPrioritiesClick: () -> Unit,
     onBuildClick: () -> Unit,
+    onSharePdfClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRequestsClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -148,6 +151,7 @@ private fun ScheduleDetailContent(
             onPrioritiesClick = onPrioritiesClick,
             onCurrentPrioritiesClick = onCurrentPrioritiesClick,
             onBuildClick = onBuildClick,
+            onSharePdfClick = onSharePdfClick,
             onSettingsClick = onSettingsClick,
             onRequestsClick = onRequestsClick
         )
@@ -215,6 +219,7 @@ private fun ActionButtonsSection(
     onPrioritiesClick: () -> Unit,
     onCurrentPrioritiesClick: () -> Unit,
     onBuildClick: () -> Unit,
+    onSharePdfClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRequestsClick: () -> Unit
 ) {
@@ -286,6 +291,17 @@ private fun ActionButtonsSection(
             shape = MaterialTheme.shapes.small
         ) {
             Text("Build Schedule", fontSize = 16.sp)
+        }
+
+        Button(
+            onClick = onSharePdfClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0DAD)),
+            shape = MaterialTheme.shapes.small
+        ) {
+            Text("Share PDF", fontSize = 16.sp)
         }
     }
 }

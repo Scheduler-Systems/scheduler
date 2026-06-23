@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Generated schedule PDFs are written to the app cache dir (see SchedulePdfRenderer). -->
+    <cache-path name="pdfs" path="." />
+</paths>

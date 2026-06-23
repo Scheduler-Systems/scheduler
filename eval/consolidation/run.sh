@@ -66,7 +66,7 @@ AREAS=(
 "priorities-current|CurrentPrioritiesViewModelTest|priorities-current.yaml|testFetchScheduleMapsCurrentPriorities|priorities-current.yaml|-|done (android+ios; detail→Current Priorities→read-only current_priorities standings)"
 "archived-schedules|ScheduleDtoTest|archived-schedules.yaml|testFetchSchedulesMapping|archived-schedules.yaml|-|done (android+ios; Home→Archived→status=archived filtered list)"
 "export-shifts|-|-|-|-|-|todo(needs-signoff)"
-"share-pdf|-|-|-|-|-|todo"
+"share-pdf|SchedulePdfTest|share-pdf.yaml|SchedulePdfTests|share-pdf.yaml|-|done (android+ios; detail/dashboard→Share PDF→built roster→Generate PDF→real on-device PDF, page count read back)"
 "chat-threads|-|-|-|-|-|todo(needs-signoff,merge)"
 "notifications|NotificationDtoTest|notifications.yaml|testFetchNotifications|notifications.yaml|-|done (android+ios; Home→bell→feed from new Go GET /notifications endpoint)"
 "profile-settings|ProfileSettingsViewModelTest|profile-settings.yaml|testAuthStateObservationAuthenticated|profile-settings.yaml|-|done (android+ios; Home→Profile shows account email)"

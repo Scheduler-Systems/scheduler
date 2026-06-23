@@ -1,0 +1,48 @@
+# Maestro GUI e2e for the iOS share-pdf page (Flutter→native consolidation).
+# login → My Schedules → schedule → dashboard → "Share PDF" → the view loads the built
+# grid (real seeded employee Alex Worker) → "Generate PDF" renders a REAL on-device PDF
+# (UIGraphicsPDFRenderer) → "PDF ready · N page(s)" confirms a valid, page-counted file.
+# The actual system share sheet (external) is the e2e ceiling and is not exercised.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- scrollUntilVisible:
+    element: "Share PDF"
+    direction: DOWN
+- tapOn: "Share PDF"                              # the dashboard button → SharePdfView
+- extendedWaitUntil:
+    visible: "Alex Worker"                        # REAL built roster in the preview
+    timeout: 25000
+- scrollUntilVisible:
+    element: "Generate PDF"
+    direction: DOWN
+- tapOn: "Generate PDF"                           # renders a real on-device PDF
+- extendedWaitUntil:
+    visible: "PDF ready.*"                         # regex: full text is "PDF ready · N page(s)"
+    timeout: 20000
+- takeScreenshot: 01-pdf-ready

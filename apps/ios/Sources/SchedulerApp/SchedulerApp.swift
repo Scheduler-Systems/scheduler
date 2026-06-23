@@ -81,6 +81,8 @@ struct SchedulerApp: App {
             CurrentPrioritiesView(scheduleId: id, scheduleService: scheduleService)
         case .scheduleBuild(let id):
             ScheduleBuildView(scheduleId: id, scheduleService: scheduleService)
+        case .sharePdf(let id):
+            SharePdfView(scheduleId: id, scheduleService: scheduleService)
         case .scheduleBuilder:
             ScheduleBuilderView(scheduleService: scheduleService)
         case .employeeList(let id):

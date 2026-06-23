@@ -19,6 +19,7 @@ enum Route: Hashable {
     case prioritiesSubmission(Schedule.ID)
     case currentPriorities(Schedule.ID)
     case scheduleBuild(Schedule.ID)
+    case sharePdf(Schedule.ID)
     case scheduleBuilder
     case employeeList(Schedule.ID)
     case employeeDetail(Employee.ID)
