@@ -1,0 +1,42 @@
+# Maestro GUI e2e for the Android schedule-build page (Flutter→native consolidation).
+# login → My Schedules → schedule → detail → "Build Schedule" → "Generate Schedule"
+# → the canonical builder runs + persists via POST /built-schedules → the grid renders the
+# seeded employee (Alex Worker) — a REAL assignment, not an empty/stub grid.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- scrollUntilVisible:
+    element: "Build Schedule"
+    direction: DOWN
+- tapOn: "Build Schedule"                         # the detail button → ScheduleBuildScreen
+- extendedWaitUntil:
+    visible: "Generate Schedule"                  # on the build screen (the action button)
+    timeout: 15000
+- tapOn: "Generate Schedule"                      # runs the assigner + persists
+- extendedWaitUntil:
+    visible: "Alex Worker"                        # REAL assignment in the built grid
+    timeout: 20000
+- takeScreenshot: 01-built

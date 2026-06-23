@@ -188,9 +188,13 @@ class ApiScheduleRepository @Inject constructor(
             val numDays = 7
             val numStations = 1
 
+            // Employees come from the dedicated roster endpoint, NOT embedded in the
+            // schedule doc (the Go API serves them separately) — fetch them so the build
+            // actually has workers to assign.
+            val roster = getEmployees(scheduleId)
             val out = buildSchedule(
                 BuildScheduleInput(
-                    employees = schedule.employees.map { it.name },
+                    employees = roster.map { it.name },
                     enabledShifts = enabledShifts,
                     numDays = numDays,
                     numStations = numStations

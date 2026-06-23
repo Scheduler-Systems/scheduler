@@ -33,6 +33,8 @@ protocol ApiClientProtocol {
     func putAvailability(tenantId: String, scheduleId: String, body: AvailabilityRequest) async throws -> AvailabilityResponse
     func createDraft(tenantId: String, scheduleId: String, body: DraftRequest) async throws -> DraftResponse
     func publishSchedule(tenantId: String, scheduleId: String, body: PublishRequest) async throws -> PublishResponse
+    func saveBuiltSchedule(tenantId: String, scheduleId: String, body: SaveBuiltScheduleRequest) async throws -> BuiltScheduleResponse
+    func latestBuiltSchedule(tenantId: String, scheduleId: String) async throws -> BuiltScheduleResponse
     func createRequest(tenantId: String, scheduleId: String, body: ScheduleRequest) async throws -> ScheduleRequestResponse
     func upsertProfile(tenantId: String, uid: String, body: UpsertProfileRequest) async throws -> UserProfileResponse
     func upsertRole(tenantId: String, uid: String, body: UpsertRoleRequest) async throws -> UserProfileResponse
@@ -145,6 +147,16 @@ final class ApiClient: ApiClientProtocol {
 
     func publishSchedule(tenantId: String, scheduleId: String, body: PublishRequest) async throws -> PublishResponse {
         let req = try await makeRequest(path: "v1/tenants/\(tenantId)/schedules/\(scheduleId)/publish", method: "POST", tenantId: tenantId, body: body)
+        return try await execute(req)
+    }
+
+    func saveBuiltSchedule(tenantId: String, scheduleId: String, body: SaveBuiltScheduleRequest) async throws -> BuiltScheduleResponse {
+        let req = try await makeRequest(path: "v1/tenants/\(tenantId)/schedules/\(scheduleId)/built-schedules", method: "POST", tenantId: tenantId, body: body)
+        return try await execute(req)
+    }
+
+    func latestBuiltSchedule(tenantId: String, scheduleId: String) async throws -> BuiltScheduleResponse {
+        let req = try await makeRequest(path: "v1/tenants/\(tenantId)/schedules/\(scheduleId)/built-schedules/latest", method: "GET", tenantId: tenantId)
         return try await execute(req)
     }
 

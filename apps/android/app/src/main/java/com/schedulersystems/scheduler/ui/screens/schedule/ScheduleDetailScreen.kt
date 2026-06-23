@@ -274,17 +274,18 @@ private fun ActionButtonsSection(
             Text("Current Priorities", fontSize = 16.sp)
         }
 
-        if (userRole == Role.EMPLOYER) {
-            Button(
-                onClick = onBuildClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0DAD)),
-                shape = MaterialTheme.shapes.small
-            ) {
-                Text("Build Schedule", fontSize = 16.sp)
-            }
+        // Ungated (matches iOS): the Android auth repo always maps role=null, so an
+        // EMPLOYER check would hide this for everyone; the server enforces manager-only
+        // on POST /built-schedules.
+        Button(
+            onClick = onBuildClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0DAD)),
+            shape = MaterialTheme.shapes.small
+        ) {
+            Text("Build Schedule", fontSize = 16.sp)
         }
     }
 }

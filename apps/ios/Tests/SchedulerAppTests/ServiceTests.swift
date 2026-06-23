@@ -241,6 +241,14 @@ final class MockApiClient: ApiClientProtocol {
     func createRequest(tenantId: String, scheduleId: String, body: ScheduleRequest) async throws -> ScheduleRequestResponse {
         return try createRequestResult.get()
     }
+
+    func saveBuiltSchedule(tenantId: String, scheduleId: String, body: SaveBuiltScheduleRequest) async throws -> BuiltScheduleResponse {
+        return BuiltScheduleResponse(id: "built_1", schedule: body.schedule)
+    }
+
+    func latestBuiltSchedule(tenantId: String, scheduleId: String) async throws -> BuiltScheduleResponse {
+        return BuiltScheduleResponse(id: "built_1", schedule: [])
+    }
 }
 
 // MARK: - ScheduleApiService Tests

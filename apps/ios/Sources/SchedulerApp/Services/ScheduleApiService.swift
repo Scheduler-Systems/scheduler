@@ -13,6 +13,11 @@ protocol ScheduleDataServiceProtocol {
     func updateDisplayName(tenantId: String, uid: String, email: String, name: String) async throws
     func updateRole(tenantId: String, uid: String, email: String, isManager: Bool) async throws
     func fetchNotifications(tenantId: String) async throws -> [NotificationResponse]
+    /// Runs the canonical schedule builder for a schedule and persists the grid via the
+    /// API. Returns the built grid (`[day][shift][station]`).
+    func buildAndSaveSchedule(tenantId: String, scheduleId: String) async throws -> [[[String]]]
+    /// The most recently built grid, or nil if none has been built.
+    func latestBuiltSchedule(tenantId: String, scheduleId: String) async throws -> [[[String]]]?
 }
 
 final class ScheduleApiService: ScheduleDataServiceProtocol {
@@ -135,6 +140,47 @@ final class ScheduleApiService: ScheduleDataServiceProtocol {
     // Notification feed — idempotent GET, retried (parity with the other read paths).
     func fetchNotifications(tenantId: String) async throws -> [NotificationResponse] {
         try await Self.withRetry { try await self.api.fetchNotifications(tenantId: tenantId) }
+    }
+
+    func buildAndSaveSchedule(tenantId: String, scheduleId: String) async throws -> [[[String]]] {
+        let schedule = try await fetchSchedule(tenantId: tenantId, scheduleId: scheduleId)
+        let employees = try await fetchEmployees(tenantId: tenantId, scheduleId: scheduleId)
+        let s = schedule.settings
+        var enabledShifts: [String] = []
+        if s.mornings { enabledShifts.append("Morning") }
+        if s.afternoons { enabledShifts.append("Afternoon") }
+        if s.evenings { enabledShifts.append("Night") }
+        if enabledShifts.isEmpty { enabledShifts = ["Morning", "Afternoon", "Night"] }
+        let numDays = 7
+        let numStations = 1
+
+        let out = buildSchedule(BuildScheduleInput(
+            employees: employees.map { $0.displayName },
+            enabledShifts: enabledShifts,
+            numDays: numDays,
+            numStations: numStations
+        ))
+        let numShifts = enabledShifts.count
+        let grid: [[[String]]] = (0..<numDays).map { d in
+            (0..<numShifts).map { sh in out.rows[d * numShifts + sh] }
+        }
+        let resp = try await api.saveBuiltSchedule(
+            tenantId: tenantId, scheduleId: scheduleId,
+            body: SaveBuiltScheduleRequest(
+                schedule: grid, firstWeekday: "", lastWeekday: "",
+                currentPriorities: schedule.currentPriorities
+            )
+        )
+        return resp.schedule ?? grid
+    }
+
+    func latestBuiltSchedule(tenantId: String, scheduleId: String) async throws -> [[[String]]]? {
+        do {
+            return try await api.latestBuiltSchedule(tenantId: tenantId, scheduleId: scheduleId).schedule
+        } catch {
+            // 404 = none built yet.
+            return nil
+        }
     }
 
     private static func map(_ response: ScheduleResponse) -> Schedule {

@@ -80,7 +80,7 @@ fun ScheduleBuildScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Build Schedule")
+                    Text("Generate Schedule")
                 }
             }
 

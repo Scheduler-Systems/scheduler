@@ -57,6 +57,8 @@ final class MockScheduleDataService: ScheduleDataServiceProtocol {
     func updateDisplayName(tenantId: String, uid: String, email: String, name: String) async throws {}
     func updateRole(tenantId: String, uid: String, email: String, isManager: Bool) async throws {}
     func fetchNotifications(tenantId: String) async throws -> [NotificationResponse] { [] }
+    func buildAndSaveSchedule(tenantId: String, scheduleId: String) async throws -> [[[String]]] { [] }
+    func latestBuiltSchedule(tenantId: String, scheduleId: String) async throws -> [[[String]]]? { nil }
 }
 
 // MARK: - BaseViewModel Tests

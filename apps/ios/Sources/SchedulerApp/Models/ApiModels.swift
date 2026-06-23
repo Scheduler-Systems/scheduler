@@ -187,6 +187,25 @@ struct PublishResponse: Decodable {
     let publishedAt: String?
 }
 
+// Built schedule (the persisted assigned grid). schedule = [day][shift][station] names.
+struct SaveBuiltScheduleRequest: Encodable {
+    let schedule: [[[String]]]
+    let firstWeekday: String
+    let lastWeekday: String
+    let currentPriorities: [String]
+    enum CodingKeys: String, CodingKey {
+        case schedule
+        case firstWeekday = "first_weekday"
+        case lastWeekday = "last_weekday"
+        case currentPriorities = "current_priorities"
+    }
+}
+
+struct BuiltScheduleResponse: Decodable {
+    let id: String
+    let schedule: [[[String]]]?
+}
+
 // User-profile (users/{uid}) — Privacy/role onboarding. Role is computed server-side
 // from the RoleStruct (snake_case), parity with scheduler-web's roleStructToFlutterString.
 struct RoleStructPayload: Encodable {

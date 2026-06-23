@@ -1,0 +1,45 @@
+# Maestro GUI e2e for the iOS schedule-build page (Flutter→native consolidation).
+# login → My Schedules → schedule → dashboard → "Build Schedule" → "Generate Schedule"
+# → the canonical builder (same algorithm as Android + web) runs + persists via
+# POST /built-schedules → the grid renders the seeded employee (Alex Worker) — a REAL
+# assignment, not an empty/stub grid.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- scrollUntilVisible:
+    element: "Build Schedule"
+    direction: DOWN
+- tapOn: "Build Schedule"                         # the dashboard button → ScheduleBuildView
+- extendedWaitUntil:
+    visible: "Generate Schedule"                  # on the build screen (the action button)
+    timeout: 15000
+- tapOn: "Generate Schedule"                      # runs the assigner + persists
+- extendedWaitUntil:
+    visible: "Alex Worker"                        # REAL assignment in the built grid
+    timeout: 20000
+- takeScreenshot: 01-built
