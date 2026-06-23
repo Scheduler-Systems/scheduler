@@ -11,14 +11,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.schedulersystems.scheduler.BuildConfig
+import com.schedulersystems.scheduler.domain.walkthrough.shouldShowWalkthrough
 import com.schedulersystems.scheduler.models.domain.Role
 import kotlinx.coroutines.launch
+
+private const val WALKTHROUGH_SEEN_KEY = "home_walkthrough_seen"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +40,35 @@ fun HomeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+    // One-time "first time here" welcome (FlutterFlow first_time_employer/employee coach-mark),
+    // gated eval-safe: hidden in the emulator build unless `forceWalkthrough` is set, so the
+    // existing logged-in flows that reach Home are unaffected.
+    val context = LocalContext.current
+    var showWalkthrough by remember {
+        mutableStateOf(run {
+            val activity = context as? android.app.Activity
+            val force = activity?.intent?.getStringExtra("forceWalkthrough") == "true" ||
+                activity?.intent?.getBooleanExtra("forceWalkthrough", false) == true
+            val seen = context.getSharedPreferences("scheduler_prefs", android.content.Context.MODE_PRIVATE)
+                .getBoolean(WALKTHROUGH_SEEN_KEY, false)
+            shouldShowWalkthrough(force, BuildConfig.USE_FIREBASE_EMULATOR, seen)
+        })
+    }
+    if (showWalkthrough) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text("Welcome!") },
+            text = { Text("It seems like this is your first time here. Let's get you started.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    context.getSharedPreferences("scheduler_prefs", android.content.Context.MODE_PRIVATE)
+                        .edit().putBoolean(WALKTHROUGH_SEEN_KEY, true).apply()
+                    showWalkthrough = false
+                }) { Text("Got it") }
+            }
+        )
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,

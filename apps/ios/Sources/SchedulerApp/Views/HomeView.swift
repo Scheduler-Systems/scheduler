@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var vm: HomeViewModel
     @EnvironmentObject private var router: Router
+    @State private var showWalkthrough = WalkthroughGate.shouldShowHomeWalkthrough()
 
     init(scheduleService: ScheduleDataServiceProtocol, authViewModel: AuthViewModel) {
         _vm = StateObject(wrappedValue: HomeViewModel(
@@ -36,6 +37,39 @@ struct HomeView: View {
         }
         .task {
             await vm.initialize()
+        }
+        .overlay {
+            if showWalkthrough {
+                walkthroughOverlay
+            }
+        }
+    }
+
+    // One-time "first time here" welcome (FlutterFlow first_time_employer/employee coach-mark).
+    private var walkthroughOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.6).ignoresSafeArea()
+            VStack(spacing: 16) {
+                Text("Welcome!").font(.title).fontWeight(.bold)
+                Text("It seems like this is your first time here. Let's get you started.")
+                    .multilineTextAlignment(.center).foregroundColor(.secondary)
+                Button(action: {
+                    WalkthroughGate.markHomeSeen()
+                    showWalkthrough = false
+                }) {
+                    Text("Got it")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.purple)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+            }
+            .padding(24)
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(40)
         }
     }
 

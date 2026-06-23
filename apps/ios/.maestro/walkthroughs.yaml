@@ -1,0 +1,30 @@
+# Maestro GUI e2e for the iOS first-time walkthrough (Flutter→native consolidation).
+# A `forceWalkthrough` launch argument makes Home show the one-time "first time here" welcome
+# overlay (the gate is otherwise HIDDEN in the emulator context, so the existing logged-in flows
+# are unaffected). login → Home → "Welcome!" overlay → "Got it" persists the seen-flag → Home content.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+      forceWalkthrough: true
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "Welcome!"                           # the first-time walkthrough overlay on Home
+    timeout: 20000
+- tapOn: "Got it"                                 # persists the seen-flag → dismiss
+- extendedWaitUntil:
+    visible: "My Schedules"                       # walkthrough gone → real Home content
+    timeout: 15000
+- takeScreenshot: 01-walkthrough-dismissed
