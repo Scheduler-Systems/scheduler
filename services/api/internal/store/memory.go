@@ -15,6 +15,7 @@ type MemoryStore struct {
 	employees              map[string][]Employee            // key: "tenantID:scheduleID" → ordered employees
 	invitations            map[string]Invitation            // key: "tenantID:invitationID"
 	shiftRequests          map[string]ShiftRequest          // key: "tenantID:requestID"
+	builtSchedules         map[string]BuiltSchedule         // key: "tenantID:builtScheduleID"
 	scheduleChangeRequests map[string]ScheduleChangeRequest // key: "tenantID:requestID"
 	userProfiles           map[string]UserProfile           // key: "tenantID:uid"
 	availability           map[string]Availability
@@ -32,6 +33,7 @@ func NewMemoryStore() *MemoryStore {
 		employees:              make(map[string][]Employee),
 		invitations:            make(map[string]Invitation),
 		shiftRequests:          make(map[string]ShiftRequest),
+		builtSchedules:         make(map[string]BuiltSchedule),
 		scheduleChangeRequests: make(map[string]ScheduleChangeRequest),
 		userProfiles:           make(map[string]UserProfile),
 		availability:           make(map[string]Availability),
@@ -479,6 +481,55 @@ func (m *MemoryStore) DeleteShiftRequest(tenantID, id string) bool {
 	}
 	delete(m.shiftRequests, key)
 	return true
+}
+
+// PutBuiltSchedule upserts a built schedule (the persisted grid), keyed by
+// tenant + id.
+func (m *MemoryStore) PutBuiltSchedule(b BuiltSchedule) BuiltSchedule {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.builtSchedules[b.TenantID+":"+b.ID] = b
+	return b
+}
+
+// GetBuiltSchedule returns a built schedule by tenant + id, or nil.
+func (m *MemoryStore) GetBuiltSchedule(tenantID, id string) *BuiltSchedule {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	b, ok := m.builtSchedules[tenantID+":"+id]
+	if !ok {
+		return nil
+	}
+	cp := b
+	return &cp
+}
+
+// ListBuiltSchedulesForSchedule returns the built schedules for a schedule,
+// newest first (by TimeCreated).
+func (m *MemoryStore) ListBuiltSchedulesForSchedule(tenantID, scheduleID string) []BuiltSchedule {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	var out []BuiltSchedule
+	for _, b := range m.builtSchedules {
+		if b.TenantID == tenantID && b.ScheduleID == scheduleID {
+			out = append(out, b)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].TimeCreated > out[j].TimeCreated
+	})
+	return out
+}
+
+// GetLatestBuiltSchedule returns the most recently created built schedule for a
+// schedule, or nil if none exists.
+func (m *MemoryStore) GetLatestBuiltSchedule(tenantID, scheduleID string) *BuiltSchedule {
+	list := m.ListBuiltSchedulesForSchedule(tenantID, scheduleID)
+	if len(list) == 0 {
+		return nil
+	}
+	cp := list[0]
+	return &cp
 }
 
 // -------------------------------------------------------------------------

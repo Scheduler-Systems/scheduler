@@ -161,6 +161,12 @@ func assertStatus(t *testing.T, w *httptest.ResponseRecorder, want int) {
 	}
 }
 
+// mustJSON marshals v to a compact JSON string for equality comparisons in tests.
+func mustJSON(v interface{}) string {
+	b, _ := json.Marshal(v)
+	return string(b)
+}
+
 // mergeHeaders returns a shallow copy of src with overrides applied.
 func mergeHeaders(src, overrides map[string]string) map[string]string {
 	out := make(map[string]string, len(src)+len(overrides))
@@ -797,6 +803,85 @@ func TestSchedgy(t *testing.T) {
 // ---------------------------------------------------------------------------
 // Tenant isolation (memory store)
 // ---------------------------------------------------------------------------
+
+// TestBuiltSchedules covers the schedule-build persistence: a manager (schedule
+// creator → member) saves a built grid, anyone-member reads it back (list /
+// latest / by-id) with the grid round-tripping verbatim, and the IDOR guards
+// hold (non-member manager 403, employee POST 403, cross-tenant 404).
+func TestBuiltSchedules(t *testing.T) {
+	app := newDefaultApp()
+	base := "/v1/tenants/tenant_security_demo/schedules"
+
+	// Manager creates a schedule (becomes its creator/member).
+	cw := do(app, http.MethodPost, base, managerHeaders, map[string]interface{}{"name": "Built Test"})
+	assertStatus(t, cw, http.StatusCreated)
+	sid, _ := jsonBody(t, cw)["id"].(string)
+	if sid == "" {
+		t.Fatalf("no schedule id returned")
+	}
+	bsBase := base + "/" + sid + "/built-schedules"
+
+	grid := [][][]string{{{"alice", "bob"}, {"carol"}}, {{"dave"}, {}}}
+
+	// Save a built grid as the manager.
+	sw := do(app, http.MethodPost, bsBase, managerHeaders, map[string]interface{}{
+		"schedule":           grid,
+		"first_weekday":      "Sun",
+		"last_weekday":       "Sat",
+		"current_priorities": []string{"alice", "bob"},
+	})
+	assertStatus(t, sw, http.StatusCreated)
+	saved := jsonBody(t, sw)
+	builtID, _ := saved["id"].(string)
+	if builtID == "" {
+		t.Fatalf("no built id returned")
+	}
+	if saved["createdBy"] != "user_mgr_1" {
+		t.Errorf("createdBy = %v, want server-derived user_mgr_1", saved["createdBy"])
+	}
+	if saved["scheduleId"] != sid {
+		t.Errorf("scheduleId = %v, want %s", saved["scheduleId"], sid)
+	}
+	// Grid round-trips verbatim.
+	if gj, _ := json.Marshal(saved["schedule"]); string(gj) != mustJSON(grid) {
+		t.Errorf("grid = %s, want %s", gj, mustJSON(grid))
+	}
+
+	// List returns the one built schedule.
+	lw := do(app, http.MethodGet, bsBase, managerHeaders, nil)
+	assertStatus(t, lw, http.StatusOK)
+	if items, _ := jsonBody(t, lw)["items"].([]interface{}); len(items) != 1 {
+		t.Errorf("list len = %d, want 1", len(items))
+	}
+
+	// Latest matches the saved one.
+	latw := do(app, http.MethodGet, bsBase+"/latest", managerHeaders, nil)
+	assertStatus(t, latw, http.StatusOK)
+	if jsonBody(t, latw)["id"] != builtID {
+		t.Errorf("latest id mismatch")
+	}
+
+	// Get by id.
+	gw := do(app, http.MethodGet, bsBase+"/"+builtID, managerHeaders, nil)
+	assertStatus(t, gw, http.StatusOK)
+
+	// IDOR: a DIFFERENT manager in the same tenant is not a member → 403.
+	otherMgr := bearer("user_mgr_2", "tenant_security_demo", auth.RoleManager)
+	ow := do(app, http.MethodPost, bsBase, otherMgr, map[string]interface{}{"schedule": grid})
+	assertStatus(t, ow, http.StatusForbidden)
+	og := do(app, http.MethodGet, bsBase, otherMgr, nil)
+	assertStatus(t, og, http.StatusForbidden)
+
+	// A non-manager (employee) save is manager-gated at the router → 403.
+	ew := do(app, http.MethodPost, bsBase, employeeHeaders, map[string]interface{}{"schedule": grid})
+	assertStatus(t, ew, http.StatusForbidden)
+
+	// Cross-tenant: the built id is invisible from another tenant (schedule 404).
+	xw := do(app, http.MethodGet,
+		"/v1/tenants/tenant_other/schedules/"+sid+"/built-schedules/"+builtID,
+		withTenant(managerHeaders, "user_mgr_1", "tenant_other", auth.RoleManager), nil)
+	assertStatus(t, xw, http.StatusNotFound)
+}
 
 func TestTenantIsolation(t *testing.T) {
 	t.Run("memory store isolates tenants", func(t *testing.T) {

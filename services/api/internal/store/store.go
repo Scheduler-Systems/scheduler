@@ -142,6 +142,36 @@ type ShiftRequest struct {
 	CreatedAt   string `json:"created_time,omitempty"`
 }
 
+// BuiltSchedule is a persisted, published shift grid — the canonical artifact
+// schedule-build produces and that export-shifts / share-pdf / shift-swap
+// requests consume. It mirrors the web/Flutter `schedules/{sid}/built_schedules/{bid}`
+// document; the JSON keys are kept VERBATIM with the web (lib/types.ts BuiltSchedule)
+// and the native clients so a grid persisted through this API round-trips with them.
+//
+// Grid shape: `Schedule` is a 3-D `[][][]string` matching the native assigner
+// output (Android ShiftAssigner.assignShifts → List<List<List<String?>>>): the
+// outer list is the period (weeks/rows), the middle the day/slot, the inner the
+// assigned employee identifiers for that cell. The native assigner's "no
+// assignment" null is normalized to "" on save (Go strings are not nullable, and
+// an empty cell renders identically for export/share-pdf), so the inner type is a
+// plain string. The web's Firestore representation wraps the inner list as
+// `{stringList: [...]}` (Firestore can't nest arrays); that wrapping is a
+// Firestore-storage concern handled in the firestore Store impl, NOT part of this
+// API's wire shape (the native clients read this clean 3-D form from the Go API).
+type BuiltSchedule struct {
+	ID                   string       `json:"id"`
+	TenantID             string       `json:"tenantId"`
+	ScheduleID           string       `json:"scheduleId"`
+	Grid                 [][][]string `json:"schedule"`
+	FirstWeekday         string       `json:"first_weekday,omitempty"`
+	LastWeekday          string       `json:"last_weekday,omitempty"`
+	FirstWeekdayDateTime string       `json:"first_weekday_datetime,omitempty"`
+	LastWeekdayDateTime  string       `json:"last_weekday_datetime,omitempty"`
+	CurrentPriorities    []string     `json:"current_priorities"`
+	TimeCreated          string       `json:"time_created,omitempty"`
+	CreatedBy            string       `json:"createdBy,omitempty"`
+}
+
 // ScheduleChangeRequest mirrors the web/Flutter ScheduleChangeRequestRecord
 // document stored at the Firestore collection `scheduleChangeRequest/{id}`
 // (note camelCase collection name — see scheduler-web lib/requests-types.ts
@@ -281,6 +311,23 @@ type Store interface {
 	PutInvitation(inv Invitation) Invitation
 	GetInvitation(tenantID, id string) *Invitation
 	ListInvitationsForSchedule(tenantID, scheduleID string) []Invitation
+
+	// ---- Built schedules (the published shift grid) ---------------------------
+
+	// PutBuiltSchedule upserts a built schedule (the persisted grid), keyed by
+	// tenant + id. Returns the stored value.
+	PutBuiltSchedule(b BuiltSchedule) BuiltSchedule
+
+	// GetBuiltSchedule returns a built schedule by tenant + id, or nil.
+	GetBuiltSchedule(tenantID, id string) *BuiltSchedule
+
+	// ListBuiltSchedulesForSchedule returns the built schedules for a schedule,
+	// newest first (by TimeCreated).
+	ListBuiltSchedulesForSchedule(tenantID, scheduleID string) []BuiltSchedule
+
+	// GetLatestBuiltSchedule returns the most recently created built schedule for
+	// a schedule, or nil if none exists.
+	GetLatestBuiltSchedule(tenantID, scheduleID string) *BuiltSchedule
 
 	// ---- Requests: shift-swap (built_schedules/{bid}/shift_requests) ----------
 

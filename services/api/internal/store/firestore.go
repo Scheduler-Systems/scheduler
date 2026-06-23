@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -68,6 +69,7 @@ const (
 	colScheduleEmployees     = "schedule_employees"
 	colInvitations           = "invitations"
 	colShiftRequests         = "shift_requests"
+	colBuiltSchedules        = "built_schedules"
 	colScheduleChangeReqs    = "schedule_change_requests"
 	colUserProfiles          = "user_profiles"
 	colAvailability          = "availability"
@@ -557,6 +559,126 @@ func (f *FirestoreStore) DeleteShiftRequest(tenantID, id string) bool {
 		return false
 	}
 	return true
+}
+
+// -------------------------------------------------------------------------
+// Built schedules (the persisted shift grid)
+// -------------------------------------------------------------------------
+
+// builtScheduleDoc is the Firestore storage shape for a BuiltSchedule. The 3-D
+// grid is JSON-encoded into a single string field because Firestore arrays
+// cannot contain arrays; the API wire shape (BuiltSchedule.Grid [][][]string) is
+// reconstructed on read. All other fields persist natively.
+type builtScheduleDoc struct {
+	ID                   string   `firestore:"ID"`
+	TenantID             string   `firestore:"TenantID"`
+	ScheduleID           string   `firestore:"ScheduleID"`
+	GridJSON             string   `firestore:"GridJSON"`
+	FirstWeekday         string   `firestore:"FirstWeekday"`
+	LastWeekday          string   `firestore:"LastWeekday"`
+	FirstWeekdayDateTime string   `firestore:"FirstWeekdayDateTime"`
+	LastWeekdayDateTime  string   `firestore:"LastWeekdayDateTime"`
+	CurrentPriorities    []string `firestore:"CurrentPriorities"`
+	TimeCreated          string   `firestore:"TimeCreated"`
+	CreatedBy            string   `firestore:"CreatedBy"`
+}
+
+func toBuiltScheduleDoc(b BuiltSchedule) builtScheduleDoc {
+	gridJSON := "[]"
+	if b.Grid != nil {
+		if raw, err := json.Marshal(b.Grid); err == nil {
+			gridJSON = string(raw)
+		}
+	}
+	return builtScheduleDoc{
+		ID: b.ID, TenantID: b.TenantID, ScheduleID: b.ScheduleID,
+		GridJSON:             gridJSON,
+		FirstWeekday:         b.FirstWeekday,
+		LastWeekday:          b.LastWeekday,
+		FirstWeekdayDateTime: b.FirstWeekdayDateTime,
+		LastWeekdayDateTime:  b.LastWeekdayDateTime,
+		CurrentPriorities:    b.CurrentPriorities,
+		TimeCreated:          b.TimeCreated,
+		CreatedBy:            b.CreatedBy,
+	}
+}
+
+func (d builtScheduleDoc) toBuiltSchedule() BuiltSchedule {
+	var grid [][][]string
+	if d.GridJSON != "" {
+		_ = json.Unmarshal([]byte(d.GridJSON), &grid)
+	}
+	return BuiltSchedule{
+		ID: d.ID, TenantID: d.TenantID, ScheduleID: d.ScheduleID,
+		Grid:                 grid,
+		FirstWeekday:         d.FirstWeekday,
+		LastWeekday:          d.LastWeekday,
+		FirstWeekdayDateTime: d.FirstWeekdayDateTime,
+		LastWeekdayDateTime:  d.LastWeekdayDateTime,
+		CurrentPriorities:    d.CurrentPriorities,
+		TimeCreated:          d.TimeCreated,
+		CreatedBy:            d.CreatedBy,
+	}
+}
+
+func (f *FirestoreStore) PutBuiltSchedule(b BuiltSchedule) BuiltSchedule {
+	ctx, cancel := opCtx()
+	defer cancel()
+	ref := f.tenantDoc(b.TenantID).Collection(colBuiltSchedules).Doc(b.ID)
+	if _, err := ref.Set(ctx, toBuiltScheduleDoc(b)); err != nil {
+		logErr("PutBuiltSchedule", err)
+	}
+	return b
+}
+
+func (f *FirestoreStore) GetBuiltSchedule(tenantID, id string) *BuiltSchedule {
+	ctx, cancel := opCtx()
+	defer cancel()
+	snap, err := f.tenantDoc(tenantID).Collection(colBuiltSchedules).Doc(id).Get(ctx)
+	if err != nil {
+		if !isNotFound(err) {
+			logErr("GetBuiltSchedule", err)
+		}
+		return nil
+	}
+	var d builtScheduleDoc
+	if err := snap.DataTo(&d); err != nil {
+		logErr("GetBuiltSchedule.DataTo", err)
+		return nil
+	}
+	b := d.toBuiltSchedule()
+	return &b
+}
+
+func (f *FirestoreStore) ListBuiltSchedulesForSchedule(tenantID, scheduleID string) []BuiltSchedule {
+	ctx, cancel := opCtx()
+	defer cancel()
+	snaps, err := f.tenantDoc(tenantID).Collection(colBuiltSchedules).
+		Where("ScheduleID", "==", scheduleID).Documents(ctx).GetAll()
+	if err != nil {
+		logErr("ListBuiltSchedulesForSchedule", err)
+		return nil
+	}
+	var out []BuiltSchedule
+	for _, snap := range snaps {
+		var d builtScheduleDoc
+		if err := snap.DataTo(&d); err != nil {
+			logErr("ListBuiltSchedulesForSchedule.DataTo", err)
+			continue
+		}
+		out = append(out, d.toBuiltSchedule())
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].TimeCreated > out[j].TimeCreated })
+	return out
+}
+
+func (f *FirestoreStore) GetLatestBuiltSchedule(tenantID, scheduleID string) *BuiltSchedule {
+	list := f.ListBuiltSchedulesForSchedule(tenantID, scheduleID)
+	if len(list) == 0 {
+		return nil
+	}
+	cp := list[0]
+	return &cp
 }
 
 // -------------------------------------------------------------------------

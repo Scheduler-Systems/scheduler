@@ -203,6 +203,29 @@ func matchRoute(method, pathname string, st store.Store) *route {
 			rp := copyWith(p, "scheduleId", parts[4])
 			return &route{params: rp, handler: schedules.RequestHandler(st)}
 
+		// ---- Built schedules (the published shift grid) ---------------------
+
+		// GET /schedules/{id}/built-schedules
+		case method == http.MethodGet && depth == 6 && parts[5] == "built-schedules":
+			rp := copyWith(p, "scheduleId", parts[4])
+			return &route{params: rp, handler: schedules.ListBuiltHandler(st)}
+
+		// POST /schedules/{id}/built-schedules   (manager saves a built grid)
+		case method == http.MethodPost && depth == 6 && parts[5] == "built-schedules":
+			rp := copyWith(p, "scheduleId", parts[4])
+			return &route{params: rp, managerOnly: true, handler: schedules.SaveBuiltHandler(st)}
+
+		// GET /schedules/{id}/built-schedules/latest
+		case method == http.MethodGet && depth == 7 && parts[5] == "built-schedules" && parts[6] == "latest":
+			rp := copyWith(p, "scheduleId", parts[4])
+			return &route{params: rp, handler: schedules.LatestBuiltHandler(st)}
+
+		// GET /schedules/{id}/built-schedules/{builtId}
+		case method == http.MethodGet && depth == 7 && parts[5] == "built-schedules":
+			rp := copyWith(p, "scheduleId", parts[4])
+			rp = copyWith(rp, "builtId", parts[6])
+			return &route{params: rp, handler: schedules.GetBuiltHandler(st)}
+
 		// ---- Employees (embedded roster) ------------------------------------
 		// All employee mutations are manager-gated at the router AND
 		// membership-gated inside the handler (the schedule_acl analogue).
