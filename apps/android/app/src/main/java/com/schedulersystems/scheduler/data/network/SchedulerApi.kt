@@ -4,6 +4,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.schedulersystems.scheduler.data.network.dto.AddEmployeeApiRequest
 import com.schedulersystems.scheduler.data.network.dto.ApiEmployeeDto
 import com.schedulersystems.scheduler.data.network.dto.AvailabilityRequestDto
+import com.schedulersystems.scheduler.data.network.dto.BuiltScheduleDto
+import com.schedulersystems.scheduler.data.network.dto.BuiltScheduleSaveRequest
 import com.schedulersystems.scheduler.data.network.dto.EmployeeListApiResponse
 import com.schedulersystems.scheduler.data.network.dto.InvitationListResponse
 import com.schedulersystems.scheduler.data.network.dto.NotificationListResponse
@@ -113,6 +115,20 @@ interface SchedulerApiService {
     suspend fun listNotifications(
         @Path("tid") tenantId: String
     ): retrofit2.Response<NotificationListResponse>
+
+    // Built schedules: persist the assigned grid (manager) and read the latest one back.
+    @POST("v1/tenants/{tid}/schedules/{sid}/built-schedules")
+    suspend fun saveBuiltSchedule(
+        @Path("tid") tenantId: String,
+        @Path("sid") scheduleId: String,
+        @Body body: BuiltScheduleSaveRequest
+    ): retrofit2.Response<BuiltScheduleDto>
+
+    @GET("v1/tenants/{tid}/schedules/{sid}/built-schedules/latest")
+    suspend fun getLatestBuiltSchedule(
+        @Path("tid") tenantId: String,
+        @Path("sid") scheduleId: String
+    ): retrofit2.Response<BuiltScheduleDto>
 }
 
 class AuthInterceptor(private val firebaseAuth: FirebaseAuth) : Interceptor {

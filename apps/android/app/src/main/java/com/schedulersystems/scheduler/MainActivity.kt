@@ -28,6 +28,7 @@ import com.schedulersystems.scheduler.ui.screens.policies.PoliciesScreen
 import com.schedulersystems.scheduler.ui.screens.priority.CurrentPrioritiesScreen
 import com.schedulersystems.scheduler.ui.screens.requests.ScheduleRequestsScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ArchivedSchedulesScreen
+import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleBuildScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.NewScheduleScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleDetailScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleListScreen
@@ -175,7 +176,16 @@ fun SchedulerNavHost(
                 onNavigateToSettings = { navController.navigate("scheduleSettings/$scheduleId") },
                 onNavigateToRequests = { navController.navigate("scheduleRequests/$scheduleId") },
                 onNavigateToPriorities = { navController.navigate("prioritiesSubmission/$scheduleId") },
-                onNavigateToCurrentPriorities = { navController.navigate("currentPriorities/$scheduleId") }
+                onNavigateToCurrentPriorities = { navController.navigate("currentPriorities/$scheduleId") },
+                onNavigateToBuild = { navController.navigate("scheduleBuild/$scheduleId") }
+            )
+        }
+
+        composable("scheduleBuild/{scheduleId}") { backStackEntry ->
+            val scheduleId = backStackEntry.arguments?.getString("scheduleId") ?: ""
+            ScheduleBuildScreen(
+                scheduleId = scheduleId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

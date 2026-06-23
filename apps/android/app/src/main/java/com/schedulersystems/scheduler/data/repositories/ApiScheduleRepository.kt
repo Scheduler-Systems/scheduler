@@ -2,7 +2,11 @@ package com.schedulersystems.scheduler.data.repositories
 
 import com.schedulersystems.scheduler.data.network.SchedulerApi
 import com.schedulersystems.scheduler.data.network.dto.AvailabilityRequestDto
+import com.schedulersystems.scheduler.data.network.dto.BuiltScheduleSaveRequest
 import com.schedulersystems.scheduler.data.network.dto.toAddRequest
+import com.schedulersystems.scheduler.domain.scheduling.AssignShiftsInput
+import com.schedulersystems.scheduler.domain.scheduling.PartialStationConfig
+import com.schedulersystems.scheduler.domain.scheduling.assignShifts
 import com.schedulersystems.scheduler.data.network.dto.toDomain
 import com.schedulersystems.scheduler.data.network.dto.toDto
 import com.schedulersystems.scheduler.models.domain.Employee
@@ -163,6 +167,51 @@ class ApiScheduleRepository @Inject constructor(
             }
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    override suspend fun buildAndSaveSchedule(scheduleId: String): Result<List<List<List<String>>>> {
+        return try {
+            val schedule = getScheduleById(scheduleId)
+                ?: return Result.failure(Exception("Schedule not found"))
+            val shifts = schedule.settings.enabledShifts
+            val input = AssignShiftsInput(
+                currentPriorities = schedule.currentPriorities,
+                stationNum = 1,
+                numOfPeople = schedule.employees.size.coerceAtLeast(1),
+                stations = listOf(
+                    PartialStationConfig(
+                        morning = shifts.mornings,
+                        afternoon = shifts.afternoons,
+                        night = shifts.evenings
+                    )
+                )
+            )
+            // Real assignment algorithm; map the assigner's nullable cells → "" for the
+            // API (Go grid is [][][]string and an empty cell renders the same either way).
+            val grid = assignShifts(input).grids.map { station ->
+                station.map { day -> day.map { it ?: "" } }
+            }
+            val response = api.service.saveBuiltSchedule(
+                currentTenant(), scheduleId,
+                BuiltScheduleSaveRequest(schedule = grid, currentPriorities = schedule.currentPriorities)
+            )
+            if (response.isSuccessful) {
+                Result.success(response.body()?.schedule ?: grid)
+            } else {
+                Result.failure(Exception("Failed to save built schedule: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getLatestBuiltSchedule(scheduleId: String): List<List<List<String>>>? {
+        return try {
+            val response = api.service.getLatestBuiltSchedule(currentTenant(), scheduleId)
+            if (response.isSuccessful) response.body()?.schedule else null
+        } catch (e: Exception) {
+            null
         }
     }
 }

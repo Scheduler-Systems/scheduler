@@ -15,4 +15,13 @@ interface ScheduleRepository {
     suspend fun addEmployee(scheduleId: String, employee: Employee): Result<Unit>
     suspend fun removeEmployee(scheduleId: String, employeeId: String): Result<Unit>
     suspend fun submitAvailability(scheduleId: String, availability: Map<String, Any>): Result<Unit>
+
+    /**
+     * Runs the shift-assignment algorithm for a schedule and persists the resulting
+     * grid via the API. Returns the built grid (`[station][day][shift]`).
+     */
+    suspend fun buildAndSaveSchedule(scheduleId: String): Result<List<List<List<String>>>>
+
+    /** The most recently built grid for a schedule, or null if none has been built. */
+    suspend fun getLatestBuiltSchedule(scheduleId: String): List<List<List<String>>>?
 }

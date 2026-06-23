@@ -74,4 +74,9 @@ class FakeScheduleRepository : ScheduleRepository {
         lastSubmittedAvailability = availability
         return submitAvailabilityResult
     }
+
+    var buildResult: Result<List<List<List<String>>>> = Result.success(emptyList())
+    var latestBuilt: List<List<List<String>>>? = null
+    override suspend fun buildAndSaveSchedule(scheduleId: String): Result<List<List<List<String>>>> = buildResult
+    override suspend fun getLatestBuiltSchedule(scheduleId: String): List<List<List<String>>>? = latestBuilt
 }

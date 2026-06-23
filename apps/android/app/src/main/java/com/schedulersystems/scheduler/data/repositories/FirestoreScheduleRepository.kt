@@ -110,6 +110,13 @@ class FirestoreScheduleRepository @Inject constructor(
     override suspend fun submitAvailability(scheduleId: String, availability: Map<String, Any>): Result<Unit> =
         Result.success(Unit)
 
+    // Schedule-build persistence is served by the Go API (ApiScheduleRepository, the bound
+    // impl); the legacy Firestore path is unused for it.
+    override suspend fun buildAndSaveSchedule(scheduleId: String): Result<List<List<List<String>>>> =
+        Result.failure(UnsupportedOperationException("buildAndSaveSchedule is served by the Go API"))
+
+    override suspend fun getLatestBuiltSchedule(scheduleId: String): List<List<List<String>>>? = null
+
     suspend fun getScheduleByName(scheduleName: String): Schedule? {
         val snapshot = firestore.collection("schedules")
             .whereEqualTo("schedule_name", scheduleName)
