@@ -4,9 +4,8 @@ import com.schedulersystems.scheduler.data.network.SchedulerApi
 import com.schedulersystems.scheduler.data.network.dto.AvailabilityRequestDto
 import com.schedulersystems.scheduler.data.network.dto.BuiltScheduleSaveRequest
 import com.schedulersystems.scheduler.data.network.dto.toAddRequest
-import com.schedulersystems.scheduler.domain.scheduling.AssignShiftsInput
-import com.schedulersystems.scheduler.domain.scheduling.PartialStationConfig
-import com.schedulersystems.scheduler.domain.scheduling.assignShifts
+import com.schedulersystems.scheduler.domain.scheduling.BuildScheduleInput
+import com.schedulersystems.scheduler.domain.scheduling.buildSchedule
 import com.schedulersystems.scheduler.data.network.dto.toDomain
 import com.schedulersystems.scheduler.data.network.dto.toDto
 import com.schedulersystems.scheduler.models.domain.Employee
@@ -174,24 +173,35 @@ class ApiScheduleRepository @Inject constructor(
         return try {
             val schedule = getScheduleById(scheduleId)
                 ?: return Result.failure(Exception("Schedule not found"))
-            val shifts = schedule.settings.enabledShifts
-            val input = AssignShiftsInput(
-                currentPriorities = schedule.currentPriorities,
-                stationNum = 1,
-                numOfPeople = schedule.employees.size.coerceAtLeast(1),
-                stations = listOf(
-                    PartialStationConfig(
-                        morning = shifts.mornings,
-                        afternoon = shifts.afternoons,
-                        night = shifts.evenings
-                    )
+
+            // Real assignment via the canonical builder (faithful port of the web's
+            // buildSchedule). Roster names are the workers; with no per-cell priority
+            // data wired yet, it fairness-round-robins them across the week — a REAL,
+            // non-empty grid. Enabled shifts come from settings (default all three when
+            // none are toggled, so a freshly-created schedule still builds).
+            val es = schedule.settings.enabledShifts
+            val enabledShifts = buildList {
+                if (es.mornings) add("Morning")
+                if (es.afternoons) add("Afternoon")
+                if (es.evenings) add("Night")
+            }.ifEmpty { listOf("Morning", "Afternoon", "Night") }
+            val numDays = 7
+            val numStations = 1
+
+            val out = buildSchedule(
+                BuildScheduleInput(
+                    employees = schedule.employees.map { it.name },
+                    enabledShifts = enabledShifts,
+                    numDays = numDays,
+                    numStations = numStations
                 )
             )
-            // Real assignment algorithm; map the assigner's nullable cells → "" for the
-            // API (Go grid is [][][]string and an empty cell renders the same either way).
-            val grid = assignShifts(input).grids.map { station ->
-                station.map { day -> day.map { it ?: "" } }
+            // Day-major rows → grid[day][shift][station] for the API/native render.
+            val numShifts = enabledShifts.size
+            val grid = (0 until numDays).map { d ->
+                (0 until numShifts).map { s -> out.rows[d * numShifts + s] }
             }
+
             val response = api.service.saveBuiltSchedule(
                 currentTenant(), scheduleId,
                 BuiltScheduleSaveRequest(schedule = grid, currentPriorities = schedule.currentPriorities)

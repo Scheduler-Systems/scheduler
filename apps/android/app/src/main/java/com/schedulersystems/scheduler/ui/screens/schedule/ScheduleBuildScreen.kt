@@ -99,43 +99,42 @@ fun ScheduleBuildScreen(
                     )
                 }
             } else {
-                state.grid.forEachIndexed { stationIndex, station ->
-                    Text(
-                        "Station ${stationIndex + 1}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Row(Modifier.fillMaxWidth()) {
-                        Text("Day", Modifier.width(44.dp), fontWeight = FontWeight.SemiBold)
-                        SHIFTS.forEach { shift ->
+                // grid is day-major: grid[day][shift] = the station name(s) for that slot.
+                Text(
+                    "Built Schedule",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth()) {
+                    Text("Day", Modifier.width(44.dp), fontWeight = FontWeight.SemiBold)
+                    SHIFTS.forEach { shift ->
+                        Text(
+                            shift,
+                            Modifier.weight(1f),
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+                state.grid.forEachIndexed { dayIndex, dayShifts ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(DAYS.getOrElse(dayIndex) { "?" }, Modifier.width(44.dp))
+                        for (shiftIndex in SHIFTS.indices) {
+                            val cell = dayShifts.getOrNull(shiftIndex).orEmpty()
+                                .filter { it.isNotBlank() }.joinToString(", ")
                             Text(
-                                shift,
+                                cell.ifBlank { "—" },
                                 Modifier.weight(1f),
-                                fontWeight = FontWeight.SemiBold,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
-                    station.forEachIndexed { dayIndex, day ->
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(DAYS.getOrElse(dayIndex) { "?" }, Modifier.width(44.dp))
-                            for (shiftIndex in SHIFTS.indices) {
-                                val name = day.getOrNull(shiftIndex).orEmpty()
-                                Text(
-                                    if (name.isBlank()) "—" else name,
-                                    Modifier.weight(1f),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(16.dp))
                 }
             }
         }
