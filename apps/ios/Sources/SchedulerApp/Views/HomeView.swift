@@ -88,6 +88,15 @@ struct HomeView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
 
+                    Button(action: { router.push(.chatList) }) {
+                        Label("Chat", systemImage: "bubble.left.and.bubble.right")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.purple)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+
                     Button(action: { router.push(.scheduleBuilder) }) {
                         Label("Create New Schedule", systemImage: "plus.circle")
                             .frame(maxWidth: .infinity)

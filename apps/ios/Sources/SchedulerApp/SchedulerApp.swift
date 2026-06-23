@@ -1,5 +1,6 @@
 import FirebaseAuth
 import FirebaseCore
+import FirebaseFirestore
 import SwiftUI
 import UIKit
 
@@ -124,6 +125,10 @@ struct SchedulerApp: App {
             PoliciesView()
         case .notifications:
             NotificationsView(scheduleService: scheduleService)
+        case .chatList:
+            ChatListView()
+        case .chatThread(let id):
+            ChatThreadView(chatId: id)
         }
     }
 }
@@ -150,6 +155,14 @@ final class SchedulerAppDelegate: NSObject, UIApplicationDelegate {
         if AuthService.isFirebaseEmulatorEnabled {
             let host = ProcessInfo.processInfo.environment["FIREBASE_EMULATOR_HOST"] ?? "127.0.0.1"
             Auth.auth().useEmulator(withHost: host, port: 9099)
+            // Route Firestore (chat) at the isolated chat emulator on :8089 (NOT 8088 = the GAL
+            // emulator). settings.host only overrides the endpoint — the project id stays the
+            // bundled one (scheduler-ci-placeholder), which the seed must match. Must be set before
+            // any Firestore use; clearState wipes the app cache so defaults are fine for e2e.
+            let fsSettings = Firestore.firestore().settings
+            fsSettings.host = "\(host):8089"
+            fsSettings.isSSLEnabled = false
+            Firestore.firestore().settings = fsSettings
             #if DEBUG
             // Phone auth on the emulator has no reCAPTCHA (not implemented there) — disable app
             // verification so the Auth emulator issues a retrievable code instead. DEBUG-ONLY:

@@ -35,11 +35,10 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance().apply {
-        if (BuildConfig.USE_FIREBASE_EMULATOR) {
-            useEmulator(BuildConfig.FIREBASE_EMULATOR_HOST, 8088)
-        }
-    }
+    // The emulator wiring (useEmulator → port 8089) is done EAGERLY in SchedulerApplication.onCreate
+    // for the process singleton, so it applies to the chat screens' direct getInstance() calls too.
+    // Calling useEmulator twice throws, so it must NOT be repeated here.
+    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
     
     @Provides
     @Singleton

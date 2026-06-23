@@ -35,6 +35,7 @@ fun HomeScreen(
     onNavigateToNotifications: () -> Unit,
     onNavigateToPolicies: () -> Unit = {},
     onNavigateToGetName: () -> Unit = {},
+    onNavigateToChat: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -152,7 +153,8 @@ fun HomeScreen(
                         onArchivedClick = onNavigateToArchived,
                         onProfileClick = onNavigateToProfile,
                         onPoliciesClick = onNavigateToPolicies,
-                        onCompleteProfileClick = onNavigateToGetName
+                        onCompleteProfileClick = onNavigateToGetName,
+                        onChatClick = onNavigateToChat
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -181,7 +183,8 @@ private fun ActionButtons(
     onArchivedClick: () -> Unit,
     onProfileClick: () -> Unit,
     onPoliciesClick: () -> Unit = {},
-    onCompleteProfileClick: () -> Unit = {}
+    onCompleteProfileClick: () -> Unit = {},
+    onChatClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -200,6 +203,19 @@ private fun ActionButtons(
             shape = MaterialTheme.shapes.medium
         ) {
             Text("My Schedules", fontSize = 18.sp)
+        }
+
+        Button(
+            onClick = onChatClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF6A0DAD)
+            ),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Text("Chat", fontSize = 18.sp)
         }
 
         // Shown to any signed-in user, matching iOS (which is ungated). The Go API

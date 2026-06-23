@@ -67,7 +67,7 @@ AREAS=(
 "archived-schedules|ScheduleDtoTest|archived-schedules.yaml|testFetchSchedulesMapping|archived-schedules.yaml|-|done (android+ios; Home→Archived→status=archived filtered list)"
 "export-shifts|ScheduleIcsTest|export-shifts.yaml|ScheduleIcsTests|export-shifts.yaml|-|done (android+ios; detail/dashboard→Export Shifts→built roster→Export to Calendar→real .ics file [RFC 5545], credential-free, imports into Google Calendar + any calendar app)"
 "share-pdf|SchedulePdfTest|share-pdf.yaml|SchedulePdfTests|share-pdf.yaml|-|done (android+ios; detail/dashboard→Share PDF→built roster→Generate PDF→real on-device PDF, page count read back)"
-"chat-threads|-|-|-|-|-|todo(needs-signoff,merge)"
+"chat-threads|ChatFormatTest|chat-threads.yaml|testChat|chat-threads.yaml|-|done (android+ios; Home→Chat→live Firestore thread from the isolated :8089 emulator [app project scheduler-ci-placeholder]→last_message rendered; parity with Android Firestore chat)"
 "notifications|NotificationDtoTest|notifications.yaml|testFetchNotifications|notifications.yaml|-|done (android+ios; Home→bell→feed from new Go GET /notifications endpoint)"
 "profile-settings|ProfileSettingsViewModelTest|profile-settings.yaml|testAuthStateObservationAuthenticated|profile-settings.yaml|-|done (android+ios; Home→Profile shows account email)"
 "policies|LegalDocumentsTest|policies.yaml|testLegalDocumentsURL|policies.yaml|-|done (android+ios; Home→Policies→Privacy Policy + Terms open external Legal Center)"

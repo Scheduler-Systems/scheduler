@@ -20,6 +20,8 @@ import com.schedulersystems.scheduler.ui.screens.auth.LoginScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PasswordResetScreen
 import com.schedulersystems.scheduler.ui.screens.auth.PhoneSignInScreen
 import com.schedulersystems.scheduler.ui.screens.auth.VerifyEmailScreen
+import com.schedulersystems.scheduler.ui.screens.chat.ChatDetailsScreen
+import com.schedulersystems.scheduler.ui.screens.chat.ChatMainScreen
 import com.schedulersystems.scheduler.ui.screens.employees.EmployeeListScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
 import com.schedulersystems.scheduler.ui.screens.profile.ProfileSettingsScreen
@@ -152,7 +154,23 @@ fun SchedulerNavHost(
                 onNavigateToProfile = { navController.navigate("profile") },
                 onNavigateToPolicies = { navController.navigate("policies") },
                 onNavigateToGetName = { navController.navigate("getName") },
-                onNavigateToNotifications = { navController.navigate("notifications") }
+                onNavigateToNotifications = { navController.navigate("notifications") },
+                onNavigateToChat = { navController.navigate("chat2Main") }
+            )
+        }
+
+        composable("chat2Main") {
+            ChatMainScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToChatDetails = { chatId -> navController.navigate("chat2Details/$chatId") }
+            )
+        }
+
+        composable("chat2Details/{chatId}") { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
+            ChatDetailsScreen(
+                chatId = chatId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

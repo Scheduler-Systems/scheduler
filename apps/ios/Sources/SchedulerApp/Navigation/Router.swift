@@ -28,6 +28,8 @@ enum Route: Hashable {
     case profile
     case policies
     case notifications
+    case chatList
+    case chatThread(String)
 }
 
 @MainActor

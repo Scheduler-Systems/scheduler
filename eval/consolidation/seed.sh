@@ -156,3 +156,27 @@ print(next((s["id"] for s in d.get("items",[]) if s.get("name")=="QA Demo Schedu
 else
   echo "seed: (Go API not up — schedule data pages will be empty)"
 fi
+
+# --- chat-threads: seed one thread into the ISOLATED Firestore emulator (:8089) ---
+# Defensive: only seeds if :8089 is up, so it can NEVER affect the Go-API/Auth areas. The chat
+# schema is the Android/Flutter shape (chats.{users:[DocumentReference], last_message, ...} +
+# chat_messages subcollection). The current qa-verified uid ($localId) is a participant, so the
+# native chat query whereArrayContains("users", users/{uid}) returns it. NEVER use :8088 (=GAL).
+# PROJECT ID: Firestore namespaces data by project id, and useEmulator() only overrides host:port —
+# the app still reads under its bundled project id (scheduler-ci-placeholder, from google-services.json
+# / GoogleService-Info.plist). Seed + every referenceValue MUST use that same id, or
+# whereArrayContains("users", users/{uid}) compares mismatched reference PATHS and returns nothing
+# (→ "No chats available"). Launch the :8089 emulator with --project scheduler-ci-placeholder.
+FS_EMU=http://127.0.0.1:8089
+if curl -s -o /dev/null -w '%{http_code}' "$FS_EMU/" 2>/dev/null | grep -q 200; then
+  FS="$FS_EMU/v1/projects/scheduler-ci-placeholder/databases/(default)/documents"
+  REF="projects/scheduler-ci-placeholder/databases/(default)/documents"
+  fspatch(){ curl -s -o /dev/null -X PATCH "$FS/$1" -H 'Content-Type: application/json' -d "$2"; }
+  fspatch "users/$localId" "{\"fields\":{\"display_name\":{\"stringValue\":\"QA Verified\"},\"is_available\":{\"booleanValue\":true},\"photo_url\":{\"stringValue\":\"\"}}}"
+  fspatch "users/alex" "{\"fields\":{\"display_name\":{\"stringValue\":\"Alex Worker\"},\"is_available\":{\"booleanValue\":true},\"photo_url\":{\"stringValue\":\"\"}}}"
+  fspatch "chats/qa-thread-1" "{\"fields\":{\"users\":{\"arrayValue\":{\"values\":[{\"referenceValue\":\"$REF/users/$localId\"},{\"referenceValue\":\"$REF/users/alex\"}]}},\"user_a\":{\"referenceValue\":\"$REF/users/$localId\"},\"user_b\":{\"referenceValue\":\"$REF/users/alex\"},\"last_message\":{\"stringValue\":\"Hi from QA seed\"},\"last_message_time\":{\"timestampValue\":\"2026-06-23T12:00:00Z\"},\"last_message_sent_by\":{\"referenceValue\":\"$REF/users/alex\"},\"last_message_seen_by\":{\"arrayValue\":{\"values\":[]}},\"group_chat_id\":{\"integerValue\":\"1234567\"}}}"
+  fspatch "chats/qa-thread-1/chat_messages/m1" "{\"fields\":{\"user\":{\"referenceValue\":\"$REF/users/alex\"},\"chat\":{\"referenceValue\":\"$REF/chats/qa-thread-1\"},\"text\":{\"stringValue\":\"Hi from QA seed\"},\"timestamp\":{\"timestampValue\":\"2026-06-23T12:00:00Z\"},\"image\":{\"stringValue\":\"\"},\"video\":{\"stringValue\":\"\"}}}"
+  echo "seed: chat thread present (Firestore emulator :8089)"
+else
+  echo "seed: (Firestore emulator :8089 not up — chat-threads will be empty)"
+fi

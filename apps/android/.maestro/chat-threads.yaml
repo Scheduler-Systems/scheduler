@@ -1,0 +1,27 @@
+# Maestro GUI e2e for the Android chat-threads page (Flutter→native consolidation).
+# login → Home → "Chat" → ChatMainScreen reads the seeded thread live from the isolated
+# demo-scheduler Firestore emulator (:8089) and renders its last_message preview "Hi from QA seed"
+# — a REAL Firestore read (parity with the web/Flutter chat), not a stub.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Welcome Back"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "Chat"                                   # Home → ChatMainScreen
+- extendedWaitUntil:
+    visible: "Hi from QA seed"                    # seeded thread, read live from Firestore
+    timeout: 20000
+- takeScreenshot: 01-chat

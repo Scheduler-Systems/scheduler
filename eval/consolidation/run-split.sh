@@ -32,6 +32,24 @@ cold_boot_android(){
   echo "  (android ready after ${i} ticks)"
 }
 
+# chat-threads needs an isolated Firestore emulator on :8089, under the app's bundled project id
+# (scheduler-ci-placeholder) so the chat array-contains query matches the seeded thread. Start it
+# if absent so this eval is self-contained; never touch :8088 (the user's GAL/demo-gal emulator).
+ensure_firestore(){
+  if curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8089/" 2>/dev/null | grep -q 200; then
+    echo "  (firestore emulator :8089 already up)"; return 0; fi
+  command -v firebase >/dev/null 2>&1 || { echo "  (firebase CLI missing — chat-threads will be empty)"; return 0; }
+  local cfg="${TMPDIR:-/tmp}/scheduler-fs-emu"; mkdir -p "$cfg"
+  printf '%s' '{ "emulators": { "firestore": { "port": 8089, "host": "127.0.0.1", "websocketPort": 9151 }, "hub": { "port": 4403, "host": "127.0.0.1" }, "ui": { "enabled": false }, "singleProjectMode": true } }' > "$cfg/firebase.json"
+  echo "  (starting firestore emulator :8089 [project scheduler-ci-placeholder] …)"
+  ( cd "$cfg" && nohup firebase emulators:start --only firestore --project scheduler-ci-placeholder --config firebase.json >"$cfg/fs8089.log" 2>&1 & )
+  local i=0; while [ $i -lt 45 ]; do curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8089/" 2>/dev/null | grep -q 200 && break; sleep 1; i=$((i+1)); done
+  curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8089/" 2>/dev/null | grep -q 200 \
+    && echo "  (firestore emulator :8089 ready after ${i}s)" || echo "  (firestore emulator :8089 did NOT come up — chat-threads will be empty)"
+}
+
+ensure_firestore
+
 echo "════════ PASS 1/2: iOS (Android emulator down) ════════"
 shut_android
 bash "$HERE/run.sh" --ios
