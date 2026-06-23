@@ -108,6 +108,8 @@ struct SchedulerApp: App {
             ScheduleBuildView(scheduleId: id, scheduleService: scheduleService)
         case .sharePdf(let id):
             SharePdfView(scheduleId: id, scheduleService: scheduleService)
+        case .exportShifts(let id):
+            ExportShiftsView(scheduleId: id, scheduleService: scheduleService)
         case .scheduleBuilder:
             ScheduleBuilderView(scheduleService: scheduleService)
         case .employeeList(let id):

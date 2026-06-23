@@ -31,6 +31,7 @@ import com.schedulersystems.scheduler.ui.screens.policies.PoliciesScreen
 import com.schedulersystems.scheduler.ui.screens.priority.CurrentPrioritiesScreen
 import com.schedulersystems.scheduler.ui.screens.requests.ScheduleRequestsScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ArchivedSchedulesScreen
+import com.schedulersystems.scheduler.ui.screens.export.ExportShiftsScreen
 import com.schedulersystems.scheduler.ui.screens.export.SharePdfScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.ScheduleBuildScreen
 import com.schedulersystems.scheduler.ui.screens.schedule.NewScheduleScreen
@@ -200,7 +201,16 @@ fun SchedulerNavHost(
                 onNavigateToPriorities = { navController.navigate("prioritiesSubmission/$scheduleId") },
                 onNavigateToCurrentPriorities = { navController.navigate("currentPriorities/$scheduleId") },
                 onNavigateToBuild = { navController.navigate("scheduleBuild/$scheduleId") },
-                onNavigateToSharePdf = { navController.navigate("sharePdf/$scheduleId") }
+                onNavigateToSharePdf = { navController.navigate("sharePdf/$scheduleId") },
+                onNavigateToExport = { navController.navigate("exportShifts/$scheduleId") }
+            )
+        }
+
+        composable("exportShifts/{scheduleId}") { backStackEntry ->
+            val scheduleId = backStackEntry.arguments?.getString("scheduleId") ?: ""
+            ExportShiftsScreen(
+                scheduleId = scheduleId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

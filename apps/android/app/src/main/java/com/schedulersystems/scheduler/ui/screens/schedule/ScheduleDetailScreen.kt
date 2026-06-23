@@ -32,6 +32,7 @@ fun ScheduleDetailScreen(
     onNavigateToCurrentPriorities: () -> Unit = {},
     onNavigateToBuild: () -> Unit = {},
     onNavigateToSharePdf: () -> Unit = {},
+    onNavigateToExport: () -> Unit = {},
     viewModel: ScheduleDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -108,6 +109,7 @@ fun ScheduleDetailScreen(
                         onCurrentPrioritiesClick = onNavigateToCurrentPriorities,
                         onBuildClick = onNavigateToBuild,
                         onSharePdfClick = onNavigateToSharePdf,
+                        onExportClick = onNavigateToExport,
                         onSettingsClick = onNavigateToSettings,
                         onRequestsClick = onNavigateToRequests,
                         modifier = Modifier.padding(padding)
@@ -127,6 +129,7 @@ private fun ScheduleDetailContent(
     onCurrentPrioritiesClick: () -> Unit,
     onBuildClick: () -> Unit,
     onSharePdfClick: () -> Unit,
+    onExportClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRequestsClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -152,6 +155,7 @@ private fun ScheduleDetailContent(
             onCurrentPrioritiesClick = onCurrentPrioritiesClick,
             onBuildClick = onBuildClick,
             onSharePdfClick = onSharePdfClick,
+            onExportClick = onExportClick,
             onSettingsClick = onSettingsClick,
             onRequestsClick = onRequestsClick
         )
@@ -220,6 +224,7 @@ private fun ActionButtonsSection(
     onCurrentPrioritiesClick: () -> Unit,
     onBuildClick: () -> Unit,
     onSharePdfClick: () -> Unit,
+    onExportClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRequestsClick: () -> Unit
 ) {
@@ -302,6 +307,17 @@ private fun ActionButtonsSection(
             shape = MaterialTheme.shapes.small
         ) {
             Text("Share PDF", fontSize = 16.sp)
+        }
+
+        Button(
+            onClick = onExportClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A0DAD)),
+            shape = MaterialTheme.shapes.small
+        ) {
+            Text("Export Shifts", fontSize = 16.sp)
         }
     }
 }

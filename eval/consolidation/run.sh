@@ -65,7 +65,7 @@ AREAS=(
 "priorities-submission|PrioritiesViewModelTest|priorities-submission.yaml|testSubmitPriorities|priorities-submission.yaml|-|done (android+ios; detail→Submit Priorities→list current_priorities→Submit via POST /availability)"
 "priorities-current|CurrentPrioritiesViewModelTest|priorities-current.yaml|testFetchScheduleMapsCurrentPriorities|priorities-current.yaml|-|done (android+ios; detail→Current Priorities→read-only current_priorities standings)"
 "archived-schedules|ScheduleDtoTest|archived-schedules.yaml|testFetchSchedulesMapping|archived-schedules.yaml|-|done (android+ios; Home→Archived→status=archived filtered list)"
-"export-shifts|-|-|-|-|-|todo(needs-signoff)"
+"export-shifts|ScheduleIcsTest|export-shifts.yaml|ScheduleIcsTests|export-shifts.yaml|-|done (android+ios; detail/dashboard→Export Shifts→built roster→Export to Calendar→real .ics file [RFC 5545], credential-free, imports into Google Calendar + any calendar app)"
 "share-pdf|SchedulePdfTest|share-pdf.yaml|SchedulePdfTests|share-pdf.yaml|-|done (android+ios; detail/dashboard→Share PDF→built roster→Generate PDF→real on-device PDF, page count read back)"
 "chat-threads|-|-|-|-|-|todo(needs-signoff,merge)"
 "notifications|NotificationDtoTest|notifications.yaml|testFetchNotifications|notifications.yaml|-|done (android+ios; Home→bell→feed from new Go GET /notifications endpoint)"

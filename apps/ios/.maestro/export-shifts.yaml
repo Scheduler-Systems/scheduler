@@ -1,0 +1,48 @@
+# Maestro GUI e2e for the iOS export-shifts page (Flutter→native consolidation).
+# login → My Schedules → schedule → dashboard → "Export Shifts" → the built roster (real seeded
+# employee Alex Worker) → "Export to Calendar" writes a REAL .ics file (RFC 5545) → "Calendar
+# file ready · N event(s)" confirms a non-empty calendar. The system share sheet (external) is
+# the e2e ceiling and is not exercised. Credential-free (.ics) — no Google OAuth dependency.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"
+    timeout: 45000
+- tapOn: "Email"
+- inputText: "qa-verified@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "Password123!"
+- tapOn: "Scheduler"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "My Schedules"
+    timeout: 15000
+- tapOn: "My Schedules"
+- extendedWaitUntil:
+    visible: "QA Demo Schedule"
+    timeout: 15000
+- tapOn: "QA Demo Schedule"
+- extendedWaitUntil:
+    visible: "Schedule Name:"
+    timeout: 15000
+- scrollUntilVisible:
+    element: "Export Shifts"
+    direction: DOWN
+- tapOn: "Export Shifts"                          # the dashboard button → ExportShiftsView
+- extendedWaitUntil:
+    visible: "Alex Worker"                        # REAL built roster in the preview
+    timeout: 25000
+- scrollUntilVisible:
+    element: "Export to Calendar"
+    direction: DOWN
+- tapOn: "Export to Calendar"                     # writes the real .ics file
+- extendedWaitUntil:
+    visible: "Calendar file ready.*"              # regex: "Calendar file ready · N event(s)"
+    timeout: 20000
+- takeScreenshot: 01-ics-ready

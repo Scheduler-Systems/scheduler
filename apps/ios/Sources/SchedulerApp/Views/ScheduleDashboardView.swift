@@ -99,6 +99,7 @@ struct ScheduleDashboardView: View {
                     }
 
                     sharePdfButton
+                    exportShiftsButton
                 }
             }
             .padding()
@@ -111,6 +112,17 @@ struct ScheduleDashboardView: View {
     private var sharePdfButton: some View {
         Button(action: { router.push(.sharePdf(schedule.id)) }) {
             Label("Share PDF", systemImage: "square.and.arrow.up")
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.purple)
+                .foregroundColor(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+    }
+
+    private var exportShiftsButton: some View {
+        Button(action: { router.push(.exportShifts(schedule.id)) }) {
+            Label("Export Shifts", systemImage: "calendar.badge.clock")
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(Color.purple)
