@@ -10,6 +10,7 @@ struct SchedulerApp: App {
     @UIApplicationDelegateAdaptor(SchedulerAppDelegate.self) private var appDelegate
     @StateObject private var router = Router()
     @StateObject private var auth = AuthViewModel()
+    @State private var showOnboarding: Bool = SchedulerApp.shouldStartWithOnboarding()
 
     private let scheduleService: ScheduleDataServiceProtocol
 
@@ -33,15 +34,39 @@ struct SchedulerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $router.path) {
-                LoginView()
-                    .navigationDestination(for: Route.self) { route in
-                        destination(for: route)
+            Group {
+                if showOnboarding {
+                    OnboardingView(onComplete: {
+                        UserDefaults.standard.set(true, forKey: "onboarding_completed")
+                        showOnboarding = false
+                    })
+                } else {
+                    NavigationStack(path: $router.path) {
+                        LoginView()
+                            .navigationDestination(for: Route.self) { route in
+                                destination(for: route)
+                            }
                     }
+                }
             }
             .environmentObject(router)
             .environmentObject(auth)
         }
+    }
+
+    /// First-launch onboarding gate. Shows onboarding when a `forceOnboarding` launch
+    /// argument is present (e2e), or on a real production first launch (no emulator
+    /// context AND the completed flag unset). In the emulator/eval context it stays
+    /// HIDDEN unless explicitly forced, so the existing logged-in e2e flows are unaffected.
+    static func shouldStartWithOnboarding() -> Bool {
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains(where: { $0.localizedCaseInsensitiveContains("forceOnboarding") }) { return true }
+        let env = ProcessInfo.processInfo.environment
+        let emulator = env["USE_FIREBASE_EMULATOR"] == "true"
+            || UserDefaults.standard.bool(forKey: "useFirebaseEmulator")
+            || args.contains { $0.localizedCaseInsensitiveContains("useFirebaseEmulator") }
+        if emulator { return false }
+        return !UserDefaults.standard.bool(forKey: "onboarding_completed")
     }
 
     @ViewBuilder

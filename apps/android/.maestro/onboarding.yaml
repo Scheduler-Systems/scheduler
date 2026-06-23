@@ -1,0 +1,19 @@
+# Maestro GUI e2e for the Android onboarding first-launch gate (Flutter→native consolidation).
+# A `forceOnboarding` launch extra makes the app start on the onboarding carousel (the gate is
+# otherwise HIDDEN in the emulator build, so the 23 logged-in flows are unaffected). The real
+# onboarding slides render ("Stay Connected") → "Start Now" persists onboarding_completed and
+# advances to the login screen.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      forceOnboarding: true
+- extendedWaitUntil:
+    visible: "Stay Connected"                     # real first onboarding slide
+    timeout: 30000
+- tapOn: "Start Now"                              # persists onboarding_completed → login
+- extendedWaitUntil:
+    visible: "Welcome Back"                       # landed on the login screen
+    timeout: 15000
+- takeScreenshot: 01-onboarded-to-login

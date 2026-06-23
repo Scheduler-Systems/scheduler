@@ -3,6 +3,10 @@ import SwiftUI
 struct OnboardingView: View {
     @StateObject private var vm = OnboardingViewModel()
 
+    /// Called when the user taps "Start Now" — the host persists the completed flag
+    /// and leaves onboarding (first-launch gate; see SchedulerApp).
+    var onComplete: () -> Void = {}
+
     var body: some View {
         VStack {
             TabView(selection: $vm.currentPage) {
@@ -14,7 +18,7 @@ struct OnboardingView: View {
             .tabViewStyle(.page(indexDisplayMode: .always))
             #endif
 
-            Button(action: { vm.complete() }) {
+            Button(action: { vm.complete(); onComplete() }) {
                 Text("Start Now")
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)

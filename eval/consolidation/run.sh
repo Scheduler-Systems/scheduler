@@ -53,7 +53,7 @@ AREAS=(
 "auth-verify-email|AuthViewModelVerifyEmailTest|verify-email.yaml|testVerifyEmail|verify-email.yaml|-|done (android+ios, unit+e2e)"
 "auth-get-name|UserProfileDtoTest|auth-get-name.yaml|testUpdateDisplayName|auth-get-name.yaml|-|done (android+ios; Home→Complete Profile→name→PUT /users/{uid})"
 "auth-choose-role|UserProfileDtoTest|auth-choose-role.yaml|testUpdateRole|auth-choose-role.yaml|-|done (android+ios; →Choose Role→PUT /users/{uid}/role→home)"
-"onboarding|-|-|testOnboarding|-|-|todo"
+"onboarding|OnboardingGateTest|onboarding.yaml|testOnboarding|onboarding.yaml|-|done (android+ios; forceOnboarding gate → real carousel → Start Now → login; eval-safe: hidden in emulator unless forced)"
 "my-schedules|ScheduleListViewModelTest|my-schedules.yaml|testHomeViewModel|my-schedules.yaml|-|done (android+ios; login→Go-API data)"
 "schedule-dashboard|ScheduleDetailViewModelTest|schedule-dashboard.yaml|testScheduleDetailView|schedule-dashboard.yaml|-|done (android+ios; login→detail by id)"
 "new-schedule-create|NewScheduleViewModelTest|new-schedule-create.yaml|testCreateSchedule|new-schedule-create.yaml|-|done (android+ios; Home→create→persists via POST /schedules)"

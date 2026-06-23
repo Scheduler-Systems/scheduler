@@ -1,0 +1,20 @@
+# Maestro GUI e2e for the iOS onboarding first-launch gate (Flutter→native consolidation).
+# A `forceOnboarding` launch argument makes the app start on the onboarding carousel (the gate is
+# otherwise HIDDEN in the emulator context, so the existing logged-in flows are unaffected). The
+# real onboarding slides render ("Stay Connected") → "Start Now" persists the completed flag and
+# advances to the login screen.
+appId: com.schedulersystems.scheduler
+---
+- launchApp:
+    clearState: true
+    arguments:
+      useFirebaseEmulator: true
+      forceOnboarding: true
+- extendedWaitUntil:
+    visible: "Stay Connected"                     # real first onboarding slide
+    timeout: 30000
+- tapOn: "Start Now"                              # persists onboarding_completed → login
+- extendedWaitUntil:
+    visible: "Sign in to manage your schedules"   # landed on the login screen
+    timeout: 15000
+- takeScreenshot: 01-onboarded-to-login

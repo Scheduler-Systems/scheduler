@@ -1,5 +1,6 @@
 package com.schedulersystems.scheduler
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,7 +24,9 @@ import com.schedulersystems.scheduler.ui.screens.employees.EmployeeListScreen
 import com.schedulersystems.scheduler.ui.screens.home.HomeScreen
 import com.schedulersystems.scheduler.ui.screens.profile.ProfileSettingsScreen
 import com.schedulersystems.scheduler.ui.screens.priorities.PrioritiesSubmissionScreen
+import com.schedulersystems.scheduler.domain.onboarding.onboardingStartDestination
 import com.schedulersystems.scheduler.ui.screens.notifications.NotificationsScreen
+import com.schedulersystems.scheduler.ui.screens.onboarding.OnboardingScreen
 import com.schedulersystems.scheduler.ui.screens.policies.PoliciesScreen
 import com.schedulersystems.scheduler.ui.screens.priority.CurrentPrioritiesScreen
 import com.schedulersystems.scheduler.ui.screens.requests.ScheduleRequestsScreen
@@ -41,6 +44,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val start = resolveStartDestination()
         setContent {
             SchedulerTheme {
                 Surface(
@@ -48,10 +52,22 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    SchedulerNavHost(navController)
+                    SchedulerNavHost(navController, startDestination = start)
                 }
             }
         }
+    }
+
+    // First-launch onboarding gate (mirrors iOS). Shows onboarding when a `forceOnboarding`
+    // launch extra is set (e2e) or on a real production first launch (NOT the emulator build
+    // AND the completed flag unset). In the emulator/eval build it stays hidden unless forced,
+    // so the existing logged-in e2e flows (which clearState) are unaffected.
+    private fun resolveStartDestination(): String {
+        val force = intent?.getStringExtra("forceOnboarding") == "true" ||
+            intent?.getBooleanExtra("forceOnboarding", false) == true
+        val completed = getSharedPreferences("scheduler_prefs", Context.MODE_PRIVATE)
+            .getBoolean("onboarding_completed", false)
+        return onboardingStartDestination(force, BuildConfig.USE_FIREBASE_EMULATOR, completed)
     }
 }
 
@@ -64,6 +80,11 @@ fun SchedulerNavHost(
         navController = navController,
         startDestination = startDestination
     ) {
+        composable("onboarding") {
+            // OnboardingScreen self-persists onboarding_completed and navigates to "login".
+            OnboardingScreen(navController)
+        }
+
         composable("login") {
             LoginScreen(
                 onNavigateToPhoneSignIn = { navController.navigate("phoneSignIn") },
