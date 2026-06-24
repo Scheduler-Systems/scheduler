@@ -126,6 +126,46 @@ describe("PrioritiesClient", () => {
     );
   });
 
+  // Regression: after a successful submit, the "All submissions" list (admin/creator view)
+  // must refresh live — previously it stayed stale until a full page reload.
+  it("re-fetches all submissions after a successful submit", async () => {
+    getSchedule.mockResolvedValue(
+      baseSchedule({
+        employees: [
+          {
+            employee_name: "Ada",
+            employee_email: "ada@x",
+            role: { is_creator: true },
+          },
+        ],
+      }),
+    );
+    getPrioritySubmission.mockResolvedValue(null);
+    getAllPrioritySubmissions.mockResolvedValue([]);
+    submitPriorities.mockResolvedValueOnce(undefined);
+    const user = userEvent.setup();
+    const { container } = render(<PrioritiesClient />);
+    // initial load fetches the submissions once
+    await waitFor(() =>
+      expect(getAllPrioritySubmissions).toHaveBeenCalledTimes(1),
+    );
+    const firstCell = container.querySelector(
+      "td.cursor-pointer",
+    ) as HTMLElement;
+    expect(firstCell).toBeTruthy();
+    await user.click(firstCell);
+    await user.click(
+      screen.getByRole("button", { name: /Submit priorities/i }),
+    );
+    await waitFor(() =>
+      expect(screen.getByText(/Priorities submitted/i)).toBeInTheDocument(),
+    );
+    // the fix: submissions are re-fetched so the panel reflects the new submission
+    await waitFor(() =>
+      expect(getAllPrioritySubmissions).toHaveBeenCalledTimes(2),
+    );
+  });
+
   it("shows a friendly error when submitPriorities rejects", async () => {
     getSchedule.mockResolvedValueOnce(baseSchedule());
     getPrioritySubmission.mockResolvedValueOnce(null);
