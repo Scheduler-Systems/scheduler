@@ -113,6 +113,27 @@ describe("RequestDetailPage", () => {
     expect(screen.getByText(/family trip/)).toBeInTheDocument();
   });
 
+  // Regression: requester = the signed-in viewer with no linked employee record
+  // (e.g. the schedule creator) must show their name, never a raw auth uid.
+  it("resolves the signed-in viewer's own name as requester instead of a raw uid", async () => {
+    useAuthMock.mockReturnValue({
+      user: { uid: "ucreator", email: "demo@x", displayName: "Demo Creator" },
+    });
+    getSchedule.mockResolvedValueOnce(baseSchedule());
+    getScheduleChangeRequest.mockResolvedValueOnce({
+      ...pendingRequest(),
+      userId: "ucreator",
+    });
+    render(<RequestDetailPage />);
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: /Request detail/i })
+      ).toBeInTheDocument()
+    );
+    expect(screen.getByText(/Demo Creator/)).toBeInTheDocument();
+    expect(screen.queryByText("ucreator")).toBeNull();
+  });
+
   it("approves by calling updateScheduleChangeRequestStatus('accepted')", async () => {
     getSchedule.mockResolvedValueOnce(baseSchedule());
     getScheduleChangeRequest.mockResolvedValueOnce(pendingRequest());
