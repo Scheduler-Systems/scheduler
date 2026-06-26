@@ -1,0 +1,128 @@
+{
+  "summary": "Analyzed ~60 LangGraph agent specs (45 QA, 15 Marketing). They are remarkably uniform: every spec targets managed LangGraph Platform / LangSmith Deployments (Cloud SaaS), compiles WITHOUT a custom checkpointer/store (platform injects Postgres), gates every irreversible action behind interrupt(), uses Claude for orchestration only (no model training — Anthropic-terms compliant), and pushes heavy execution to remote runners (ARC/GAL Swarm/GitHub Actions) per the \"orchestrate local, execute on cluster\" rule. This uniformity is the single biggest leverage point: ~12 of the 45 QA agents are near-duplicate \"CI-failure-triage → classify flake-vs-regression → draft fix → approval-gate → write\" patterns, and ~6 marketing agents are \"milestone/cron → draft → compliance-gate → approval → Brevo send\" patterns. Building all 60 as bespoke repos would be enormous duplicate effort.\n\nREVENUE-FIRST ORDERING (per the workspace's standing revenue-first priority): The agents that directly protect live RevenueCat/Scheduler revenue or the paid web funnel rank highest. The single highest-leverage QA agent is qa-test-aggregator/qa-test-orchestrator (cross-repo merge-gate + flaky/regression triage over scheduler-web + scheduler-api + ios/android) because it consolidates ~12 per-repo triage agents into ONE deployment and defends the merge gate on every revenue repo. The highest-leverage marketing agents are the Brevo lifecycle/cohort agents (trial-expiring + re-engagement drips directly drive trial→paid conversion — the fastest no-app-release revenue lever per memory) and the content-review-approval gate (protects against the known overclaiming-listing landmine). Foundation should be ONE shared home repo + ONE shared agent-toolkit (GitHub-App auth, Brevo client, interrupt-gate helper, OTel instrumentation, GAL-governance hook) that all agents import, deployed as multiple graphs, not 60 repos.\n\nCRITICAL FOUNDATION INSIGHT: The specs say \"new repo per agent\" but that would create 60 langgraph.json repos with copy-pasted webhook receivers, GitHub-App tooling, and approval-gate code — a maintenance disaster. Instead: one monorepo (qa-agent-platform) holding shared libs + a langgraph.json declaring many graphs, with GAL governance (capture/govern all agent output via hooks — the agent-governance epic) and OpenTelemetry (the OTel observability decision from memory) layered as cross-cutting middleware, NOT per-agent.",
+  "prioritized_agents": [
+    {
+      "agent_name": "qa-test-aggregator (merge qa-test-orchestrator + qa-test-aggregator)",
+      "area": "QA",
+      "priority": "P0",
+      "why": "Single highest-leverage agent: one deployment ingests junit/Playwright/Go/XCResult artifacts across scheduler-web + scheduler-api + scheduler-ios + scheduler-android, normalizes to one schema, classifies flake-vs-regression, and emits one merge-gate verdict. Defends the CI gate on EVERY live-revenue repo and structurally absorbs ~6-8 of the per-repo single-runner triage agents. Build this and most per-stack triage agents become thin config of one graph."
+    },
+    {
+      "agent_name": "brevo-lifecycle-orchestrator (merge brevo-lifecycle-agent + lifecycle-email-orchestrator + cohort-export-agent)",
+      "area": "Marketing",
+      "priority": "P0",
+      "why": "Fastest no-app-release revenue lever per memory: trial-expiring + re-engagement drips drive trial→paid conversion on the live RevenueCat funnel, and the cohort pipeline is currently null/manual. The three Brevo specs overlap ~80% (same config files, same Brevo client, same suppression/frequency-cap guardrails, same approval gate). Build ONE Brevo control-plane graph. Hard prereq surfaced by multiple specs: Brevo template IDs + list IDs are currently null, so first run is a gated sync."
+    },
+    {
+      "agent_name": "content-review-approval-agent",
+      "area": "Marketing",
+      "priority": "P0",
+      "why": "Revenue-protective: enforces CONTENT-RULES.md compliance (no fabricated metrics, no false feature claims, correct per-user pricing) on every outbound social/email before Shay's mandatory approval. Directly mitigates the verified overclaiming-listing landmine (directory profile claims time-tracking/AI the product doesn't ship). The compliance-gate + interrupt pattern it establishes is reused by nearly every other marketing agent — build it as the canonical marketing template."
+    },
+    {
+      "agent_name": "vitest-gatekeeper + node-unit-test-guardian (scheduler-web + scheduler-api)",
+      "area": "QA",
+      "priority": "P1",
+      "why": "These two guard the exact CI gates (Vitest 85/75/85/85 coverage floor on scheduler-web; node:test on scheduler-api) that block every PR to the two live-revenue web/API repos. Highest automatable_score (95) and most frequent red-gate class. Build as the canonical per-repo triage template that the aggregator then rolls up; ground-truth corrections already baked in (scheduler-api is node:test NOT Vitest)."
+    },
+    {
+      "agent_name": "firestore-rules-qa-sentinel",
+      "area": "QA",
+      "priority": "P1",
+      "why": "Closes a real false-green SECURITY hole on the live paying product: the rules suite currently asserts nothing (assert.ok(true)) on a repo with no firestore.rules file — exactly the surface where the live IDOR/Firestore breach lived (per memory). High revenue/risk protection, not just velocity."
+    },
+    {
+      "agent_name": "release-gate-sentinel + prod-verify-sentinel",
+      "area": "QA",
+      "priority": "P1",
+      "why": "Protect the production release/deploy boundary for scheduler-api/scheduler-web (the paying surfaces): one GO/NO-GO verdict per release tag, post-deploy verification with approval-gated rollback. Directly prevents shipping a broken auth/billing flow to paying users. Two specs, one release-engineering graph."
+    },
+    {
+      "agent_name": "review-collection-orchestrator (merge review-campaign-orchestrator + review-collection-orchestrator)",
+      "area": "Marketing",
+      "priority": "P2",
+      "why": "Escapes 0-review invisibility for the live product (social proof → conversion), but indirect revenue and blocked on unbuilt per-app milestone webhooks + per-user Firestore review-state schema. Honest-feedback framing + biased-collection ToS guardrails matter (G2/Capterra landmine from memory). Build after the Brevo control-plane exists since it reuses the same send/approval path."
+    },
+    {
+      "agent_name": "patrol-e2e-orchestrator + emulator-e2e-orchestrator + e2e-playwright-orchestrator",
+      "area": "QA",
+      "priority": "P2",
+      "why": "E2E coverage for the revenue apps (auth/billing/paywall paths) but heavier to operate (dispatch-to-CI, runner cost) and partly blocked (emulator-e2e.yml workflow must be authored first). Consolidate the three E2E-dispatch specs into one 'e2e-dispatch-orchestrator' graph once the unit/coverage gatekeepers prove the foundation."
+    },
+    {
+      "agent_name": "directory-sentinel / directory-submission-agent / seo-backlink-* (SEO cluster)",
+      "area": "Marketing",
+      "priority": "P3",
+      "why": "~6 overlapping SEO/backlink/directory specs. All flagged in their own impact fields as slow/indirect revenue (compounding SEO, not paid conversion) and most just wrap the EXISTING working Growth Console + Playwright stack for durability. Consolidate to one 'backlink-ops' graph that governs the existing dispatcher; do not over-invest per the revenue-first rule."
+    },
+    {
+      "agent_name": "Long-tail QA hygiene cluster (precommit-fleet-enforcer, codeowners-governance-auditor, branch-protection-sentinel, lint-enforcement-agent, gate-sentinel, coverage-sentinel, pr-triage-orchestrator, fixture-sentinel, flaky-test-warden, sec-scan-triage-agent, dependabot-triage-warden, firebase-emulator-warden, qa-envguard, marionette-qa-runner, legacy-flutter-integration-test-triage)",
+      "area": "QA",
+      "priority": "P3",
+      "why": "Internal developer-productivity/hygiene with explicitly low/indirect revenue impact (their own specs rate P2/automatable 4-7). Several target the ARCHIVED Flutter repo (fixture-sentinel, marionette, legacy-integration) or hygiene across non-revenue repos. Real value but should be built last, and many collapse into the shared CI-triage template + governance auditor patterns rather than standalone deployments."
+    }
+  ],
+  "build_plan": [
+    {
+      "phase": "Phase 0 — Foundation scaffold (1 home repo, shared toolkit, governance+OTel wiring) BEFORE any agent",
+      "agents": [
+        "(no agents) — scaffold qa-agent-platform monorepo: langgraph.json multi-graph shell, shared agent_toolkit lib (GitHub-App auth, HMAC webhook verifier, Brevo client, interrupt approval-gate helper, OTel middleware, GAL-governance hook), secrets via LangSmith Deployments env, one canary 'hello-gate' graph to validate deploy + interrupt-resume end-to-end"
+      ],
+      "notes": "Do NOT build agents first. Stand up ONE repo + ONE deploy + ONE shared lib so all 60 agents become graphs that import the toolkit instead of 60 copy-pasted webhook/auth/gate implementations. Validate: managed Postgres injected (no custom checkpointer/store), interrupt()/Command(resume) round-trips, GitHub App least-privilege scopes, OTel traces land, GAL governance captures run output. Tie to a tracked GitHub issue; build in a worktree, not a live checkout."
+    },
+    {
+      "phase": "Phase 1 — P0 revenue-defenders (3 flagship graphs in the same monorepo)",
+      "agents": [
+        "qa-test-aggregator (cross-repo merge-gate + flaky/regression triage over scheduler-web/api/ios/android)",
+        "brevo-lifecycle-orchestrator (cohort sync + welcome/trial-expiring/re-engagement drips, fully approval-gated; first run = gated template+list ID sync)",
+        "content-review-approval-agent (CONTENT-RULES compliance gate → Shay approval → publish)"
+      ],
+      "notes": "These three establish the two canonical templates everything else reuses: (A) the QA 'ingest CI artifacts → classify → verdict → interrupt → gated write' template, and (B) the Marketing 'draft → compliance-gate → interrupt → Brevo/social send' template. Ship qa-test-aggregator and content-review in dry-run/report-only mode for ~1-2 weeks before enabling writes. Confirm Brevo SPF/DKIM/DMARC + suppression sync before any real send."
+    },
+    {
+      "phase": "Phase 2 — P1 per-repo gatekeepers + release/security boundary (reuse Phase-1 templates as config)",
+      "agents": [
+        "vitest-gatekeeper (scheduler-web)",
+        "node-unit-test-guardian (scheduler-api)",
+        "firestore-rules-qa-sentinel",
+        "release-gate-sentinel + prod-verify-sentinel (merged release-engineering graph)",
+        "ios-xctest-qa-orchestrator + android-junit-gate-triage (rolled up by the aggregator, thin per-stack config)"
+      ],
+      "notes": "By now most per-stack triage agents are NOT new deployments — they are config + a stack-specific parser feeding the same aggregator graph. The genuinely new graphs are firestore-rules-qa-sentinel (needs Firebase emulator in image) and the release-engineering graph (tag webhooks + gated rollback)."
+    },
+    {
+      "phase": "Phase 3 — P2 E2E + revenue-adjacent marketing (consolidated, after foundation proven)",
+      "agents": [
+        "e2e-dispatch-orchestrator (merge patrol-e2e + emulator-e2e + e2e-playwright + qa-test-orchestrator dispatch logic)",
+        "review-collection-orchestrator (after Brevo control-plane exists)",
+        "smoke-coverage-sentinel + funnel-conversion-sentinel + e2e-smoke-test-analyst (one analytics/triage graph)"
+      ],
+      "notes": "Author the missing emulator-e2e.yml workflow in scheduler-web first (a one-time prereq several specs call out). review-collection blocked on per-app milestone webhooks — emit those as a tracked dependency, ship against cron/batch trigger meanwhile."
+    },
+    {
+      "phase": "Phase 4 — P3 hygiene + SEO cluster (build last, heavily consolidated, do not over-invest)",
+      "agents": [
+        "seo-backlink-ops (merge directory-sentinel + directory-submission-agent + seo-backlink-research + seo-keyword-gap into graphs that govern the existing Growth Console stack)",
+        "gov-hygiene-suite (merge precommit-fleet-enforcer + codeowners-governance-auditor + branch-protection-sentinel + gate-sentinel + lint-enforcement into one 'repo-governance' graph)",
+        "dependency+security (merge dependabot-triage-warden + sec-scan-triage-agent)",
+        "archived-Flutter cluster (fixture-sentinel, marionette-qa-runner, legacy-flutter-integration — only if maintenance value justifies)"
+      ],
+      "notes": "Revenue-first gate: these are explicitly low/indirect revenue per their own specs. Many are 1 graph each at most, several collapse into the governance-auditor pattern. The archived-Flutter agents target a deprecated repo — confirm intent before building any of them."
+    }
+  ],
+  "foundation": {
+    "home_repo": "NEW repo: Scheduler-Systems/qa-agent-platform — a single Python monorepo that hosts ALL QA + Marketing LangGraph agents as multiple graphs in one langgraph.json (one LangSmith deployment, many addressable assistants). Rationale: every spec independently asks for a 'new repo' with copy-pasted webhook receiver + GitHub-App tooling + interrupt gate; that is 60x duplication. The workspace's org-dir layout + clone-enforcement rules mean it must live under an org dir; Scheduler-Systems is correct because the highest-value agents defend Scheduler revenue repos and business-ops-admin. Keep the Brevo/marketing graphs in the SAME deployment (or a sibling EscalateLabs/marketing-agent-platform deployment if org-secret isolation is required — decide based on whether marketing PII/Brevo keys may sit beside Scheduler GitHub creds; default to one repo, two LangSmith projects for blast-radius separation).",
+    "repo_layout": "qa-agent-platform/\n  langgraph.json            # declares ALL graphs: {qa_aggregator, vitest_gate, node_guard, firestore_rules, release_gate, brevo_lifecycle, content_review, ...}; python_version 3.12; image_distro wolfi; pip_installer uv; http.app -> shared webhook router; auth.path -> shared Auth; store.index + checkpointer.ttl (NO custom checkpointer/store passed to .compile())\n  pyproject.toml            # langgraph, langchain-anthropic, httpx/PyGithub, opentelemetry-sdk\n  agent_toolkit/            # SHARED library every graph imports\n    auth.py                 # GitHub App token minting (least-privilege per-repo), LangSmith caller authz\n    webhooks.py             # one Starlette app, HMAC verify, routes events -> SDK run-create\n    approval.py             # interrupt() gate helper + Command(resume) decode (the single HITL primitive)\n    github_tools.py         # gated write tools (PR/comment/issue/check-run/dispatch), idempotency keys\n    brevo.py                # Brevo client (send/list/suppression/blocklist), frequency-cap ledger\n    junit_parsers.py        # junit/Playwright/Go/XCResult/coverage normalizers (shared by all QA triage)\n    governance.py           # GAL-governance hook: capture every run's output/decision to the governance plane\n    otel.py                 # OpenTelemetry instrumentation middleware (fail-safe, bounded shutdown)\n  graphs/\n    qa/<one_module_per_graph>.py   # each exports module-level `graph = builder.compile()`\n    marketing/<one_module_per_graph>.py\n  Dockerfile_lines via langgraph.json for graphs that need Node20 (node:test), Firebase emulator (rules), or Flutter (only if archived-Flutter agents are built)",
+    "langgraph_json": "ONE langgraph.json at repo root declaring every graph as a separate entry (graphs: {qa_aggregator: ./graphs/qa/aggregator.py:graph, brevo_lifecycle: ./graphs/marketing/brevo.py:graph, ...}). Critical invariants from EVERY spec: (1) graphs compile WITHOUT checkpointer=/store= — the managed platform injects production Postgres; an InMemorySaver is local-only and silently overridden; (2) http.app mounts ONE shared signature-verified webhook router (not one per agent); (3) auth.path points to ONE shared Auth; (4) store.index uses openai:text-embedding-3-small/1536 for flake-history + dedupe memory; (5) checkpointer.ttl set generously where long human-pause windows exist (release approvals, re-engagement waits, review consent). Secrets injected via the LangSmith Deployments UI/API — NEVER committed (security rule).",
+    "shared_tools": "The reusable seams every agent needs (build once in agent_toolkit, import everywhere): GitHub-App auth + least-privilege per-repo tokens; HMAC-verified webhook router; the interrupt()/Command(resume) approval-gate helper (the load-bearing HITL primitive in 100% of specs); gated idempotent GitHub write tools (PR/comment/issue/check-run/workflow_dispatch); Brevo client with suppression+frequency-cap enforcement; a junit/Playwright/Go/XCResult/coverage parser set (shared by ~12 QA triage agents); Claude orchestration wrapper with prompt-caching; remote-runner dispatch client (ARC/GAL Swarm/GitHub Actions — heavy execution NEVER in the LangGraph container, per the orchestrate-local/execute-on-cluster rule).",
+    "governance": "Layer GAL governance + OpenTelemetry as CROSS-CUTTING middleware over the LangGraph agents, not per-agent: (1) GAL governance hook (the agent-governance epic, go-services#37 per memory) captures + governs every agent run's output/decision via the governance plane — one governance.py wrapper around each graph's terminal node, so all 60 agents are observable/auditable through GAL without bespoke wiring; (2) OpenTelemetry instrumentation (the OTel-not-LangSmith-proprietary decision from memory) on every node via otel.py middleware — fail-safe with bounded shutdown (the latent-bug lesson from memory), emitting spans to the workspace OTel collector alongside LangSmith's built-in tracing; (3) hard org guardrails enforced in shared code, not trusted to prompts: every send/publish/merge/delete behind the approval gate, Anthropic-terms guard (orchestration-only, never train/eval/distill a model — explicitly excludes gal-model/governance eval-worker suites), secrets only from env, and a no-direct-push/no-auto-merge invariant (agents open PRs, humans merge). Tie all work to documented GitHub issues; build in worktrees, not live checkouts."
+  },
+  "open_questions": [
+    "One deployment vs two: should marketing (Brevo PII + EscalateLabs secrets) share the same LangSmith deployment as QA (Scheduler GitHub creds), or split into two deployments for blast-radius/secret isolation? Default recommendation: one monorepo, two LangSmith projects. Needs Shay's call on org-secret policy.",
+    "GAL governance integration point: which exact surface does the governance hook write to — agent-network (A2A fabric), go-services governance gateway, or a new collector? The agent-governance epic (go-services#37) is 'not yet started' per memory, so this dependency may need to be built or stubbed before Phase 0 governance wiring is real.",
+    "Several P0/P1 agents have hard prereqs that are NOT yet built and block go-live: Brevo template/list IDs are null (first run must be a gated sync); emulator-e2e.yml workflow does not exist in scheduler-web; per-app milestone webhooks (review-collection) and per-user Firestore review-state schema are unbuilt; SPF/DKIM/DMARC on the sender domain is undocumented. Which of these does Shay want unblocked first?",
+    "Anthropic-terms boundary on QA agents that touch GAL repos: gal-vitest-qa-orchestrator and gal-web-playwright explicitly must SKIP gal-model / governance eval-worker suites. Confirm the allowlist/denylist is enforced at the shared-toolkit level so no QA agent can ever run model/training/eval code.",
+    "Heavy-execution runner choice per agent class: ARC self-hosted runners vs GAL Swarm vs GitHub Actions workflow_dispatch. The specs mix all three. A single dispatch abstraction in the toolkit is recommended, but the default backend (and cost ownership) needs deciding — especially for iOS (macOS runner cost) and emulator/Patrol (GPU/KVM).",
+    "Archived-Flutter cluster (fixture-sentinel, marionette-qa-runner, legacy-flutter-integration-test-triage) targets the DEPRECATED Scheduler Flutter repo. Per memory, new work goes to native repos. Confirm whether maintaining legacy regression coverage justifies building these at all, or whether they should be dropped from the catalog."
+  ]
+}

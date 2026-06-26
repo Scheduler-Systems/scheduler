@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  revenue_reporter LaunchAgent — STAGED, do NOT load until sign-off.
+
+  Weekly RevenueCat metrics + deploy state + pipeline digest. PROBATION = report-only:
+  OPS_REPORT_ONLY=1 and GITHUB_OPS_REPORT_ONLY=1 mean the digest is written locally + traced,
+  and the GitHub issue is NOT filed (no write, no approval interrupt). Drop those envs (and set
+  AGENT_AUTONOMY=auto, or run attended) to let it file the weekly issue after promotion.
+
+  This graph is ALSO cloud-deployable (registered in langgraph.json); this plist is the local
+  schedule until/unless it is scheduled on LangGraph Platform.
+
+  Install (after sign-off):
+    cp docs/launchd/com.schedulersystems.revenue-reporter.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.schedulersystems.revenue-reporter.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.schedulersystems.revenue-reporter</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/worktrees/ops-fleet &amp;&amp; ENVF=.env; [ -f "$ENVF" ] || ENVF=/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/.env; set -a &amp;&amp; . "$ENVF" &amp;&amp; set +a &amp;&amp; export LANGSMITH_TRACING=true LANGSMITH_PROJECT=scheduler-qa OPS_REPORT_ONLY=1 GITHUB_OPS_REPORT_ONLY=1 &amp;&amp; ./.venv/bin/python scripts/run_ops_graph.py revenue_reporter</string>
+  </array>
+
+  <!-- Weekly: Monday 09:00 local. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key><integer>1</integer>
+    <key>Hour</key><integer>9</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/revenue-reporter/launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/revenue-reporter/launchd.log</string>
+</dict>
+</plist>

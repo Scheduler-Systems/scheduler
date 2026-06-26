@@ -15,10 +15,9 @@ Pipeline (each node wrapped in ``span()``; cost-first model via ``get_model(TIER
                          roster status. Covers EVERY agent in the roster.
   2. review            — the model scores each agent against ``policy.firing_criteria`` and
                          returns keep | probation | fire_candidate (with a reason).
-  3. staffing          — read the JOB BOARD (``docs/audit/catalog.json`` — the broader
-                         ~81-process workforce; NOT shipped in the OSS tree, so the board
-                         is empty unless you supply it) -> the prioritized open roles NOT
-                         yet staffed = HIRE candidates; also flag over-budget / overloaded
+  3. staffing          — read ``docs/audit/catalog.json`` (THE JOB BOARD: the broader
+                         ~81-process workforce) -> the prioritized open roles NOT yet
+                         staffed = HIRE candidates; also flag over-budget / overloaded
                          agents.
   4. propose           — assemble structured hire / fire / raise proposals.
   5. gate              — ``request_approval(action="hr_decisions", risk="high")``. Hire/fire/
@@ -56,12 +55,8 @@ from agent_toolkit import payroll
 # --- Recon constants ----------------------------------------------------------
 # THE JOB BOARD: the full audit catalog (~81 processes) = the broader workforce beyond
 # the handful of built workers. Its prioritized roles are the open positions to hire into.
-# The catalog is NOT shipped in the OSS tree; when absent, _load_job_board() fails safe and
-# returns an empty board (no open roles proposed). Override via JOB_BOARD_PATH env.
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-JOB_BOARD_PATH = os.environ.get(
-    "JOB_BOARD_PATH", os.path.join(_REPO_ROOT, "docs", "audit", "catalog.json")
-)
+JOB_BOARD_PATH = os.path.join(_REPO_ROOT, "docs", "audit", "catalog.json")
 # The directory of BUILT worker graphs — a role is "staffed" if a graph already exists.
 GRAPHS_QA_DIR = os.path.abspath(os.path.dirname(__file__))
 

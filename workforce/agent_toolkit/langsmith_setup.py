@@ -35,7 +35,7 @@ from typing import Any, Optional
 DATASET_NAME = "scheduler-qa-learning"
 ANNOTATION_QUEUE_NAME = "scheduler-qa-review"
 PROMPT_PREFIX = "scheduler-qa"
-DEFAULT_ENDPOINT = "https://eu.api.smith.langchain.com"  # EU region
+DEFAULT_ENDPOINT = "https://eu.api.smith.langchain.com"  # EU region (org b0ba914d)
 
 
 # ---------------------------------------------------------------------------
@@ -98,6 +98,27 @@ AGENT_PROMPTS: dict[str, str] = {
         "Report-only: any bug issue/comment is gated by human approval."
     ),
 }
+
+
+def _register_exec_prompts() -> None:
+    """Register exec-agent system prompts (e.g. the CFO) onto AGENT_PROMPTS.
+
+    The CFO's prompt lives next to its graph (``graphs/exec/cfo_deepagents._SYSTEM``) as
+    the single source of truth, but it must also be pushed to the Prompt Hub as
+    ``scheduler-qa-cfo`` so the graph's ``get_prompt(... )`` pull resolves to a real
+    pinned version. Importing it here (fail-safe) avoids duplicating the text.
+    """
+    try:
+        from graphs.exec.cfo_deepagents import _SYSTEM as _CFO_SYSTEM
+
+        AGENT_PROMPTS.setdefault("cfo", _CFO_SYSTEM)
+    except Exception:
+        # graphs import may pull heavy deps in some contexts — provisioning the QA
+        # prompts must never be blocked by an exec-graph import hiccup.
+        pass
+
+
+_register_exec_prompts()
 
 # LLM-as-judge instruction — scores an AGENT's QA verdict (task output), NOT a model.
 _JUDGE_SYSTEM = (

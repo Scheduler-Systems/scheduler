@@ -35,19 +35,36 @@ class MergeGuardTests(unittest.TestCase):
         with mock.patch.object(go, "request_approval", return_value="reject"), \
              mock.patch.object(go, "is_approved", return_value=False):
             with self.assertRaises(go.GitHubWriteBlocked):
-                ops.merge_pr("gal-run/agent-workforce", 1)
+                ops.merge_pr("Scheduler-Systems/qa-agent-platform", 1)
 
 
 class ReportOnlyTests(unittest.TestCase):
-    def test_report_only_returns_plan_without_gate_or_client(self):
+    def test_report_only_code_action_returns_plan_without_gate_or_client(self):
+        # A CODE action (open_pr) on probation still returns an honest plan, no GitHub, no gate.
         ops = go.GitHubOps(report_only=True)
         with mock.patch.object(go, "request_approval") as gate, \
              mock.patch.object(go.GitHubOps, "_client") as client:
-            out = ops.open_issue("Scheduler-Systems/scheduler-web", "t", "b")
+            out = ops.open_pr("Scheduler-Systems/scheduler-web", "h", "main", "t", "b")
         self.assertEqual(out["status"], "report_only")
-        self.assertEqual(out["action"], "open_issue")
+        self.assertEqual(out["action"], "open_pr")
         gate.assert_not_called()
         client.assert_not_called()
+
+    def test_report_only_record_action_WRITES_without_gate(self):
+        # RECORD vs CODE boundary: an issue is a durable RECORD, not an irreversible code
+        # action, so open_issue WRITES even under report_only — the close-the-loop fix.
+        ops = go.GitHubOps(report_only=True)
+        fake_issue = mock.Mock(number=5, html_url="https://x/i/5", sha=None, merged=None)
+        fake_repo = mock.Mock()
+        fake_repo.create_issue.return_value = fake_issue
+        fake_client = mock.Mock()
+        fake_client.get_repo.return_value = fake_repo
+        with mock.patch.object(go, "request_approval") as gate, \
+             mock.patch.object(go.GitHubOps, "_client", return_value=fake_client):
+            out = ops.open_issue("Scheduler-Systems/scheduler-web", "t", "b")
+        gate.assert_not_called()                     # records never enter the merge gate
+        fake_repo.create_issue.assert_called_once()  # a REAL write happened on probation
+        self.assertEqual(out["status"], "done")
 
 
 class FailClosedTests(unittest.TestCase):

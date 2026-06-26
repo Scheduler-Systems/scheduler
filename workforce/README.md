@@ -1,8 +1,8 @@
-# agent-workforce
+# qa-agent-platform
 
 Deployed **LangGraph** agents that automate Scheduler's **QA** (and, as a fast-follow, **Marketing**) processes. **One monorepo, many graphs, one shared toolkit** — not 60 copy-pasted repos.
 
-Built from a 2026-06-04 workspace audit of 81 QA + Marketing processes; the build plan and fleet roadmap live in `EPIC.md`.
+Built from the 2026-06-04 workspace audit (81 QA + Marketing processes — see `docs/audit/`).
 
 ## Architecture
 - `langgraph.json` declares every agent as a separate **graph** (an addressable assistant) in **one** deployment.
@@ -43,4 +43,4 @@ Routing lives in `agent_toolkit/models.py` — change it in one place, re-route 
 - Secrets via env only (`.env.example` lists names) — never committed.
 - iOS agents degrade gracefully against the incomplete native app.
 
-See `EPIC.md` for the build plan and the full fleet roadmap.
+See `EPIC.md` for the build plan and `docs/audit/catalog.json` for the full roadmap.

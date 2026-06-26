@@ -1,0 +1,781 @@
+[
+  {
+    "name": "Unit Tests (Dart/Flutter)",
+    "area": "QA",
+    "description": "Dart unit tests for Flutter app business logic, models, and services using Flutter testing framework. Tests are located in test/unit/ directory.",
+    "current_state": "Active. Executed via 'make test-unit' (runs 'flutter test') on all Dart files.",
+    "automatable_score": 95,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/test/unit/, pubspec.yaml",
+    "repos_or_paths": "Scheduler-Systems/Scheduler (Flutter), Scheduler-Systems/scheduler-ios (Swift Unit Tests), Scheduler-Systems/scheduler-android (JUnit tests)"
+  },
+  {
+    "name": "Widget Tests (Flutter)",
+    "area": "QA",
+    "description": "Flutter widget tests for UI component behavior and rendering. Tests verify widget state, user interactions, and appearance in test/widget/ directory.",
+    "current_state": "Active. Part of 'flutter test' suite execution. Tests isolated UI widgets.",
+    "automatable_score": 90,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/test/widget/",
+    "repos_or_paths": "Scheduler-Systems/Scheduler"
+  },
+  {
+    "name": "Integration Tests (Legacy Flutter)",
+    "area": "QA",
+    "description": "Legacy Flutter integration tests for end-to-end flows. Executed via './test/runners/run_integration_tests.sh' script.",
+    "current_state": "Active but transitioning. Legacy integration tests still present in test/integration/ directory.",
+    "automatable_score": 85,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/test/integration/, test/runners/run_integration_tests.sh",
+    "repos_or_paths": "Scheduler-Systems/Scheduler"
+  },
+  {
+    "name": "Patrol E2E Tests (Flutter Mobile)",
+    "area": "QA",
+    "description": "Patrol integration testing framework for Flutter apps on Android/iOS. Provides native automation, permission handling, and device interaction. Tests located in integration_test/patrol/.",
+    "current_state": "Active. Executed via 'make patrol-android TARGET=<test>', 'make patrol-ios TARGET=<test>' using ./scripts/test/patrol_unified.sh. Configured in pubspec.yaml with patrol 4.2.0.",
+    "automatable_score": 85,
+    "data_sources": "/Users/scheduler-Systems/Scheduler/scripts/test/patrol_unified.sh, integration_test/patrol/, .claude/rules/marionette-testing.md, Scheduler-Systems/Scheduler/_parked/docs/testing/patrol/README.md",
+    "repos_or_paths": "Scheduler-Systems/Scheduler (main), Scheduler-Systems/scheduler-ios, Scheduler-Systems/scheduler-android"
+  },
+  {
+    "name": "Marionette MCP Runtime Testing (Flutter Mobile)",
+    "area": "QA",
+    "description": "AI-driven interactive testing via Marionette MCP. Claude Code connects to running Flutter app via VM service extensions to inspect widgets, tap UI, enter text, scroll, capture screenshots, and read logs. Six playbooks (01-06) cover smoke test through full regression.",
+    "current_state": "Active. Health check via 'make marionette-health PLATFORM=android|ios'. Launch via 'make marionette-android' or 'make marionette-ios' which captures VM service URI for MCP connection. Playbooks in docs/testing/marionette/.",
+    "automatable_score": 70,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/docs/testing/marionette/01-06_*.md, .claude/rules/marionette-testing.md, .claude/commands/marionette-test.md, scripts/dev/marionette/check_marionette_health.sh",
+    "repos_or_paths": "Scheduler-Systems/Scheduler (Flutter), Scheduler-Systems/scheduler-ios, Scheduler-Systems/scheduler-android"
+  },
+  {
+    "name": "E2E Tests - Playwright (Scheduler Web)",
+    "area": "QA",
+    "description": "Playwright browser automation for web platform E2E testing. Tests cover authenticated flows against production API (read-only test accounts) or mocked APIs. Dev-Local uses localhost:3000, Dev-CI uses production API with test accounts.",
+    "current_state": "Active. Playwright config at scheduler-web/playwright.config.ts. Tests in scheduler-web/test/ and scheduler-web/e2e/ directories. Global setup handles auth token caching. Execution via 'gh workflow run e2e-*.yml' or ./scripts/test.sh smoke dev-local.",
+    "automatable_score": 90,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-web/playwright.config.ts, scheduler-web/test/, .claude/rules/e2e-testing.md",
+    "repos_or_paths": "Scheduler-Systems/scheduler-web, .github/workflows/e2e-*.yml"
+  },
+  {
+    "name": "Unit Tests - Vitest (React/TypeScript Web)",
+    "area": "QA",
+    "description": "JavaScript/TypeScript unit tests using Vitest for React components and utilities in web applications. Configuration at vitest.config.ts files.",
+    "current_state": "Active. Tests in test/ directories of web projects. Vitest config at scheduler-web/vitest.config.ts.",
+    "automatable_score": 95,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-web/vitest.config.ts, scheduler-web/test/",
+    "repos_or_paths": "Scheduler-Systems/scheduler-web, gal-run/web/gal-website, gal-run/platform/gal-*"
+  },
+  {
+    "name": "Unit Tests - Node.js (Cloud Functions/API)",
+    "area": "QA",
+    "description": "Node.js unit tests for Firebase Cloud Functions and API backend using Vitest or Jest. Tests cover route handlers, middleware, Firebase integration, contracts, and custom functions.",
+    "current_state": "Active. Tests in scheduler-api/test/ and scheduler-api/functions/test/ directories. 6358 test files identified across project.",
+    "automatable_score": 95,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-api/test/, scheduler-api/functions/test/",
+    "repos_or_paths": "Scheduler-Systems/scheduler-api, gal-run backend services"
+  },
+  {
+    "name": "Unit Tests - Swift/iOS",
+    "area": "QA",
+    "description": "Swift unit tests for iOS app using XCTest framework. Tests cover ViewModels, Services, Models, and business logic.",
+    "current_state": "Active. Tests in Scheduler-Systems/scheduler-ios/Tests/SchedulerAppTests/ directory. Six test files: AuthViewModelTests, ModelsTests, ScheduleViewModelCreateTests, ServiceTests, ViewModelServiceTests, AppViewsTests.",
+    "automatable_score": 90,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-ios/Tests/SchedulerAppTests/",
+    "repos_or_paths": "Scheduler-Systems/scheduler-ios"
+  },
+  {
+    "name": "Unit Tests - Kotlin/Android (JUnit)",
+    "area": "QA",
+    "description": "Android unit tests using JUnit and Mockito for ViewModels, services, and business logic. Located in src/test/java directory.",
+    "current_state": "Active. Multiple test files including SchedulingTypesTest, ShiftAssignerTest, UiStateTest, HomeViewModelTest, ChatViewModelTest, etc. Execution via gradle test targets.",
+    "automatable_score": 90,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-android/app/src/test/java/",
+    "repos_or_paths": "Scheduler-Systems/scheduler-android"
+  },
+  {
+    "name": "Instrumented Tests - Android (Espresso)",
+    "area": "QA",
+    "description": "Android instrumented tests on emulator/device using Espresso framework. Located in src/androidTest/java directory for UI and integration testing.",
+    "current_state": "Active. Test files in app/src/androidTest/java/com/schedulersystems/scheduler/. UI and integration test coverage.",
+    "automatable_score": 85,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-android/app/src/androidTest/java/",
+    "repos_or_paths": "Scheduler-Systems/scheduler-android"
+  },
+  {
+    "name": "Firebase Emulator Suite (Local Development)",
+    "area": "QA",
+    "description": "Docker-based Firebase emulator environment for local testing. Includes Authentication, Firestore, Cloud Functions, Hosting, and Storage emulators. Started via 'make emulators-start'.",
+    "current_state": "Active. Configured in firebase.json with emulator ports (Auth 9099, Firestore 8081, Functions 5001, Hosting 5003, UI 4000). Docker setup in scripts/emulators/. Status check via 'make emulators-status', reset via 'make emulators-reset'.",
+    "automatable_score": 95,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/firebase.json (emulators section), scripts/emulators/docker-compose.emulators.yml, scripts/emulators/start_emulators.sh",
+    "repos_or_paths": "Scheduler-Systems/Scheduler, Firebase emulator configuration shared across all repos"
+  },
+  {
+    "name": "Test Data & Fixtures (Dart/Flutter)",
+    "area": "QA",
+    "description": "Generated mock classes and test data helpers for unit testing. Mocks auto-generated via mockito/build_runner. Test credentials embedded for Firebase emulator (shaypanuilov@gmail.com / 123456).",
+    "current_state": "Active. Mock files in test/ directories (.mocks.dart files). Test data helper at test/custom_code/actions/test_data.dart. Firestore and Firebase wrappers for mocking in test/helpers/.",
+    "automatable_score": 90,
+    "data_sources": "/Users/scheduler-Systems/Scheduler/test/*.mocks.dart, test/helpers/firebase_wrapper_mocks.dart, test/helpers/firestore_query_mocks.dart, test/custom_code/actions/test_data.dart",
+    "repos_or_paths": "Scheduler-Systems/Scheduler"
+  },
+  {
+    "name": "Emulator-Based E2E Tests (Playwright)",
+    "area": "QA",
+    "description": "E2E tests targeting Firebase emulator suite. Tests in scheduler-web/e2e/ include emulator-features, emulator-employer-journey, emulator-premium that connect to emulator instead of production API.",
+    "current_state": "Active. Tests in scheduler-web/e2e/emulator-*.spec.ts files. Helper utilities in scheduler-web/e2e/helpers/emulator.ts. Can be run with 'make patrol-web --use-emulators' flag.",
+    "automatable_score": 90,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-web/e2e/emulator-*.spec.ts, scheduler-web/e2e/helpers/emulator.ts",
+    "repos_or_paths": "Scheduler-Systems/scheduler-web"
+  },
+  {
+    "name": "Vitest Unit Tests (gal-run Platform)",
+    "area": "QA",
+    "description": "Comprehensive unit test suite for gal-run projects using Vitest. Covers swarm orchestration, planning, topology, evidence ledger, and capability catalog.",
+    "current_state": "Active. 1511+ test files across gal-run. Tests at gal-run/platform/gal-swarm/tests/, gal-run/web/gal-website/tests/, gal-run/core/gal-agents/tests/, etc.",
+    "automatable_score": 95,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/gal-run/platform/gal-swarm/tests/*.test.ts, gal-run/web/gal-website/tests/",
+    "repos_or_paths": "gal-run/* (all sub-projects)"
+  },
+  {
+    "name": "Playwright Browser Tests (gal-run Web)",
+    "area": "QA",
+    "description": "Playwright E2E tests for gal-run web applications. Tests cover website routing, contract regression, and browser interactions.",
+    "current_state": "Active. Config at gal-run/web/gal-website/playwright.config.ts and gal-run/platform/gal-chrome-extension/e2e/playwright.config.ts.",
+    "automatable_score": 90,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/gal-run/web/gal-website/playwright.config.ts, gal-run/platform/gal-chrome-extension/e2e/playwright.config.ts",
+    "repos_or_paths": "gal-run/web/gal-website, gal-run/platform/gal-chrome-extension"
+  },
+  {
+    "name": "Test Execution Orchestration Scripts",
+    "area": "QA",
+    "description": "Unified test scripts that orchestrate execution across platforms and test types. patrol_unified.sh handles Patrol tests for web/Android/iOS with environment management.",
+    "current_state": "Active. Main orchestration scripts: scripts/test/patrol_unified.sh, scripts/test/patrol_test.sh, scripts/test/patrol_web_test.sh. Support for local/CI/production environments.",
+    "automatable_score": 85,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/scripts/test/patrol_unified.sh, scripts/test/patrol_web_test.sh, scripts/test/README.md",
+    "repos_or_paths": "Scheduler-Systems/Scheduler/scripts/test/"
+  },
+  {
+    "name": "Firestore Rules Testing",
+    "area": "QA",
+    "description": "Security rules validation for Firestore using Vitest. Tests cover access control and data validation rules.",
+    "current_state": "Active. Test file: scheduler-api/test/firestore-rules.test.js. Run as part of API test suite.",
+    "automatable_score": 90,
+    "data_sources": "/Users/scheduler-Systems/scheduler-api/test/firestore-rules.test.js",
+    "repos_or_paths": "Scheduler-Systems/scheduler-api"
+  },
+  {
+    "name": "Test Result Aggregation & Reporting",
+    "area": "QA",
+    "description": "Test result collection and reporting infrastructure. Results from different test types aggregated for CI/CD visibility.",
+    "current_state": "Active. Test results directories in scheduler-web/test-results/, Android JUnit XML reports in build/test-results/testDebugUnitTest/. GitHub Actions workflows parse and report results.",
+    "automatable_score": 80,
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-web/test-results/, Scheduler-Systems/scheduler-android/app/build/test-results/",
+    "repos_or_paths": "All repos with CI/CD integration"
+  },
+  {
+    "name": "Gate/Code Quality Checks (PR & Commit Validation)",
+    "area": "QA",
+    "description": "Automated quality gates run on every pull request and commit to main. Comprehensive checks including TypeScript type checking (typecheck), linting (eslint, prettier, yamllint, shellcheck), unit tests, and build validation. Some repos include CodeQL security analysis. Gates enforce test passage before merge.",
+    "current_state": "Implemented across major repos. Standardized gate.yml patterns in Scheduler-Systems repos (scheduler-api, scheduler-web, scheduler-ios, workspace-governance, legal). Advanced gate patterns in ZenuxLabs/Zenux with Zenux security gate evaluation via external API. StratusCloudLabs/stratus uses custom runner-policy validation. Approximately 429 active workflow files across non-archived repos.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/.github/workflows/gate.yml (multiple repos), /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-web/.github/workflows/gate.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/ZenuxLabs/Zenux/.github/workflows/gate.yml",
+    "repos_or_paths": "Scheduler-Systems/scheduler-api, Scheduler-Systems/scheduler-web, Scheduler-Systems/scheduler-ios, Scheduler-Systems/workspace-governance, Scheduler-Systems/legal, ZenuxLabs/Zenux, StratusCloudLabs/stratus, StratusCloudLabs/agent-sandbox, gal-run/extensions/gal-code",
+    "pain_points": "Multiple repo-specific gate implementations require maintenance consistency; gate complexity varies; some repos lack comprehensive linting coverage",
+    "automatable_score": 9
+  },
+  {
+    "name": "Unit & Integration Testing with Artifact Reporting",
+    "area": "QA",
+    "description": "Structured test execution with JUnit XML report generation and artifact uploads for analysis. Unit tests run in CI (jest/vitest for JS/TS, pytest for Python, go test for Go). E2E testing with Playwright (gal-code) or custom E2E suites. Test results published as GitHub check reports with detailed summaries. Reports retained 7-30 days. Failed tests block merges.",
+    "current_state": "Implemented in major repos with varying maturity. gal-run/extensions/gal-code uses Playwright with E2E heartbeat monitoring (junit reporting via mikepenz/action-junit-report). Scheduler-Systems repos run npm test suite. StratusCloudLabs/stratus includes E2E validation. Test timeout configurations: 20-45min for full suites.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/gal-run/extensions/gal-code/.github/workflows/test.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-web/.github/workflows/gate.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/workflows/deploy-stratus.yml",
+    "repos_or_paths": "gal-run/extensions/gal-code, Scheduler-Systems/scheduler-web, Scheduler-Systems/scheduler-api, StratusCloudLabs/stratus, EscalateLabs/marketing",
+    "pain_points": "Test artifact retention varies; some repos skip test steps on certain branches; E2E test flakiness managed with heartbeat monitoring; test timeouts need tuning per environment",
+    "automatable_score": 8
+  },
+  {
+    "name": "Pre-commit Hooks & Local Code Quality Enforcement",
+    "area": "QA",
+    "description": "Pre-commit framework installed in StratusCloudLabs/stratus with 8 hook types: trailing-whitespace fixer, JSON/YAML linting (yamllint, checkjson), merge conflict detection, private key detection (secret scanning), Terraform fmt, Prettier formatting. Excludes archive/ directory from hooks.",
+    "current_state": "Active in StratusCloudLabs/stratus (.pre-commit-config.yaml). Hooks prevent common issues before push: detects private keys, validates YAML syntax, enforces code style. Not uniformly deployed across all repos.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.pre-commit-config.yaml",
+    "repos_or_paths": "StratusCloudLabs/stratus",
+    "pain_points": "Limited adoption across org; inconsistent pre-commit enforcement; developers may skip hooks; archive directory exclusion indicates legacy config management",
+    "automatable_score": 7
+  },
+  {
+    "name": "Code Ownership & Required Reviews (CODEOWNERS)",
+    "area": "QA",
+    "description": "GitHub CODEOWNERS files enforce review requirements for sensitive code paths. Examples: Scheduler-Systems/legal requires legal-team review for /agreements/**, legal-counsel for signed agreements, devops for .github/workflows/**. StratusCloudLabs/stratus requires security-team review for /security/** and security-related workflows. Ensures accountability and cross-functional review gates.",
+    "current_state": "Implemented in multiple repos: Scheduler-Systems/legal (strict separation of legal/lawyer/devops approvals), StratusCloudLabs/stratus (security-team controls security/ and scan workflows), EscalateLabs/marketing. GitHub enforces these automatically on PR merge attempts.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/legal/.github/CODEOWNERS, /Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/CODEOWNERS",
+    "repos_or_paths": "Scheduler-Systems/legal, StratusCloudLabs/stratus, StratusCloudLabs/agent-sandbox, EscalateLabs/marketing, ProjectMasterLabs/pilotlight",
+    "pain_points": "CODEOWNERS not uniformly applied; some repos lack ownership definitions; review requirements can slow down development; team mapping maintenance overhead",
+    "automatable_score": 6
+  },
+  {
+    "name": "Static Code Analysis & Security Scanning",
+    "area": "QA",
+    "description": "CodeQL Analysis runs weekly and on Python file changes (StratusCloudLabs/stratus). Scans for security vulnerabilities in Python code. Results uploaded as SARIF artifacts (30-day retention) for manual review. Pre-commit hooks detect private keys (detect-private-key). Dependabot configured for dependency vulnerability scanning across npm, GitHub Actions, Terraform, pip packages.",
+    "current_state": "CodeQL active in StratusCloudLabs/stratus (Python analysis), Scheduler-Systems/Scheduler. Dependabot enabled with weekly update schedule (Monday 08:00 PST). Scans run on push to main and PRs. SARIF upload disabled (Code Security/GHAS not enabled on private repos); results saved as artifacts instead.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/workflows/codeql-analysis.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/dependabot.yml",
+    "repos_or_paths": "StratusCloudLabs/stratus, Scheduler-Systems/Scheduler, multiple repos with dependabot.yml",
+    "pain_points": "GHAS not enabled on private repos; SARIF upload disabled limits integration with GitHub security tab; CodeQL coverage limited to select repos; dependabot PR limits (10 open PRs) can create bottlenecks",
+    "automatable_score": 7
+  },
+  {
+    "name": "Deploy Gates & Release Validation",
+    "area": "QA",
+    "description": "Release workflows validate production readiness before deployment. StratusCloudLabs/stratus deploy-stratus.yml triggers on tags (v*), validates release tags, verifies Stratus-owned release gates via script validation and unit tests (test_stratus_release_workflows, test_runner_router_callers), runs E2E smoke tests on production environment. Separate workflows for API, Admin, Arc Config, governance deployments. Post-merge maintenance jobs clean up branches and artifacts.",
+    "current_state": "Active release validation in StratusCloudLabs/stratus with script-level gate verification. gal-run/extensions/gal-code uses release-test.yml. Scheduler-Systems repos (scheduler-api, scheduler-web) have release.yml and deploy-dev.yml. Release gates block faulty deployments; concurrency policy prevents simultaneous deploys (cancel-in-progress: false for critical flows).",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/workflows/deploy-stratus.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-api/.github/workflows/release.yml",
+    "repos_or_paths": "StratusCloudLabs/stratus, Scheduler-Systems/scheduler-api, Scheduler-Systems/scheduler-web, gal-run/extensions/gal-code, EscalateLabs/marketing, ProjectMasterLabs/pilotlight",
+    "pain_points": "Release gate complexity varies; some repos lack automated validation; deployment concurrency control inconsistent; E2E smoke test timeouts (25min) can block releases",
+    "automatable_score": 8
+  },
+  {
+    "name": "Automated PR Management & Triage",
+    "area": "QA",
+    "description": "Automated PR recap generation via daily scheduled CI jobs (gal-run/extensions/gal-code daily-pr-recap.yml). Uses Claude Code + GitHub CLI to analyze today's PRs, filter out team members, identify bug fixes/high-activity PRs, and post summaries to Discord. PR review enforcement via runner-policy checks. Label automation for dependencies, GitHub Actions, Terraform. Stale PR closure workflows.",
+    "current_state": "Active in gal-run/extensions/gal-code with daily Discord recaps. StratusCloudLabs/stratus has label automation (labels.yaml). Multiple repos use enforce-assignee, label-sync, and stale-issue-manager workflows. PR governance enforced via runner-policy-check.yml in multiple repos.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/gal-run/extensions/gal-code/.github/workflows/daily-pr-recap.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/labels.yaml",
+    "repos_or_paths": "gal-run/extensions/gal-code, StratusCloudLabs/stratus, EscalateLabs/marketing, Scheduler-Systems repos, ZenuxLabs/Zenux",
+    "pain_points": "Discord webhook secrets required for automation; PR recap script complexity (filtering team members, Discord char limits); label sync maintenance overhead; stale PR closure policies not uniformly applied",
+    "automatable_score": 6
+  },
+  {
+    "name": "Lint & Code Formatting Enforcement",
+    "area": "QA",
+    "description": "Comprehensive linting integrated into gate workflows: ESLint (gal-run, Scheduler-Systems), Prettier (JSON formatting in StratusCloudLabs/stratus), yamllint (YAML config validation), shellcheck (Bash scripts with --severity=warning), TypeScript typecheck (scheduler-web). Linting runs as CI checks; failing lints block merges. Some repos (scheduler-web) run both typecheck and lint as separate steps.",
+    "current_state": "Implemented across major repos. Scheduler-Systems/scheduler-web gate includes typecheck and lint steps. StratusCloudLabs/stratus has pre-commit Prettier and yamllint hooks + CI enforcement. gal-run/extensions/gal-code uses turbo for monorepo linting. Makefile targets standardize lint commands (e.g., 'make lint' in ProjectMasterLabs/pilotlight).",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-web/.github/workflows/gate.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.pre-commit-config.yaml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/ProjectMasterLabs/pilotlight/Makefile",
+    "repos_or_paths": "Scheduler-Systems/scheduler-web, Scheduler-Systems/scheduler-api, StratusCloudLabs/stratus, gal-run/extensions/gal-code, ProjectMasterLabs/pilotlight, EscalateLabs/marketing",
+    "pain_points": "Lint configuration fragmentation (different rules per repo); pre-commit vs CI lint duplication; shellcheck severity thresholds may miss bugs; Prettier config inconsistency across repos",
+    "automatable_score": 8
+  },
+  {
+    "name": "Branch Protection & Merge Requirements",
+    "area": "QA",
+    "description": "GitHub branch protection enforced on main branch across repos. Requires: CI checks passing (gate.yml), CODEOWNERS review for protected paths, minimum one approval before merge, status checks enforced. Protections prevent direct pushes to main; all changes via PRs. Branching model follows Kubernetes pattern (no long-lived dev/staging branches, short-lived feature branches deleted after merge).",
+    "current_state": "Actively enforced in StratusCloudLabs/stratus (CONTRIBUTING.md specifies Kubernetes model), Scheduler-Systems repos, ZenuxLabs/Zenux. Contributing guidelines document review requirements (CONTRIBUTING.md files). Branch prune workflows (scheduled-branch-pruning.yml, prune-branches.sh) clean up stale feature branches.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/community/CONTRIBUTING.md, /Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/scripts/prune-branches.sh",
+    "repos_or_paths": "StratusCloudLabs/stratus, Scheduler-Systems/scheduler-web, Scheduler-Systems/scheduler-api, ZenuxLabs/Zenux, gal-run/extensions/gal-code",
+    "pain_points": "Branch protection configuration not visible in repo (GitHub settings-only); no audit trail for changes to protection rules; release branches occasionally require exception handling",
+    "automatable_score": 7
+  },
+  {
+    "name": "E2E & Smoke Testing with Playwright",
+    "area": "QA",
+    "description": "End-to-end testing with Playwright framework. gal-run/extensions/gal-code implements multi-matrix E2E (linux/windows), caches Playwright browsers, installs system dependencies, runs tests with heartbeat monitoring (60s intervals to prevent timeout detection). E2E tests publish JUnit reports and artifacts (test-results/, playwright-report). Scheduler-Systems/scheduler-web runs E2E against Firebase staging (E2E_BASE_URL=https://scheduler-web-next.web.app). Configurable test timeouts per environment.",
+    "current_state": "Active in gal-run/extensions/gal-code (linux/windows matrix, 60min timeout), Scheduler-Systems/scheduler-web (Firebase staging URL), StratusCloudLabs/stratus (production smoke E2E in deploy-stratus.yml). Test results published with mikepenz/action-junit-report. Browser caching reduces CI time.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/gal-run/extensions/gal-code/.github/workflows/test.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-web/.github/workflows/gate.yml",
+    "repos_or_paths": "gal-run/extensions/gal-code, Scheduler-Systems/scheduler-web, StratusCloudLabs/stratus, gal-run/web/gal-dashboard, gal-run/web/gal-app",
+    "pain_points": "E2E flakiness managed with heartbeat monitoring (workaround for timeout detection); matrix expansion (linux/windows) doubles run time; browser cache invalidation strategy needed",
+    "automatable_score": 7
+  },
+  {
+    "name": "Test Coverage Tracking & Artifact Management",
+    "area": "QA",
+    "description": "Test artifacts (JUnit XML, Playwright reports, code coverage) uploaded to GitHub with configurable retention (7-30 days). gal-run/extensions/gal-code publishes unit/e2e reports, Playwright test-results and reports. Reports accessible via workflow run details. StratusCloudLabs/stratus uploads CodeQL SARIF results. No centralized coverage reporting tool (codecov/coveralls) integrated; coverage tracked locally in repos.",
+    "current_state": "Artifact uploads implemented in test workflows using actions/upload-artifact@v4. Retention policies: 7-30 days. Reports structured (junit.xml, test-results/, playwright-report/). Manual review required for artifact analysis; no automated coverage trend tracking.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/gal-run/extensions/gal-code/.github/workflows/test.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/workflows/codeql-analysis.yml",
+    "repos_or_paths": "gal-run/extensions/gal-code, Scheduler-Systems/scheduler-web, StratusCloudLabs/stratus, all repos with test.yml/gate.yml",
+    "pain_points": "No centralized coverage dashboard; artifact retention limits historical comparison; manual report review process; no automated alerts for coverage drops",
+    "automatable_score": 5
+  },
+  {
+    "name": "Automated Dependency Updates & Security Patches",
+    "area": "QA",
+    "description": "Dependabot configured for continuous dependency scanning and PR auto-creation. Weekly schedule (Monday 08:00 PST) for npm, GitHub Actions, Terraform, pip. Open PR limit: 10 per ecosystem to prevent PR flooding. Labels applied (dependencies, npm, github-actions, terraform, python). Commit message prefix: 'deps' with scope inclusion. Target branch: main. Auto-created PRs go through standard gate checks before merge.",
+    "current_state": "Active in StratusCloudLabs/stratus with 6 ecosystems configured (npm root, GitHub Actions, Terraform AWS/Azure/GCP/GitHub, pip). EscalateLabs/marketing and other repos inherit org-level Dependabot config. PR limits prevent overwhelming reviewers.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/dependabot.yml",
+    "repos_or_paths": "StratusCloudLabs/stratus, EscalateLabs/marketing, Scheduler-Systems repos, ProjectMasterLabs/pilotlight",
+    "pain_points": "10-PR limit can create bottlenecks in high-dependency projects; weekly schedule may miss critical security patches; dependency PR review fatigue; version conflicts not automatically resolved",
+    "automatable_score": 6
+  },
+  {
+    "name": "Release Notes & Version Management Automation",
+    "area": "QA",
+    "description": "Release workflows generate version bumps and release notes. gal-run/web/gal-app uses cut_new_release_candidate.yml and cut_new_releases.yml for automated versioning. Internal release workflows (internal-release.yml) for staging. Release-please integration (implied from release-please.yml files). GitHub release assets: CLI tarballs, Docker images, binaries added via automated workflows.",
+    "current_state": "Partially implemented. gal-run/web/gal-app has release candidate and final release workflows. Scheduler-Systems repos have release.yml. No centralized release-please config found, suggesting manual or legacy release process in some repos.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/gal-run/web/gal-app/.github/workflows/cut_new_releases.yml, /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/scheduler-api/.github/workflows/release.yml",
+    "repos_or_paths": "gal-run/web/gal-app, Scheduler-Systems/scheduler-api, Scheduler-Systems/scheduler-web, EscalateLabs/marketing, ProjectMasterLabs/pilotlight",
+    "pain_points": "Release process automation incomplete (cut_release vs release-please inconsistency); version bump logic not centralized; release notes generation manual in some repos; GitHub release asset uploads error-prone",
+    "automatable_score": 6
+  },
+  {
+    "name": "Monitoring & Alerting for CI/CD Pipeline Health",
+    "area": "QA",
+    "description": "CI/CD health monitoring via workflow health checks, GitHub status checks, and scheduled synthetic probes. StratusCloudLabs/stratus includes health-probes, health-metrics-presubmit, status-alert-routing workflows. Synthetic production monitors (synthetic-production-monitor.yml) verify service health. Status page updates (status.yml). Metrics collection for queue health (health-metrics-presubmit, health-probes).",
+    "current_state": "Monitoring framework in place for StratusCloudLabs/stratus with synthetic probes and metrics. Scheduler-Systems repos lack centralized health monitoring. EscalateLabs/marketing uses basic workflow monitoring (indexing-health.yml).",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/StratusCloudLabs/stratus/.github/workflows directory (health-probes.yml, health-metrics-presubmit.yml, synthetic-production-monitor.yml implied from workflow listing)",
+    "repos_or_paths": "StratusCloudLabs/stratus, EscalateLabs/marketing",
+    "pain_points": "Monitoring not uniformly deployed across org; alert routing configuration not visible; no centralized dashboard for pipeline health; synthetic probe coverage limited",
+    "automatable_score": 5
+  },
+  {
+    "name": "Bug Triage & Defect Categorization",
+    "area": "QA",
+    "description": "Process for intake, categorization, and initial assessment of reported bugs and defects from production, staging, and development environments. Includes severity classification (SEV1-3), impact analysis, and routing to appropriate teams.",
+    "current_state": "Partially formalized. Bug resolver orchestrator agent exists with comprehensive jira workflows (fetch ticket details, create sub-tasks, move status, comment). SMR tickets in Jira drive triage. GitHub issues also tracked for defects. No documented severity matrix or SLA for triage completion.",
+    "pain_points": "No formal triage SLA documented; routing between Jira (SMR) and GitHub issues inconsistent; no automated severity assessment; no public-facing defect dashboard to track triage backlog",
+    "automatable_score": 6,
+    "data_sources": ".claude/agents/bug-resolver-orchestrator.md; docs/incident-response.md (severity definitions for incidents but not defects); AGENTS.md (references qa-engineer, bug-solver agents)",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/.claude/agents/; /Users/scheduler-systems/Documents/scheduler-systems-ltd/docs/incident-response.md"
+  },
+  {
+    "name": "Regression Testing",
+    "area": "QA",
+    "description": "Systematic testing to ensure code changes do not break existing functionality. Includes unit test coverage requirements, integration test re-runs, and cross-platform validation (web, iOS, Android).",
+    "current_state": "Well-established. Patrol 4.0 framework used for unified mobile+web E2E testing. Regression test suites exist for auth, calendar, billing. 100% unit test coverage enforced via angular-qa-engineer guidelines. Pre-commit hooks enforce test runs. CI/CD workflows trigger regression suites on PR and main branch pushes.",
+    "pain_points": "No documented minimum regression coverage percentage; no automatic detection of tests that should be added for changed code; no regression test result tracking/trending; Patrol test maintenance overhead high (boilerplate); no cross-environment regression matrix (dev/stg/prod)",
+    "automatable_score": 7,
+    "data_sources": ".claude/agents/qa-engineer.md; .claude/agents/angular-qa-engineer.md; Scheduler-Systems/Scheduler/integration_test/README.md; .github/workflows/flutter_web_e2e.yml",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/.github/workflows/flutter_web_e2e.yml; /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/integration_test/"
+  },
+  {
+    "name": "Manual QA Passes",
+    "area": "QA",
+    "description": "Human-driven testing workflows including exploratory testing, user story validation, accessibility testing, and cross-device manual verification. Includes test environment setup, data preparation, and execution logging.",
+    "current_state": "Present but minimally documented. Marionette MCP used for interactive device testing (Android/iOS). Health check playbooks exist (01_app_launch → 06_full_regression). QA engineer role has background test execution patterns. Limited documentation on manual test case prioritization or test environment prerequisites.",
+    "pain_points": "No centralized test case repository or tracking system; manual test result logging inconsistent; no documented test environment reset procedures; Marionette test setup has knowledge gaps (VM URI extraction, device state clearing); no test checklists per feature area",
+    "automatable_score": 4,
+    "data_sources": ".claude/rules/marionette-testing.md; .claude/agents/qa-engineer-streamlined.md; Scheduler-Systems/Scheduler/docs/operations/TESTING.md",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/.claude/rules/marionette-testing.md; /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/docs/operations/TESTING.md"
+  },
+  {
+    "name": "Smoke Testing",
+    "area": "QA",
+    "description": "Rapid, lightweight test suite covering critical user paths (login, core features) to quickly validate that a build is viable for deeper testing. Runs post-deployment and pre-release to catch obvious failures fast.",
+    "current_state": "Mature. Patrol 4.0 web smoke tests automated in CI/CD. Minimal smoke tests documented (00_minimal_test.dart, auth flows). Smoke suite runs on PRs (~5 min), full suite on main pushes (~30 min). Makefile targets for smoke execution (make patrol-web, make patrol-android, make patrol-ios). FTL auto-retry for flaky tests (--num-flaky-test-attempts 1).",
+    "pain_points": "No documented smoke test coverage criteria; unclear if all critical paths (payment, calendar sync, scheduling) are covered; smoke test selection logic hardcoded in CI workflow; no smoke test duration tracking; no metrics on which smoke tests are highest-value vs maintenance overhead",
+    "automatable_score": 8,
+    "data_sources": ".github/workflows/flutter_web_e2e.yml; integration_test/README.md; docs/operations/TESTING.md; Makefile (referenced in qa-engineer-streamlined.md)",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/.github/workflows/flutter_web_e2e.yml; /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/integration_test/"
+  },
+  {
+    "name": "Flaky Test Management",
+    "area": "QA",
+    "description": "Process to identify, isolate, diagnose, and remediate tests that fail intermittently due to timing issues, state pollution, environmental factors, or race conditions. Includes re-run policies, flake tracking, and prevention strategies.",
+    "current_state": "Partially implemented. FTL auto-retry enabled (--num-flaky-test-attempts 1). No dedicated flaky test detection pipeline. Marionette tests documented to be 'clean state' before execution (app data clearing). QA engineer playbook mentions test isolation and background execution patterns. No centralized flaky test registry or flakiness metrics dashboard.",
+    "pain_points": "No automated flaky test detection (would need test run history analysis); no public flakiness trending; no root cause categorization (timing vs state vs environment); Patrol test design could be prone to flakiness (network, emulator state); no documented remediation playbook for identified flaky tests; teams lack visibility into which tests are historically unreliable",
+    "automatable_score": 5,
+    "data_sources": ".github/workflows/flutter_web_e2e.yml (--num-flaky-test-attempts flag); .claude/agents/qa-engineer-streamlined.md (clean state, isolation principles); integration_test/README.md (common issues & solutions)",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/.github/workflows/flutter_web_e2e.yml; /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/integration_test/README.md"
+  },
+  {
+    "name": "Production Verification After Deploy",
+    "area": "QA",
+    "description": "Post-deployment validation to confirm that production systems are functioning correctly. Includes health checks, smoke tests, user-facing feature validation, critical transaction verification, and monitoring alert checks.",
+    "current_state": "Formalized in CI/CD. Patrol 4.0 smoke tests run post-deploy on web (E2E smoke in apps-web-deploy.yml). Production smoke test suite in flutter_web_e2e.yml. Incident response plan documents production incident detection and escalation. Status page integration configured. No documented production-specific test environment (tests run against live prod Firebase).",
+    "pain_points": "Smoke tests run against production Firebase (risky); no synthetic user monitoring documented; no pre-deploy staging validation explicitly required; production deployment gate checks not fully documented in CICD_PIPELINES; no automated production health dashboard beyond status page; no documented rollback triggers or production smoke failure response SLA",
+    "automatable_score": 6,
+    "data_sources": ".github/workflows/apps-web-deploy.yml; .github/workflows/release.yml; docs/operations/CI-CD.md; docs/incident-response.md; .github/workflows/flutter_web_e2e.yml (production smoke suite)",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/.github/workflows/apps-web-deploy.yml; /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/docs/operations/CI-CD.md"
+  },
+  {
+    "name": "Test Environment / Emulator Management",
+    "area": "QA",
+    "description": "Setup, configuration, and lifecycle management of local dev emulators (Firebase, Android, iOS) and remote test environments (staging Firebase, CI runners). Includes resource cleanup, environment parity, data seeding, and health checks.",
+    "current_state": "Mature for local emulators. Firebase emulators standardized (Firestore, Auth, Functions, Hosting on fixed ports 8081, 9099, 5001, 5000). Makefile targets automate emulator startup (make emulators-start, make emulators-stop, make emulators-reset). Android/iOS simulators also managed via Makefile (make android-avd-start, make ios-sim-start). Health check playbook exists (make marionette-health). Single production Firebase project (priority-118da) with no separate staging project documented.",
+    "pain_points": "No staging Firebase environment (tests run against production data); emulator port conflicts not documented; no automated emulator health monitoring; data seeding procedures unclear; emulator reset loses test data (no backup/restore strategy); no CI environment parity validation; Tart VM cleanup processes exist but partially documented",
+    "automatable_score": 7,
+    "data_sources": ".claude/rules/flutter-development.md; .claude/rules/firebase-config.md; docs/operations/ENVIRONMENTS.md; docs/operations/TESTING.md; Makefile targets referenced in qa-engineer-streamlined.md and marionette-testing.md",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/.claude/rules/firebase-config.md; /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/docs/operations/ENVIRONMENTS.md; /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/Scheduler/Makefile (inferred)"
+  },
+  {
+    "name": "Content Review & Approval Workflow",
+    "area": "Marketing",
+    "description": "Process for generating, reviewing, and approving marketing content (social posts, emails, blogs, ads). Includes draft generation, human review gates, compliance checks, and publishing controls.",
+    "current_state": "Formalized in Growth Operating Contract. Human review explicitly required for social post publishing before going live. Content generation layer AI-powered (90% automated). Social content sourced from /marketing/data/social-media/ drafts. Review cycle requires human approval from designated reviewer/publisher. Growth Console acts as execution surface for certain workflows.",
+    "pain_points": "No centralized content calendar visible to all teams; no documented SLA for content review turnaround; no automated content compliance check (brand guidelines, tone, legal); no content performance feedback loop (what got approved that underperforms?); no documented approval chain for different content types (ads vs emails vs social); no rejection/revision workflow documented",
+    "automatable_score": 4,
+    "data_sources": "/EscalateLabs/marketing/GROWTH_OPERATING_CONTRACT.md (human review required for social, publishing); /EscalateLabs/marketing/MARKETING_AUTOMATION_BLUEPRINT.md (content generation pipeline structure)",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/GROWTH_OPERATING_CONTRACT.md; /Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/"
+  },
+  {
+    "name": "Campaign Performance Testing & Validation",
+    "area": "Marketing",
+    "description": "A/B testing, performance tracking, and validation of marketing campaigns (email, social, ads) to measure effectiveness, conversion, engagement, and ROI. Includes variant setup, metrics collection, result analysis, and winning variant promotion.",
+    "current_state": "Partially documented. Marketing Automation Blueprint describes performance tracking layer (100% automated). Analytics system planned to aggregate content metrics and conversions. Competitor monitoring automation outlined. No existing A/B testing framework documented. Campaign success tracked via project-master for launches (Product Hunt, G2). Ad conversion tracking configured (google-ads-conversion-tracking.md).",
+    "pain_points": "No documented A/B testing methodology or statistical significance thresholds; no centralized campaign metrics dashboard; no automated variant performance analysis; no documented decision rules for when to pause/pivot underperforming campaigns; campaign feedback loop unclear (does data flow back to content generation?); no test environment for validating campaign logic before live launch",
+    "automatable_score": 5,
+    "data_sources": "/EscalateLabs/marketing/MARKETING_AUTOMATION_BLUEPRINT.md (analytics layer); /EscalateLabs/marketing/ads/google-ads-conversion-tracking.md; Growth Operating Contract (defines project vs ops work split)",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/MARKETING_AUTOMATION_BLUEPRINT.md; /Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/ads/"
+  },
+  {
+    "name": "Directory & Backlink Management (SEO)",
+    "area": "Marketing",
+    "description": "Ongoing process to submit, claim, and maintain business listings (directories, review sites) and manage backlink quality. Includes drift detection, metadata updates, listing health monitoring, and broken link remediation.",
+    "current_state": "Formalized in Growth Operating Contract. Growth Console is primary execution surface for directory submissions and backlink upkeep. GAL runs background jobs (safe automation only): live listing crawl for drift, review-status rechecks, email polling, metadata comparison. Jira issue history tracks backlog. Owned by growth team with operator review of decisions.",
+    "pain_points": "No automated drift alerting (how often are listings rechecked?); no centralized listing health dashboard; CAPTCHA/anti-bot flows require human intervention (fallback from GAL); metadata comparison process unclear; no automated competitor listing monitoring; no SLA for addressing drift when detected; GAL-driven background jobs not well integrated with notification system",
+    "automatable_score": 6,
+    "data_sources": "/EscalateLabs/marketing/GROWTH_OPERATING_CONTRACT.md (defines Growth Console + GAL split); docs/backlinks-rate-limits.md; docs/status-page-integration.md",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/GROWTH_OPERATING_CONTRACT.md; /Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/docs/"
+  },
+  {
+    "name": "Email Campaign Execution & Delivery Monitoring",
+    "area": "Marketing",
+    "description": "Sending of marketing and transactional emails (onboarding sequences, newsletters, announcements), monitoring delivery success rates, bounce handling, unsubscribe management, and engagement tracking.",
+    "current_state": "Planned in Marketing Automation Blueprint (Phase 2: Email Automation layer). Automation described as 100% automated via Brevo/SendGrid API integration. Email sequence definitions and templates structure outlined. No active email automation system documented yet. Transactional emails from Firebase Functions assumed but not detailed.",
+    "pain_points": "Email automation system not yet built/documented; no described bounce handling or spam complaint response process; no documented unsubscribe/preference management; no email deliverability monitoring (spam rate, bounce rate, authentication - SPF/DKIM); no A/B testing framework for email subject lines/content; no engagement tracking dashboard (open, click, conversion rates); no backup procedure if email service provider fails",
+    "automatable_score": 3,
+    "data_sources": "/EscalateLabs/marketing/MARKETING_AUTOMATION_BLUEPRINT.md (Phase 2 email layer design)",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/MARKETING_AUTOMATION_BLUEPRINT.md"
+  },
+  {
+    "name": "Prospecting & Lead Finding",
+    "area": "Marketing",
+    "description": "Multi-channel prospecting for partnerships, reviews, and guest posts. Includes prospect discovery via social media (Reddit, Twitter, LinkedIn), email research, contact enrichment, and qualification scoring.",
+    "current_state": "Partially automated with manual research and discovery. `/connect-prospects` command identifies prospects from social platforms (Twitter, Reddit, Facebook, LinkedIn) with qualification scoring. Prospect data stored in `/data/prospects/qualified.json`. No cohort segmentation yet.",
+    "pain_points": "Manual contact research, LinkedIn search limited to profiles not posts, email finding requires manual effort, no lead scoring automation, no prospect database or CRM integration yet beyond JSON files, social platform search unreliable for real intent signals.",
+    "automatable_score": 6,
+    "data_sources": "/data/prospects/qualified.json, WebSearch, social platform APIs (Twitter, LinkedIn), email enrichment services",
+    "repos_or_paths": "/EscalateLabs/marketing/.claude/commands/marketing/connect-prospects.md, /data/prospects/"
+  },
+  {
+    "name": "Cold Email Outreach Campaigns",
+    "area": "Marketing",
+    "description": "Three campaign types: integration partnerships, review requests, and guest post pitches. Each has multiple email templates, personalization hooks, follow-up sequences, and A/B testing frameworks. Subject lines tested for open rates. Tracking of opens, clicks, replies, and conversions.",
+    "current_state": "Template-based, semi-automated. `/cold-outreach` command manages campaigns (partnerships, reviews, guestposts). Email templates hardcoded in markdown. Manual campaign setup and sending. Outreach log stored in `/data/outreach-log.json`. Rate limiting guidelines provided (10-100 emails/day). Sending currently manual via human email (not automated).",
+    "pain_points": "Sending not automated—requires human initiation per GROWTH_OPERATING_CONTRACT. No email service provider integration (would require Brevo). Manual campaign tracking in JSON. No unsubscribe/blocklist sync. No email address validation. A/B testing requires manual setup. No lead scoring based on reply sentiment. CRM integration only mentioned as 'move hot leads to CRM' without infrastructure.",
+    "automatable_score": 5,
+    "data_sources": "/data/outreach-log.json, WebSearch for target research, company websites for contact discovery",
+    "repos_or_paths": "/EscalateLabs/marketing/.claude/commands/marketing/cold-outreach.md, /data/outreach/, /automation/src/"
+  },
+  {
+    "name": "Brevo Email Marketing & Automation",
+    "area": "Marketing",
+    "description": "Brevo integration for transactional and lifecycle emails. Email template management (create, upload, sync), test sends, and automation workflows. Supports welcome sequences, trial expiring reminders, re-engagement campaigns. Lifecycle triggers at user signup, trial expiry, and inactivity. HTML templates stored in `/email-templates/`. Template IDs tracked in brevo-templates.json.",
+    "current_state": "Partially implemented. `/brevo-sync-all` syncs all HTML templates to Brevo. `/brevo-upload-template` for individual uploads. `/brevo-test-email` for test sends. `/brevo-setup-automation` creates contact lists and workflow sequences. Brevo automation config stored in `/data/brevo-automation-config.json` with 3 core workflows (welcome, trial_expiring, re_engagement). Contact lists defined (trial_users, trial_expiring, inactive_users, churned_users, team_creators). Frequency caps set (max 2 emails/week per contact).",
+    "pain_points": "Webhooks to trigger workflows not fully wired (requires app-side implementation for signup, trial expiry, inactivity events). Contact list population manual or requires webhook integration. No unsubscribe/blocklist sync with Brevo (suppressionList mentioned in infrastructure but not implemented). No bounce/complaint handling automation. Brevo API integration incomplete—using SDK but missing advanced features. No A/B testing setup in Brevo templates. No segment-based send rules beyond contact lists.",
+    "automatable_score": 7,
+    "data_sources": "/email-templates/*.html, /data/brevo-templates.json, /data/brevo-automation-config.json, Brevo API",
+    "repos_or_paths": "/EscalateLabs/marketing/email-templates/, /automation/src/brevo/index.js, /data/brevo-automation-config.json"
+  },
+  {
+    "name": "Review Request Campaigns (G2/Capterra)",
+    "area": "Marketing",
+    "description": "Milestone-triggered review requests for G2, Capterra, GetApp, TrustRadius, SaaSHub. Uses in-app prompts and email. Honest-feedback framing (not positive-bias requests). Tracks review URLs, deduplicates asks per user per 60 days, respects existing reviews.",
+    "current_state": "Draft stage. Strategy defined in `/data/campaigns/review-collection-g2-2026.md`. Milestone triggers: 3+ schedules created (Scheduler), 5+ logins (Scheduler), 10+ actions/0 errors (Scheduler), 1st agent dispatch (GAL), 7+ dispatches/week (GAL). Design partner review pack exists at `/data/outreach/gal/g2-design-partner-review-pack.md`. Brevo email template for milestone-triggered asks in `/email-templates/review_request_milestone_triggered.md`. Review URLs stored in Growth Console `reviewProfiles[]`. All sends require human approval via Growth Console email draft workflow.",
+    "pain_points": "In-app prompts not yet implemented (requires Scheduler & GAL product team work). Webhook integration from apps to Growth Console not built. Human approval required for all sends (bottleneck). Email deduplication logic not automated—requires manual check of `reviewProfiles[].lastAskAt`. Contact list for review requests needs to sync with Brevo. No tracking of review completion status. No analytics on review request performance.",
+    "automatable_score": 4,
+    "data_sources": "/data/campaigns/review-collection-g2-2026.md, Growth Console reviewProfiles[], Brevo email metrics",
+    "repos_or_paths": "/data/campaigns/review-collection-g2-2026.md, /data/outreach/gal/g2-design-partner-review-pack.md, /email-templates/review_request_milestone_triggered.md"
+  },
+  {
+    "name": "Directory Submission & Backlink Acquisition",
+    "area": "Marketing",
+    "description": "Automated Playwright-based bot for submitting to startup directories (BetaList, BetaPage, LaunchingNext, StartupRanking, AlternativeTo). Supports directory crawling, target research, single and batch submissions. Uses Growth CLI for orchestration. GAL dispatch available for automated submissions. Directory metadata tracked in backlink-targets.json. Submissions logged to Firestore (seo_backlink_jobs). Growth Console (growth.scheduler-systems.com/backlinks) is canonical UI.",
+    "current_state": "Well-developed. `growth backlink submit` for single/batch submissions. Supports Browserbase provider for cloud-based runs. Hardcoded handlers for common directories plus universal fallback. Job queue tracks pending, in-progress, completed, failed submissions. Directory drift detected via crawl. Review status rechecks automated. Email polling for verification emails. Growth Console provides operator UI with backlink rows, history, and metadata snapshots. Firestore stores source of truth. Daily GitHub Actions workflow rechecks status. Backup workflow exports daily.",
+    "pain_points": "CAPTCHA flows require human fallback (per contract). Manual ownership transfers for personal accounts. Directory password management in GCP Secret Manager adds complexity. No automatic submission without handlers (falls back to universal). Email verification polling has rate limits. Some directories require manual login/claims. Growth Console only accessible to scheduler-systems.com domain users. No mobile/low-bandwidth friendly alternative UI.",
+    "automatable_score": 8,
+    "data_sources": "/data/backlink-targets.json, Firestore (seo_backlinks, seo_backlink_jobs, seo_backlink_metadata_snapshots), GCP Secret Manager for passwords",
+    "repos_or_paths": "/EscalateLabs/marketing/growth-cli/, /automation/src/directories/, /seo-tools/ (Growth Console), /data/backlink-targets.json"
+  },
+  {
+    "name": "Cohort Export for Marketing Campaigns",
+    "area": "Marketing",
+    "description": "Export user cohorts from product database for targeted campaigns. Includes trial users, trial expiring, inactive users, churned users, team creators without invites. Cohorts feed into Brevo contact lists and email campaigns.",
+    "current_state": "Defined but not fully implemented. Brevo automation config lists 5 cohort types (trial_users, trial_expiring, inactive_users, churned_users, team_creators). Contact list IDs in config are null (not yet created in Brevo). No export pipeline from product database to Brevo. Manual cohort sync mentioned in infrastructure checklist but not operationalized.",
+    "pain_points": "No export pipeline from Scheduler/GAL databases to Brevo. Manual list creation in Brevo required. No scheduling for cohort refreshes (daily/weekly). No data governance around user attributes (FIRSTNAME, LASTNAME, EMAIL, TRIAL_START_DATE, TRIAL_END_DATE, LAST_LOGIN, PLAN_TYPE, TEAM_SIZE, FEATURES_USED). No webhook for dynamic cohort updates. List cleanup (removing converted, churned users) manual. GDPR compliance unclear for retention policies.",
+    "automatable_score": 3,
+    "data_sources": "Scheduler/GAL databases, Brevo API, Google Sheets (legacy, archived)",
+    "repos_or_paths": "/data/brevo-automation-config.json, /automation/src/brevo/index.js (partial implementation)"
+  },
+  {
+    "name": "Unsubscribe & Blocklist Management",
+    "area": "Marketing",
+    "description": "Tracks unsubscribed users, bounced emails, complained emails. Respects unsubscribe requests immediately. Maintains suppression lists. Brevo handles bounces and complaints. Manual feedback for unengaged users.",
+    "current_state": "Partially implemented. Brevo deliverability checklist exists. Hard-bounce removal mentioned but status 'needs_review'. Frequency caps enforced (max 2 emails/week). Unsubscribe links included in email templates. Contact status enum includes 'unsubscribed'. Brevo API can process unsubscribe webhooks but webhook endpoint health not checked. No automated sunset policy (remove contacts after 180 days no engagement—mentioned as action item, not implemented).",
+    "pain_points": "No export of Brevo suppression list back to product database (unsubscribes not reflected in CRM). No automated list hygiene (hard bounces, soft bounces, complaints). No sunset policy for unengaged contacts. Webhook endpoint for bounce/complaint processing not verified. No audit trail of unsubscribes. GDPR right-to-be-forgotten not automated. Suppression list sync between app and Brevo mentioned in checklist but not implemented.",
+    "automatable_score": 4,
+    "data_sources": "Brevo suppression lists, bounce/complaint webhooks, Firestore (contacts), email status tracking",
+    "repos_or_paths": "/data/brevo-deliverability-checklist.json, /automation/src/brevo/index.js, /data/brevo-automation-config.json"
+  },
+  {
+    "name": "Drip & Lifecycle Email Sequences",
+    "area": "Marketing",
+    "description": "Automated email sequences triggered by user milestones and lifecycle events. Includes welcome (Day 0: Get Started, Day 3: Team Invite, Day 7: Features), trial expiring (Day -7, -3, -1), and re-engagement (Day 7, 30, 60 after inactivity). Personalized with user attributes. Conditional sends based on user behavior.",
+    "current_state": "Configured in Brevo but not fully operational. 3 workflows defined: welcome (3 steps, 0/3/7 days), trial_expiring (3 steps, -7/-3/-1 days), re_engagement (3 steps, 7/30/60 days inactive). Email templates created: get_started_today, your_team_is_waiting, exclusive_features, unlock_premium_benefits, we_miss_you, re_engage_users. Conditions: no_team_members, not_converted, inactive_7_days, etc. Brevo lists not yet populated. Webhooks not wired to product apps.",
+    "pain_points": "Webhook integration incomplete—no trigger ingestion from Scheduler/GAL. Contact list population not automated. Conditions require manual user attribute sync (TEAM_SIZE, FEATURES_USED, LAST_LOGIN). No A/B testing of email content across variants. No dynamic delays based on user timezone. Reply tracking (opens, clicks) not linked back to user behavior for next email timing. Delay logic all hardcoded—no flexibility for varying trial lengths or churn signals.",
+    "automatable_score": 5,
+    "data_sources": "/data/brevo-automation-config.json, /email-templates/*.html, Brevo workflow state, product app webhooks",
+    "repos_or_paths": "/data/brevo-automation-config.json, /automation/src/brevo/index.js, /email-templates/"
+  },
+  {
+    "name": "Prospect Outreach & Engagement (Social/Multi-Channel)",
+    "area": "Marketing",
+    "description": "Social platform engagement for prospect discovery and conversion. Includes Twitter replies, LinkedIn comments/connections/messages, Reddit comments, Facebook group posts. Playwright-based browser automation for posting. DM follow-ups. Reply categorization and meeting booking.",
+    "current_state": "Partially automated. `/prospect-outreach` command with sub-actions: reply, dm, followup, report, auto. Platform-specific templates for Twitter replies, LinkedIn messages, Reddit comments. DM sequences defined (value-first, soft pitch, demo offer). Follow-up sequence (Day 3, 7, 14). Prospect status tracking: new → replied → engaged → dm_sent → following_up → converted/closed. Outreach log stored in `/data/prospects/outreach-log.json`. Rate limits defined (Twitter 30 replies/day, LinkedIn 25, Reddit 15). Playwright helper functions for login verification, element clicking, text filling. Screenshots on error.",
+    "pain_points": "LinkedIn strategy limited to profiles, not post search (post search unreliable). No automation for Twitter/LinkedIn DMs—requires manual Playwright session. No automatic CRM sync (prospects to Sheets mentioned but not implemented). No email capture from social outreach (requires manual user entry). No meeting scheduling integration (Calendly links manual). Reply sentiment analysis not automated (categorization manual). No tracking of engagement velocity (fast reply = more interested). Browser automation fragile—selector fallbacks help but updates to platforms break selectors.",
+    "automatable_score": 6,
+    "data_sources": "/data/prospects/qualified.json, /data/prospects/outreach-log.json, social platform APIs (Twitter, LinkedIn), email enrichment",
+    "repos_or_paths": "/EscalateLabs/marketing/.claude/commands/marketing/prospect-outreach.md, /data/prospects/"
+  },
+  {
+    "name": "ASO (App Store Optimization) Tracking",
+    "area": "Marketing",
+    "description": "Keyword ranking tracking, competitor analysis, metadata optimization (title, subtitle, keywords, description, screenshots). Bi-weekly snapshot cycles. Rank history and change log. Uses AppTweak or Playwright export. Competitive positioning and market gap analysis.",
+    "current_state": "Well-developed with slash commands. `/aso-start` bi-weekly snapshot. `/aso-track-change` logs metadata changes. `/aso-research` for keyword/competitor research. `/aso-track-keywords` weekly rankings. `/aso-competitor-analysis` monthly competitor review. Data files: aso-keywords.json (25 tracked keywords), aso-ranking-history.json (snapshots), aso-change-log.json (metadata changes), aso-config.json (config). Playwright export via `scripts/apptweak-export.js` (credentials: APPTWEAK_EMAIL/PASSWORD). Competitors tracked: When I Work, Deputy, Sling (primary); Homebase, 7shifts, Connecteam (secondary).",
+    "pain_points": "Playwright export fragile (depends on AppTweak UI). AppTweak API not yet integrated (would improve reliability). Manual tracking cycle—no automation for weekly snapshots. Keyword strategy static (hardcoded in aso-keywords.json). Ranking changes not correlated with competitor changes automatically. No A/B test framework for metadata (changes made, manual tracking only). Ranking impact predictions manual (expected vs actual filled in manually). App review monitoring not integrated with ASO (reviews tracked separately). No seasonal keyword analysis.",
+    "automatable_score": 6,
+    "data_sources": "/data/aso-keywords.json, /data/aso-ranking-history.json, /data/aso-change-log.json, /data/aso-config.json, AppTweak API or Playwright",
+    "repos_or_paths": "/EscalateLabs/marketing/automation/src/aso/, /data/aso-*.json, /scripts/apptweak-export.js"
+  },
+  {
+    "name": "SEO & Backlink Research",
+    "area": "Marketing",
+    "description": "Keyword research, competitive gap analysis, backlink opportunity identification. Moz data for DA/traffic metrics. Resource pages, integration partnerships, editorial opportunities. Google Search Console integration for indexing health.",
+    "current_state": "Research-driven, partially automated. `/seo-keyword-research`, `/seo-backlink-research`, `/seo-competitor-gaps` slash commands exist. Moz API available for DA/traffic data ($250/mo). Backlink outreach templates in `/data/seo/outreach/email-templates.md` (5 templates: resource page inclusion, integration partnership, editorial/content citation, directory/list submission, follow-up). Directory-specific playbooks (e.g., AlternativeTo manual submission). Outreach tracker in `/data/seo/outreach/outreach-tracker.json`. Directory submissions tracked in `/data/seo/outreach/directory-submissions.json`.",
+    "pain_points": "Moz API credentials required ($250/mo cost). Keyword research manual—no continuous monitoring. Competitor analysis ad-hoc (slash command runs snapshot, not continuous). Backlink target list static (updates manual). No automated ranking position tracking (unlike ASO). Search Console integration mentioned but not integrated. Email verification polling for directory submissions manual. No ROI tracking (which backlinks drive traffic/rankings).",
+    "automatable_score": 5,
+    "data_sources": "/data/seo/outreach/, Moz API, Google Search Console, WebSearch",
+    "repos_or_paths": "/EscalateLabs/marketing/.claude/commands/seo/, /data/seo/, /automation/src/gsc/ (Search Console)"
+  },
+  {
+    "name": "Blog & Content Production",
+    "area": "Marketing",
+    "description": "Blog post generation, editing, and publication pipeline for Scheduler and Stratus products. Includes content ideation, AI-assisted drafting, human review, and multi-channel distribution (blog, social, email).",
+    "current_state": "Documented in MARKETING_AUTOMATION_BLUEPRINT.md. Workflow: Topic selection → AI outline generation → Human approval → AI draft → Human review/edit (20-30 min) → Auto-publish to blog → Auto-social post generation → Auto-email distribution. Stratus blog has dedicated content strategy (5-post launch series with specific voice rules). Targets 5 posts/week for Scheduler, separate content calendar for Stratus (direct, technical, confident voice).",
+    "pain_points": "Manual editing time per post (20-30 min), human review bottleneck, cross-platform distribution coordination, maintaining brand voice consistency across products",
+    "automatable_score": 75,
+    "repos_or_paths": "/EscalateLabs/marketing/MARKETING_AUTOMATION_BLUEPRINT.md, /StratusCloudLabs/stratus/stratus/blog/README.md, /EscalateLabs/marketing/data/social-media/content-pillars.md"
+  },
+  {
+    "name": "Social Media Content Planning & Publishing",
+    "area": "Marketing",
+    "description": "Multi-platform social content strategy covering LinkedIn, X (Twitter), and Facebook. Includes content calendar, content pillars (Building in Public, Industry Insights, Product Updates, Founder Journey, AI Governance), posting schedules, and pre-publish verification.",
+    "current_state": "Weekly cadence: Tuesday (product/technical), Thursday (industry insight), optional Saturday (founder reflection). Posting times: LinkedIn 8-10am EST, X 9am or 12pm EST. Content ratio: 80% value, 15% engagement, 5% promotion. All posts require factual verification and founder (Shay) approval before publishing. Governed by CONTENT-RULES.md with strict verification requirements (no fabricated stories, metrics, or false claims).",
+    "pain_points": "Manual content verification and approval workflow, multi-platform scheduling coordination, founder approval bottleneck, maintaining consistency across products and channels",
+    "automatable_score": 60,
+    "repos_or_paths": "/EscalateLabs/marketing/data/social-media/CONTENT-RULES.md, /EscalateLabs/marketing/data/social-media/calendar-framework.md, /EscalateLabs/marketing/data/social-media/content-pillars.md, /EscalateLabs/marketing/MARKETING_AUTOMATION_BLUEPRINT.md"
+  },
+  {
+    "name": "SEO & Backlink Acquisition",
+    "area": "Marketing",
+    "description": "Search engine optimization including keyword research, backlink acquisition, directory submissions, and competitor gap analysis. Core operations handled through Growth Console (https://growth.scheduler-systems.com/backlinks), supports both Scheduler and GAL products.",
+    "current_state": "Growth Console is canonical operational surface for backlink/directory work using Firestore backend. Workflow: Backlink target research → Directory submission (via Playwright bot for BetaList, BetaPage, LaunchingNext, StartupRanking, AlternativeTo) → Backlink tracking → Metadata drift monitoring → Review status rechecks. Uses free tools (Ahrefs, Semrush) + Moz Pro ($250/mo) for gap analysis. Supports human-initiated submissions and GAL background automation for safe jobs (rechecks, email polling, drift detection, CAPTCHA audio fallback).",
+    "pain_points": "Manual CAPTCHA solving on some directories, ownership transfer friction (tied to personal accounts), Moz API cost ($250/mo), coordinating between free tool limits and paid tier",
+    "automatable_score": 70,
+    "repos_or_paths": "/EscalateLabs/marketing/seo-tools/README.md, /EscalateLabs/marketing/data/SEO_TOOLS_GUIDE.md, /EscalateLabs/marketing/.claude/commands/backlinks/, /EscalateLabs/marketing/GROWTH_OPERATING_CONTRACT.md, /EscalateLabs/marketing/automation/ (Playwright bot)"
+  },
+  {
+    "name": "App Store Optimization (ASO)",
+    "area": "Marketing",
+    "description": "Mobile app optimization for Scheduler app across iOS and Android. Includes keyword research, ranking tracking, competitor analysis, metadata management (title, subtitle, keywords, screenshots, descriptions), and performance measurement.",
+    "current_state": "Bi-weekly ASO cycles controlled via slash commands. Workflow: /aso-start (snapshot + recommendations) → metadata changes in App Store Connect/Google Play Console → /aso-track-change (log changes) → /aso-track-keywords (weekly ranking monitoring) → /aso-competitor-analysis (monthly deep dive). Target competitors: When I Work, Deputy, Sling (primary). Tracks 25 keywords across categories (Primary, Secondary, Industry, Feature, Long-tail, Brand). Uses AppTweak integration (Playwright export or API when available). Data stored in aso-keywords.json, aso-ranking-history.json, aso-change-log.json, aso-config.json, aso-competitor-analysis.json.",
+    "pain_points": "AppTweak API not yet integrated (currently Playwright-based), manual metadata changes required in app stores, limited ranking history analysis automation, competitor tracking coordination",
+    "automatable_score": 65,
+    "repos_or_paths": "/EscalateLabs/marketing/data/ASO_WORKFLOW_GUIDE.md, /EscalateLabs/marketing/.claude/commands/aso/, /EscalateLabs/marketing/automation/src/aso/, /EscalateLabs/marketing/data/aso-*.json"
+  },
+  {
+    "name": "Landing Page Copywriting & A/B Testing",
+    "area": "Marketing",
+    "description": "Landing page optimization including headline testing, CTA copy variations, hero image/video testing, social proof placement, and mobile-first readability. Covers main landing page plus use-case specific pages (/restaurant-scheduling, /retail-scheduling, /healthcare-scheduling, /small-business, /enterprise).",
+    "current_state": "Conversion copywriting guidelines documented in copywriting-guidelines.md with John Rush Rule (specific language, no vague marketing speak). Current audit identifies issues: headline too generic, abstract hero image, missing above-fold social proof. A/B testing framework prioritizes hero section (Headline, CTA, Hero Image) over minor elements. Test plan includes: Value vs Pricing headline, CTA friction ('Start Free Trial' vs 'Build Your First Schedule'), Visual evidence (static screenshot vs animated GIF), Social proof type variations. Uses Google Optimize with 50/50 traffic split, 95% statistical significance threshold. Success metrics defined at 30 days.",
+    "pain_points": "Manual test design and analysis, long test cycle times (14 days minimum), multiple landing page versions to maintain, copywriting review cycles, measuring conversion impact across pages",
+    "automatable_score": 50,
+    "repos_or_paths": "/EscalateLabs/marketing/data/landing-page/copywriting-guidelines.md, /EscalateLabs/marketing/data/landing-page/current-audit.md, /EscalateLabs/marketing/data/landing-page/ab-testing.md, /EscalateLabs/marketing/data/landing-page/use-case-pages.md, /EscalateLabs/marketing/data/landing-page/hero-optimization.md"
+  },
+  {
+    "name": "Email Marketing Automation (Brevo)",
+    "area": "Marketing",
+    "description": "Email campaign management using Brevo including template design, automation sequences (welcome, trial reminders, re-engagement), and drip campaigns. Covers template upload, testing, and webhook-triggered workflows.",
+    "current_state": "6 email templates in production (exclusive_features, get_started_today, re_engage_users, unlock_premium_benefits, we_miss_you, your_team_is_waiting). Automation workflows defined: Trial Welcome (Day 0, 3, 7), Trial Expiring Reminders (Days -7, -3, -1), Re-engagement Campaign (Days 30, 45, 60). Requires contact attributes (FIRSTNAME, LASTNAME, EMAIL, TRIAL_START_DATE, TRIAL_END_DATE, LAST_LOGIN, PLAN_TYPE, TEAM_SIZE, FEATURES_USED). Slash commands: /brevo-upload-template, /brevo-sync-all, /brevo-test-email, /brevo-setup-automation. Template mappings stored in brevo-templates.json with content hash tracking for change detection.",
+    "pain_points": "Template maintenance across multiple email clients, Brevo API rate limits (300/day free tier), webhook configuration complexity, manual template testing, managing contact attributes from app",
+    "automatable_score": 80,
+    "repos_or_paths": "/EscalateLabs/marketing/data/BREVO_INTEGRATION.md, /EscalateLabs/marketing/.claude/commands/brevo/, /EscalateLabs/marketing/email-templates/, /EscalateLabs/marketing/data/brevo-*.json"
+  },
+  {
+    "name": "Testimonial & User Feedback Collection",
+    "area": "Marketing",
+    "description": "Systematic testimonial collection from users, conversion to marketing assets, and distribution across website, social, and sales materials. Includes feedback monitoring, quote extraction, and visual asset generation.",
+    "current_state": "Trigger-based collection: Watch support/DM conversations for 'aha!' moments (e.g., 'saved me X hours', comparison with competitors). Frictionless request template provided to team. Workflow: Capture feedback → Draft testimonial quote → Request approval → Add to testimonials.json → Generate social graphic (Figma template) → Distribute to website testimonials block, LinkedIn/X social posts, sales deck 'Wall of Love', email newsletter. Daily workflow documented with tracking template and categorization system.",
+    "pain_points": "Manual feedback monitoring and extraction, graphic creation overhead, testimonial approval delays, testimonial asset versioning and updates",
+    "automatable_score": 55,
+    "repos_or_paths": "/EscalateLabs/marketing/data/user-feedback/testimonial-pipeline.md, /EscalateLabs/marketing/data/user-feedback/daily-workflow.md, /EscalateLabs/marketing/data/user-feedback/categorization.md, /EscalateLabs/marketing/data/user-feedback/tracking-template.md"
+  },
+  {
+    "name": "Competitor Monitoring & Review Response",
+    "area": "Marketing",
+    "description": "Systematic monitoring of competitor reviews on G2, TrustRadius, GetApp, and other platforms. Includes weekly intelligence reports, competitor response strategies, and pain point tracking from reviews.",
+    "current_state": "Weekly competitor intel reports track competitor activity, app updates, and review patterns. Response playbook documents tone and handling strategies. Source map identifies all review platforms. Pain points and monitoring specs defined. GitHub Actions workflow (weekly-competitor-intel.yml) automates weekly collection. Data stored in monitoring-spec.json and source-map.json. Review response requires human approval before sending.",
+    "pain_points": "Manual weekly report generation, monitoring multiple platform APIs, tracking competitor changes, review response coordination, maintaining response playbook accuracy",
+    "automatable_score": 70,
+    "repos_or_paths": "/EscalateLabs/marketing/data/competitor-reviews/monitoring-spec.md, /EscalateLabs/marketing/data/competitor-reviews/response-playbook.md, /EscalateLabs/marketing/data/competitor-reviews/source-map.md, /EscalateLabs/marketing/data/competitor-reviews/weekly-report-template.md, /EscalateLabs/marketing/.github/workflows/weekly-competitor-intel.yml"
+  },
+  {
+    "name": "Product Launch Coordination",
+    "area": "Marketing",
+    "description": "Structured approach to major product launches including pre-launch checklists, launch day coordination, post-launch follow-up, and partner/supporter engagement for Product Hunt, G2, and other platform launches.",
+    "current_state": "Documented launch playbook with: pre-launch-checklist.md (30+ day prep), launch-day-plan.md (hour-by-hour timeline), engagement-strategy.md (supporter outreach), devhunt-plan.md (Dev Hunt specific), post-launch.md (follow-up cadence). Supporter outreach and coordinated timing across platforms. Human-owned execution (founder/growth-lead responsible). Launch assets tracked as GitHub issues in marketing repo. G2 design partner review pack and Product Hunt launch pack documented.",
+    "pain_points": "Coordinating timing across multiple platforms, managing supporter outreach at scale, tracking launch assets and messaging consistency, post-launch engagement maintenance",
+    "automatable_score": 45,
+    "repos_or_paths": "/EscalateLabs/marketing/data/launches/, /EscalateLabs/marketing/GROWTH_OPERATING_CONTRACT.md"
+  },
+  {
+    "name": "Outreach & Prospect Engagement",
+    "area": "Marketing",
+    "description": "Multi-channel outreach campaigns including cold email sequences, LinkedIn connection/messaging, partner outreach, and PR/review request campaigns. Includes prospect research, targeting, and follow-up tracking.",
+    "current_state": "Outreach assets stored in /data/seo/outreach/ with email templates, directory submission playbooks, and review request campaigns. John Rush outreach cadence runs bi-weekly (john-rush-twitter.md, john-rush-linkedin.md, john-rush-research.md). Prospect database tracked in prospects/qualified.json. Review request campaigns (G2, TrustRadius) have dedicated 30-day plans. Zapier blog pitch and PMP Get Reviewed submission tracked. All outreach emails require human approval before sending. Slack/GitHub automation available for draft generation and research.",
+    "pain_points": "Manual prospect research and list building, email personalization at scale, follow-up coordination, response tracking, campaign performance measurement",
+    "automatable_score": 55,
+    "repos_or_paths": "/EscalateLabs/marketing/data/seo/outreach/, /EscalateLabs/marketing/.claude/commands/marketing/, /EscalateLabs/marketing/data/partnerships/, /EscalateLabs/marketing/data/john-rush/"
+  },
+  {
+    "name": "Creative Assets & Ad Copy Management",
+    "area": "Marketing",
+    "description": "Production and management of marketing creative assets including social media graphics, ad copy variations, video scripts, and landing page visuals. Covers Google Ads campaigns, social ads, and brand asset organization.",
+    "current_state": "Ad creatives stored in /ads/ directory with scheduler-search-campaign.md, gal-search-campaign.md, pm-app-development-ad-prompts.md, and google-ads-conversion-tracking.md. Social media post templates documented in post-templates.md. Creative assets stored in /assets/. Video scripts generated via AI with human review. Google Ads conversion tracking configured. Ad copy variations tested via A/B testing framework. All ad launches require review before going live.",
+    "pain_points": "Managing multiple ad platform requirements, creative variation testing coordination, tracking creative performance metrics, maintaining brand consistency across ad variants",
+    "automatable_score": 65,
+    "repos_or_paths": "/EscalateLabs/marketing/ads/, /EscalateLabs/marketing/assets/, /EscalateLabs/marketing/data/social-media/templates/"
+  },
+  {
+    "name": "Growth Console Operations (Backlink Management UI)",
+    "area": "Marketing",
+    "description": "Web-based operational interface for managing backlinks, directory submissions, and SEO metadata. Serves as canonical data store for all backlink/directory work with Firestore backend, daily automated backups, and GAL integration for background automation.",
+    "current_state": "Live at https://growth.scheduler-systems.com/backlinks with Google Workspace auth. Firestore collections: seo_backlinks, seo_backlink_sheets, seo_backlink_metadata_snapshots, seo_backlink_jobs, growth_social_drafts. Row-level history subcollections for audit trails. Daily backup workflow (seo-tools-backup.yml) exports to gs://scheduler-systems-web-seo-tools-backups/. GAL dispatch for safe background jobs (recheck_review_status, poll_verification_email, crawl_live_listing_for_drift, submit_or_update_directory, resume_after_human_checkpoint). Machine token auth for automation. Backup retention: 90 days.",
+    "pain_points": "Dashboard complexity for non-technical users, GAL dispatch latency, backup/restore operations, drift detection accuracy, per-row history scaling",
+    "automatable_score": 80,
+    "repos_or_paths": "/EscalateLabs/marketing/seo-tools/README.md, /EscalateLabs/marketing/seo-tools/src/, /EscalateLabs/marketing/.github/workflows/seo-tools-backup.yml"
+  },
+  {
+    "name": "App Store Listing Management (ASO)",
+    "area": "Marketing",
+    "description": "End-to-end app store optimization including keyword research, ranking tracking, competitor analysis, and metadata management for iOS and Android apps. Includes tools for monitoring ranking changes, documenting metadata updates, and identifying optimization opportunities.",
+    "current_state": "Operational with established bi-weekly optimization cycles. Automated Playwright-based AppTweak integration for ranking data export. Manual ranking checks via web search; future API integration planned.",
+    "data_sources": "AppTweak, App Store Connect, Google Play Console, /data/aso-keywords.json, /data/aso-ranking-history.json, /data/aso-change-log.json, /data/aso-competitor-analysis.json",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/data (ASO tracking), .claude/commands/aso/, /automation/scripts/apptweak-export.js",
+    "pain_points": "Manual ranking verification; limited historical trend analysis; competitor metadata tracking requires manual updates; ASO API not yet fully automated",
+    "automatable_score": 75
+  },
+  {
+    "name": "Funnel & Conversion Analytics",
+    "area": "QA",
+    "description": "Measurement of core sales funnel stages from lead capture to closed-won deals. Tracks new contacts, qualified prospects, proposal stage deals, and revenue metrics. Includes conversion rate guardrails and alerts for funnel stalls.",
+    "current_state": "Established baseline (2026-03-03) with weekly export automation via scripts/generate-weekly-kpi-review.mjs. Weekly KPI reviews with conversion guardrails for stage progression alerts.",
+    "data_sources": "Brevo Deals Pipeline, Brevo Home (contacts), weekly review exports at reviews/weekly/*-kpi-review.md",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/business-ops-admin/kpis/funnel-metrics.md, /scripts/generate-weekly-kpi-review.mjs, /.github/workflows/weekly-kpi-export.yml",
+    "pain_points": "Conversion stalls between lead and qualification; qualified deals not moving to proposal stage; requires 2-week observation for alerts; lacks real-time visibility",
+    "automatable_score": 85
+  },
+  {
+    "name": "Review Collection & Reputation Management",
+    "area": "Marketing",
+    "description": "Milestone-triggered in-app and email-based review request campaigns across G2, Capterra, GetApp, TrustRadius, and SaaSHub. Tracks review collection by platform, manages deduplication, and prevents negative-experience requests.",
+    "current_state": "Draft phase (requires human approval). Milestone triggers defined for Scheduler Web and GAL-Run. Integration with Growth Console for review profile tracking and Brevo email template management planned.",
+    "data_sources": "Growth Console reviewProfiles[], Brevo email campaigns, review platform APIs, product app milestone events",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/data/campaigns/review-collection-g2-2026.md, /email-templates/review_request_milestone_triggered.md",
+    "pain_points": "Integration between product apps and Growth Console not yet implemented; in-app milestone detection requires product repo changes; deduplication logic needs Firestore schema design",
+    "automatable_score": 65
+  },
+  {
+    "name": "Email Lifecycle & Retention Messaging",
+    "area": "Marketing",
+    "description": "Automated email sequences for user lifecycle stages: onboarding (day 0), education (day 3-5), upsell (trial ending), re-engagement (7+ days inactive), team growth (invites), and win-back (30+ days churned). Includes holiday appreciation campaigns.",
+    "current_state": "Templates created and documented; Brevo integration in progress. 7 email template types defined with trigger conditions. Awaiting full Brevo automation setup and trigger configuration.",
+    "data_sources": "Brevo contact database, user activity events from Scheduler/GAL apps, email-templates/ HTML templates",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/email-templates/ (HTML templates), /data/BREVO_INTEGRATION.md",
+    "pain_points": "Product apps not yet sending lifecycle events to Brevo; trigger definition incomplete; no testing of email deliverability; template variable mapping needs validation",
+    "automatable_score": 70
+  },
+  {
+    "name": "Competitive Analysis & Positioning",
+    "area": "Marketing",
+    "description": "Systematic competitive intelligence gathering including competitor ASO strategies, keyword rankings, feature positioning, and market gap identification. Weekly automated competitor reports and comparative analysis against top 10 competitors.",
+    "current_state": "Operational with weekly GitHub Actions-based competitor intel scripts. Manual competitive analysis commands available. Competitor data tracked in JSON files and weekly reports.",
+    "data_sources": "Competitor app store pages, Moz backlink data, weekly competitor intel scripts, /data/seo/competitors-*.json, /data/aso-competitor-analysis.json",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/scripts/weekly-competitor-intel.js, /.github/workflows/weekly-competitor-intel.yml, /data/social-media/competitor-analysis.md",
+    "pain_points": "Competitor metadata changes tracked manually; limited predictive analysis; market positioning gaps not formally documented; no automated alert for major competitor moves",
+    "automatable_score": 70
+  },
+  {
+    "name": "Pricing & Positioning Copy",
+    "area": "Marketing",
+    "description": "Definition and management of pricing model, value messaging, positioning copy, and promotional messaging for Scheduler Core, GAL Ops, and Unified Platform. Includes discount policies, upgrade paths, and entitlement matrices.",
+    "current_state": "Pricing model documented with three tiered plans, discount guardrails, and upgrade triggers. Packaging and entitlement matrix defined. No dynamic pricing or A/B testing infrastructure currently implemented.",
+    "data_sources": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/business-ops-admin/model/pricing.md, /model/packaging.md, ADR-0001",
+    "repos_or_paths": "/Scheduler-Systems/business-ops-admin/model/ (pricing.md, packaging.md)",
+    "pain_points": "No A/B testing framework for pricing copy; discount approval requires manual ADR updates; no variant testing for positioning messaging; pricing/packaging changes not integrated with product infrastructure",
+    "automatable_score": 40
+  },
+  {
+    "name": "Attribution & Campaign Tracking",
+    "area": "Marketing",
+    "description": "Multi-channel attribution and campaign performance tracking including Google Ads conversion tracking setup, organic inbound tracking, and outbound campaign measurement. Integration with Google Analytics 4, Google Tag Manager, and Brevo.",
+    "current_state": "Google Ads conversion tracking documented but not fully deployed. Requires gtag.js installation on gal.run, gal-run.io, and app.scheduler-systems.com. GA4 linked to Ads account; remarketing audiences setup incomplete.",
+    "data_sources": "Google Ads conversions, Google Analytics 4, Brevo campaign metrics, growth CLI campaign tracking JSON files",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/ads/google-ads-conversion-tracking.md, /growth-cli/",
+    "pain_points": "Tags not yet installed across all domains; cross-domain tracking requires GTM setup; Brevo event tracking not fully configured; multi-touch attribution model not defined",
+    "automatable_score": 55
+  },
+  {
+    "name": "Directory & Backlink Acquisition",
+    "area": "Marketing",
+    "description": "Automated directory submission for startup directories (BetaList, BetaPage, LaunchingNext, StartupRanking, AlternativeTo) with CAPTCHA handling, email verification polling, and backlink upkeep. Playwright-based bot with 2Captcha integration.",
+    "current_state": "Operational with automated bot. Growth Console is canonical execution surface. GAL handles safe background jobs (crawl, recheck, polling). 100+ directories tracked with submission tier system.",
+    "data_sources": "/data/backlink-targets.json, Growth Console Firestore records, automated submission logs, email verification status tracking",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/automation/src/, /data/seo/backlinks/",
+    "pain_points": "CAPTCHA audio challenge fallback to human; email verification polling sometimes delays; metadata drift review manual; ownership transfers tied to personal accounts require human approval",
+    "automatable_score": 80
+  },
+  {
+    "name": "SEO Keyword Research & Gap Analysis",
+    "area": "Marketing",
+    "description": "Systematic keyword discovery, competitor gap analysis, and SEO opportunity identification using Moz API. Identifies high-value keywords, tracks search intent, and documents competitor keyword coverage gaps.",
+    "current_state": "Operational with Moz API integration ($250/mo). Commands available for keyword research and competitor gap analysis. Historical data stored in JSON with trending analysis. Weekly export capability.",
+    "data_sources": "Moz API (keywords, backlinks, domain authority), /data/moz-*.json, /data/seo/reports/, /data/aso-keywords.json (cross-channel)",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/.claude/commands/seo/, /seo-tools/",
+    "pain_points": "Moz API rate limits ($250/mo); keyword search volume estimates not real-time; long-tail keyword discovery incomplete; content-to-keyword mapping not automated",
+    "automatable_score": 75
+  },
+  {
+    "name": "Content Marketing & Distribution Automation",
+    "area": "Marketing",
+    "description": "AI-powered content generation, social media scheduling, blog publishing, and cross-platform distribution. Includes content calendar automation, templated post generation, and engagement monitoring across LinkedIn, Twitter, and email.",
+    "current_state": "Blueprint documented; partial automation in place. Social posting scheduled; blog pipelines defined; email sequences templated. Requires API integrations for LinkedIn, Twitter, and full blog publishing automation.",
+    "data_sources": "/marketing-automation-blueprint.md, /data/social-media/, /email-templates/, content queue JSON files",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/MARKETING_AUTOMATION_BLUEPRINT.md, /automation/src/",
+    "pain_points": "LinkedIn API access limited; Twitter/X API requires elevated tier; blog publishing not automated; content approval workflow needs UI; weekly content calendar compliance not tracked",
+    "automatable_score": 60
+  },
+  {
+    "name": "Cold Outreach & Prospect Research",
+    "area": "Marketing",
+    "description": "Systematic prospect list building, cold email campaigns, LinkedIn outreach, and sales engagement. Includes personalization at scale, follow-up sequences, and lead scoring based on engagement. Supports partnership, review request, and guest post pitches.",
+    "current_state": "Commands available for cold outreach, prospect research, and engagement. Data templates and rate-limiting guidelines documented. Integration with Brevo for campaign management. Requires human approval for sends.",
+    "data_sources": "/data/outreach/*, Brevo contact lists, LinkedIn/email engagement logs",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/.claude/commands/marketing/cold-outreach.md, /prospect-outreach.md, /data/outreach/",
+    "pain_points": "LinkedIn automation requires stealth plugin; email reputation management not formalized; follow-up sequence automation incomplete; no lead scoring algorithm; GDPR/CAN-SPAM compliance checks manual",
+    "automatable_score": 65
+  },
+  {
+    "name": "Campaign Blitz Execution (Launch Framework)",
+    "area": "Marketing",
+    "description": "Full product launch execution framework based on John Rush's 13-step methodology: 100+ directory submissions, ProductHunt launch, Reddit/Twitter/LinkedIn campaigns, cold outreach, review requests, guest posts, and integrations. End-to-end campaign orchestration.",
+    "current_state": "Framework documented and command available (/marketing-blitz). Requires campaign prep (assets, parameters). Rate-limiting guidelines in place. Tracking data structure defined.",
+    "data_sources": "Campaign configuration JSON, tracking logs (/campaigns/{campaign-name}/), submission success/failure logs",
+    "repos_or_paths": "/Users/scheduler-systems/Documents/scheduler-systems-ltd/EscalateLabs/marketing/.claude/commands/marketing/marketing-blitz.md",
+    "pain_points": "No real-time campaign dashboard; post-campaign analytics requires manual compilation; cross-channel attribution not integrated; ProductHunt timing coordination manual",
+    "automatable_score": 70
+  },
+  {
+    "name": "ICP & GTM Motion Definition",
+    "area": "Marketing",
+    "description": "Ideal Customer Profile definition, market segment focus, and go-to-market motion strategy. Includes buying triggers, time-to-value expectations, qualification criteria, and handoff rules between marketing, sales, and customer success.",
+    "current_state": "Documented for two primary segments (product/engineering teams 5-80 engineers, founder-led SMB ops). GTM motion defined as hybrid (founder-led + agent-assisted). Handoff rules between functions documented.",
+    "data_sources": "/model/icp.md, /model/gtm-motion.md, ADR-0001, ADR-0002",
+    "repos_or_paths": "/Scheduler-Systems/business-ops-admin/model/icp.md, /model/gtm-motion.md",
+    "pain_points": "No dynamic lead qualification automation; handoff criteria not formalized in Brevo; secondary segment outreach not yet resourced; buying trigger detection manual",
+    "automatable_score": 45
+  },
+  {
+    "name": "Product Lifecycle & Distribution Lock",
+    "area": "QA",
+    "description": "Product lifecycle management including evidence gates for current-problem validation, demand/distribution proof, and release integrity. Defines allowed work classes under distribution lock to prevent speculative feature work without market proof.",
+    "current_state": "Lifecycle states defined (7 states from problem_research to evidence_review). Distribution lock enforces evidence gates. GAL consumes product status exports. Override system with approved classes (production_outage, security/legal compliance).",
+    "data_sources": "/products/status/*.json, /products/lifecycle.md, /scripts/product-status.mjs",
+    "repos_or_paths": "/Scheduler-Systems/business-ops-admin/products/lifecycle.md, /status/",
+    "pain_points": "Evidence validation not automated; distribution lock status relies on manual record updates; override tracking requires manual review; release-ready criteria not integrated with CI/CD",
+    "automatable_score": 50
+  }
+]

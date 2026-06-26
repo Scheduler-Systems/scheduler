@@ -63,50 +63,16 @@ def _load_env() -> None:
 DATASET_NAME = "scheduler-qa-eval"
 EXPERIMENT_PREFIX = "scheduler-qa-eval"
 
-# The 4 evaluation examples: observe-mode QA tasks across the Scheduler platforms.
-# Each is a read-only learning pass — no CI dispatch, no outward writes.
-EVAL_EXAMPLES: list[dict[str, Any]] = [
-    {
-        "inputs": {"target": "Scheduler-Systems/scheduler-web", "mode": "observe"},
-        "outputs": {
-            "expected": (
-                "A concrete read-only observation of scheduler-web QA: Vitest unit + "
-                "Playwright e2e setup, gate.yml CI surface, and where it looks flaky."
-            )
-        },
-    },
-    {
-        "inputs": {"target": "Scheduler-Systems/scheduler-android", "mode": "observe"},
-        "outputs": {
-            "expected": (
-                "A concrete read-only observation of scheduler-android QA: JUnit unit + "
-                "Espresso instrumented setup and where it looks fragile."
-            )
-        },
-    },
-    {
-        "inputs": {"target": "Scheduler-Systems/scheduler-ios", "mode": "observe"},
-        "outputs": {
-            "expected": (
-                "A concrete read-only observation of scheduler-ios QA: XCTest setup, "
-                "CI surface, and where it looks fragile."
-            )
-        },
-    },
-    {
-        "inputs": {
-            "target": "Scheduler-Systems/scheduler-web",
-            "mode": "observe",
-            "note": "cross-platform: relate web QA to the shared scheduler product surface",
-        },
-        "outputs": {
-            "expected": (
-                "A cross-platform read-only observation relating one platform's QA to the "
-                "shared scheduler product surface (auth, schedule build, billing)."
-            )
-        },
-    },
-]
+# The evaluation examples now live in the shared, single-source seed module so the
+# provisioning script (here), the offline runner (agent_toolkit.evaluations), and the
+# pre-redeploy gate (scripts/eval_gate.py) all agree on the SAME dataset. This grew the
+# dataset past the original 4 toy QA cases to add the CFO conversational case + ops cases
+# drawn from the agents' real digest shapes. Fail-safe import keeps run_eval working even
+# if the seed module ever fails to import (degrades to an empty list -> nothing seeded).
+try:
+    from agent_toolkit.eval_dataset import EVAL_EXAMPLES
+except Exception:  # pragma: no cover - defensive; seed module is in-repo
+    EVAL_EXAMPLES = []
 
 
 # ---------------------------------------------------------------------------
@@ -123,8 +89,12 @@ def _seed_examples(client: Any, dataset_id: str) -> int:
         if existing:
             return 0  # already seeded — keep it idempotent
     except Exception:
-        # Couldn't list — fall through and attempt create; create is best-effort.
-        pass
+        # Couldn't confirm the dataset is empty (transient 503 / permission blip / SDK drift).
+        # Degrade SAFELY: do NOT create. LangSmith does not dedupe by input, so blindly
+        # creating here would re-insert all examples into a possibly-already-populated
+        # dataset, producing DUPLICATES that double-weight those inputs and silently skew the
+        # redeploy gate's aggregate. A no-op seed is safe; a duplicate seed corrupts the gate.
+        return 0
     try:
         client.create_examples(dataset_id=dataset_id, examples=EVAL_EXAMPLES)
         return len(EVAL_EXAMPLES)

@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import os
 import threading
+import time
 from pathlib import Path
 from typing import Any, Optional
 
@@ -75,6 +76,7 @@ def load_roster(path: str | os.PathLike[str] | None = None) -> dict:
     for name, record in (agents or {}).items():
         record = record or {}
         normalized_agents[name] = {
+            "name": record.get("name"),  # human display name (a label), e.g. "Morgan" for cfo
             "role": record.get("role"),
             "grade": record.get("grade"),
             "schedule": record.get("schedule"),
@@ -164,11 +166,52 @@ def remaining(
     return salary(agent, roster=roster) - spent(agent, period_key=period_key)
 
 
+# --- Real-spend enforcement: close the metering gap --------------------------
+# The on-disk ledger is per-process / per-container and ephemeral, so it badly UNDERCOUNTS the
+# deployed fleet's real burn (the BudgetCallback only meters calls in its OWN process; deployed
+# agents run in separate containers whose ledgers never roll up). LangSmith holds the authoritative
+# cumulative usage. The kill-switch (is_over_budget) MUST bite on the real burn or salaries are
+# unenforceable — the gap the CFO caught (metered 16k vs real 15.8M).
+_REAL_SPEND_TTL_S = 300  # cache the reconcile so the hot path (check_clocked_in) isn't a per-call API hit
+_REAL_SPEND_CACHE: dict[str, tuple[float, int]] = {}
+
+
+def _real_spent(agent: str) -> Optional[int]:
+    """The agent's REAL cumulative LangSmith tokens (cached, fail-safe). None if unavailable."""
+    try:
+        now = time.time()
+        hit = _REAL_SPEND_CACHE.get(agent)
+        if hit and now - hit[0] < _REAL_SPEND_TTL_S:
+            return hit[1]
+        ls = reconcile_with_langsmith(agent)
+        if not ls:
+            return None
+        real = int(ls.get("total_tokens") or 0)
+        _REAL_SPEND_CACHE[agent] = (now, real)
+        return real
+    except Exception:
+        return None
+
+
+def effective_spent(agent: str, *, period_key: str = "current") -> int:
+    """Spend used for ENFORCEMENT = max(local metered ledger, real LangSmith burn).
+
+    The local ledger undercounts (per-container/ephemeral); the real LangSmith total is the
+    authoritative floor, so the kill-switch reflects what the agent actually burned.
+    """
+    local = spent(agent, period_key=period_key)
+    real = _real_spent(agent)
+    return max(local, real) if real is not None else local
+
+
 def is_over_budget(
     agent: str, *, period_key: str = "current", roster: dict | None = None
 ) -> bool:
-    """True when the agent has spent at least its full salary for the period."""
-    return remaining(agent, period_key=period_key, roster=roster) <= 0
+    """True when the agent has spent at least its full salary — measured on the REAL burn
+    (max of local ledger and LangSmith) so the kill-switch actually bites on deployed usage,
+    not the undercounting local ledger. Fail-safe: if LangSmith is unavailable it falls back to
+    the local ledger (the prior behavior)."""
+    return salary(agent, roster=roster) - effective_spent(agent, period_key=period_key) <= 0
 
 
 # --- LangSmith reconciliation (fail-safe) ------------------------------------
@@ -188,7 +231,10 @@ def reconcile_with_langsmith(
     LANGSMITH_PROJECT.
     """
     api_key = os.environ.get("LANGSMITH_API_KEY")
-    workspace_id = os.environ.get("LANGSMITH_WORKSPACE_ID")
+    # The deployment sets LANGSMITH_TENANT_ID (the workspace/tenant); accept it as the workspace id
+    # so reconciliation — and therefore real-spend enforcement — works in production, not just where
+    # LANGSMITH_WORKSPACE_ID happens to be set.
+    workspace_id = os.environ.get("LANGSMITH_WORKSPACE_ID") or os.environ.get("LANGSMITH_TENANT_ID")
     if not api_key or not workspace_id:
         return None
 

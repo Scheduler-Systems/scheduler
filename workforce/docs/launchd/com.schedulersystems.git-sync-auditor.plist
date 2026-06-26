@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  git_sync_auditor LaunchAgent — STAGED, do NOT load until sign-off.
+
+  Read-only divergence auditor (local<->remote across the workspace). It never pushes,
+  fetches (by default), removes worktrees, or deletes branches. Probation = report-only;
+  the only output is a local digest + LangSmith traces.
+
+  Install (after sign-off):
+    cp docs/launchd/com.schedulersystems.git-sync-auditor.plist ~/Library/LaunchAgents/
+    launchctl load  ~/Library/LaunchAgents/com.schedulersystems.git-sync-auditor.plist
+  Run once now:
+    launchctl start com.schedulersystems.git-sync-auditor
+  Review the digest at .tmp/git-sync-auditor/latest.md
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.schedulersystems.git-sync-auditor.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.schedulersystems.git-sync-auditor</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/worktrees/ops-fleet/scripts/run_git_sync_auditor.sh</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>WORKSPACE_ROOT</key>
+    <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd</string>
+    <!-- Passive observer: no fetch. Set GIT_SYNC_AUDITOR_FETCH=1 to opt into `fetch --prune`. -->
+  </dict>
+
+  <!-- Hourly, read-only. -->
+  <key>StartInterval</key>
+  <integer>3600</integer>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/git-sync-auditor/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/git-sync-auditor/launchd.err.log</string>
+</dict>
+</plist>

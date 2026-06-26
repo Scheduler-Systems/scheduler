@@ -39,6 +39,7 @@ from agent_toolkit import (
     check_clocked_in,
     TIER_DEFAULT,
 )
+from agent_toolkit.slack_tool import post_digest as _slack_post
 
 try:  # works whether loaded as a package module or by file path (LangGraph platform)
     from .observe import is_observe_mode, read_local_repo_recon, render_recon
@@ -336,6 +337,8 @@ def finalize(state: State) -> dict:
             "report_only": True,
         }
         governance_capture("qa_lead_aggregator", decision)
+        # Post shippability verdict to #qa-reports (fail-safe).
+        _slack_post("qa_lead_aggregator", "✅ QA Shippability Verdict", state.get("report", "") or "")
         return {}
 
 
