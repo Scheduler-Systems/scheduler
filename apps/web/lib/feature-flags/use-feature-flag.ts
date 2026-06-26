@@ -6,23 +6,13 @@ import { useAuth } from "@/lib/auth-context";
 import { isInternalEmail, orgIdForEmail } from "./audience-tier";
 import { evaluateFlag } from "./pilotlight";
 
-// Flags for behavior INTRODUCED after the Flutter→web migration (no Flutter counterpart). During
-// pilot each is gated to the INTERNAL audience tier via Pilotlight: default ON for Scheduler-Systems
-// staff, OFF for paying customers — so post-migration additions ship dark to customers.
-export const CSV_IMPORT_FLAG = "scheduler.csv-import";
-export const LOCALE_SWITCHER_FLAG = "scheduler.locale-switcher";
-
-// Flutter→web PARITY feature modules built in later rounds. Each is registered in Pilotlight's
-// config-as-code seed script (scripts/seed-growthbook-flags.sh) as internal-only + default-OFF —
-// mirroring scheduler.agent-workforce — so the partially-built module is visible to Scheduler-Systems
-// staff for review but ships dark to paying customers until it is faithful and signed off. Wrap the
-// new module's entry component in `useFeatureFlag(<FLAG>)` to gate it.
-export const WEB_ONBOARDING_CAROUSEL_FLAG = "scheduler.web-onboarding-carousel";
+// Flutter→web PARITY feature modules, gated to the INTERNAL audience tier via Pilotlight:
+// default ON for Scheduler-Systems staff, OFF for paying customers — they ship dark to
+// customers until faithful and signed off. Wrap the entry component in `useFeatureFlag(<FLAG>)`.
+// (Only flags actually wired to a feature are kept here — premature/dead flag constants were
+// removed; add a new one only when its module is built and gated.)
 export const WEB_EMPLOYEE_INVITE_FLAG = "scheduler.web-employee-invite";
 export const WEB_NOTIFICATIONS_CENTER_FLAG = "scheduler.web-notifications-center";
-export const WEB_GEMINI_AI_FLAG = "scheduler.web-gemini-ai";
-export const WEB_WALKTHROUGHS_FLAG = "scheduler.web-walkthroughs";
-export const WEB_CONFETTI_FLAG = "scheduler.web-confetti";
 
 // Default visibility for INTERNAL users when Pilotlight isn't wired/reachable. Customers are never
 // affected by this — the internal-tier check returns false for them regardless.
