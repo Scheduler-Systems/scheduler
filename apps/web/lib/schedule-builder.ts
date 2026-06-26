@@ -93,7 +93,8 @@ export function buildSchedule(input: BuildScheduleInput): BuildScheduleOutput {
 
   function pickIndex(
     cellKey: string,
-    dayAssigned: Set<string>
+    dayAssigned: Set<string>,
+    reservedLater: Set<number>
   ): number | null {
     if (employees.length === 0) return null;
 
@@ -117,11 +118,28 @@ export function buildSchedule(input: BuildScheduleInput): BuildScheduleOutput {
 
     // 2. Fairness fallback: least-assigned eligible worker,
     // tie-break on cursor-relative order.
-    const candidateIdxs: number[] = [];
-    for (let offset = 0; offset < employees.length; offset++) {
-      const i = (cursor + offset) % employees.length;
-      if (avoidSameDayConflicts && dayAssigned.has(employees[i].name)) continue;
-      candidateIdxs.push(i);
+    //
+    // When same-day conflicts are avoided, a fairness fill must NOT consume a
+    // worker who has an explicit, still-unfulfilled priority on a LATER shift of
+    // this same day — otherwise placing them here would block their own
+    // priority. We hold those workers back (reservedLater) and only fall back to
+    // them if no unreserved worker is available.
+    const buildCandidates = (respectReserved: boolean): number[] => {
+      const idxs: number[] = [];
+      for (let offset = 0; offset < employees.length; offset++) {
+        const i = (cursor + offset) % employees.length;
+        if (avoidSameDayConflicts && dayAssigned.has(employees[i].name)) continue;
+        if (respectReserved && reservedLater.has(i)) continue;
+        idxs.push(i);
+      }
+      return idxs;
+    };
+
+    let candidateIdxs = buildCandidates(true);
+    if (candidateIdxs.length === 0) {
+      // No one free who isn't holding a later priority — relax the reservation
+      // so the slot still gets filled rather than left empty.
+      candidateIdxs = buildCandidates(false);
     }
     if (candidateIdxs.length === 0) return null;
     candidateIdxs.sort((a, b) => {
@@ -138,9 +156,29 @@ export function buildSchedule(input: BuildScheduleInput): BuildScheduleOutput {
     const dayAssigned = new Set<string>();
     for (let s = 0; s < enabledShifts.length; s++) {
       const cellKey = `${weekday}|${enabledShifts[s]}`;
+
+      // Workers with an explicit priority on a LATER shift of this same day.
+      // When avoiding same-day conflicts, a fairness fill in this shift must not
+      // grab them, or it would block their own later priority. (Only matters
+      // with conflict-avoidance on; otherwise a worker can take multiple shifts.)
+      const reservedLater = new Set<number>();
+      if (avoidSameDayConflicts) {
+        for (let i = 0; i < employees.length; i++) {
+          if (dayAssigned.has(employees[i].name)) continue;
+          const cell = normalizedPriorities[normName(employees[i].name)];
+          if (!cell) continue;
+          for (let s2 = s + 1; s2 < enabledShifts.length; s2++) {
+            if (cell.has(`${weekday}|${enabledShifts[s2]}`)) {
+              reservedLater.add(i);
+              break;
+            }
+          }
+        }
+      }
+
       const stringList: string[] = [];
       for (let k = 0; k < numStations; k++) {
-        const idx = pickIndex(cellKey, dayAssigned);
+        const idx = pickIndex(cellKey, dayAssigned, reservedLater);
         if (idx === null) {
           stringList.push("");
           continue;
