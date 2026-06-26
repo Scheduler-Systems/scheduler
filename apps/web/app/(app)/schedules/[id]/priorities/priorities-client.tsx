@@ -97,6 +97,12 @@ export default function PrioritiesClient() {
         Array.from(selected)
       );
       setSubmitMsg("Priorities submitted.");
+      // Refresh the "All submissions" panel (admin/creator view) live, so it reflects
+      // this submission immediately instead of staying stale until a full page reload.
+      const role = findCurrentUserRole(schedule, user.email);
+      if (role?.is_admin || role?.is_creator) {
+        setAllSubs(await getAllPrioritySubmissions(schedule.id));
+      }
     } catch (err) {
       setSubmitMsg(friendlyAuthError(err));
     } finally {
