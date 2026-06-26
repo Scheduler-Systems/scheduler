@@ -41,12 +41,18 @@ function splitReason(reason: string): { target?: string; body: string } {
 
 function requesterNameFor(
   schedule: Schedule | null,
-  userId: string | undefined
+  userId: string | undefined,
+  currentUser: { uid: string; displayName: string | null; email: string | null } | null
 ): string {
   if (!userId) return "";
   for (const emp of schedule?.employees ?? []) {
     const uid = (emp.user_ref as { id?: string } | null)?.id;
     if (uid && uid === userId) return emp.employee_name || emp.employee_email;
+  }
+  // The signed-in viewer may be the requester without a linked employee record
+  // (e.g. the schedule creator) — resolve their own uid so we never show a raw uid.
+  if (currentUser?.uid === userId) {
+    return currentUser.displayName || currentUser.email || "You";
   }
   return userId;
 }
@@ -130,7 +136,7 @@ export default function RequestDetailClient() {
   const parsed = splitReason(request.Reason ?? "");
   const isPending =
     request.status === "sent" || request.status === "pending";
-  const requesterName = requesterNameFor(schedule, request.userId);
+  const requesterName = requesterNameFor(schedule, request.userId, user);
 
   const statusLabel =
     request.status === "accepted"

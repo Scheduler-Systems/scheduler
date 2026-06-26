@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
+import { useAuth } from "@/lib/auth-context";
 import {
   getScheduleChangeRequestsForSchedule,
 } from "@/lib/requests";
@@ -30,13 +31,25 @@ function formatTimestamp(ts: ScheduleChangeRequest["DateTime"]): string {
 // Map an employee uid / email to a display name via the schedule's
 // employees list. Returns the uid/email itself as a fallback so the UI
 // still shows something sensible.
-function employeeNameLookup(schedule: Schedule | null) {
+function employeeNameLookup(
+  schedule: Schedule | null,
+  currentUser: { uid: string; displayName: string | null; email: string | null } | null,
+) {
   const byKey = new Map<string, string>();
   for (const emp of schedule?.employees ?? []) {
     const uid = (emp.user_ref as { id?: string } | null)?.id;
     const name = emp.employee_name || emp.employee_email || "";
     if (uid) byKey.set(uid, name);
     if (emp.employee_email) byKey.set(emp.employee_email.toLowerCase(), name);
+  }
+  // The signed-in viewer may have submitted a request without a linked employee
+  // record (e.g. the schedule creator, who is auto-added without a user_ref) — map
+  // their own uid to a name so the UI never falls back to showing a raw auth uid.
+  if (currentUser?.uid) {
+    byKey.set(
+      currentUser.uid,
+      currentUser.displayName || currentUser.email || "You",
+    );
   }
   return (key: string | undefined | null): string => {
     if (!key) return "";
@@ -88,7 +101,11 @@ export default function RequestsInboxClient() {
     load();
   }, [load]);
 
-  const nameOf = useMemo(() => employeeNameLookup(schedule), [schedule]);
+  const { user } = useAuth();
+  const nameOf = useMemo(
+    () => employeeNameLookup(schedule, user),
+    [schedule, user],
+  );
 
   const { pending, resolved } = useMemo(() => {
     const p: ScheduleChangeRequest[] = [];

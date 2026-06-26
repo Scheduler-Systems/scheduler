@@ -34,6 +34,11 @@ vi.mock("@/lib/firestore", () => ({
   getSchedule: (id: string) => getSchedule(id),
 }));
 
+const useAuthMock = vi.fn();
+vi.mock("@/lib/auth-context", () => ({
+  useAuth: () => useAuthMock(),
+}));
+
 const RequestsInboxPage = (await import("./page")).default;
 
 function baseSchedule() {
@@ -75,6 +80,9 @@ describe("RequestsInboxPage", () => {
   beforeEach(() => {
     getScheduleChangeRequestsForSchedule.mockReset();
     getSchedule.mockReset();
+    useAuthMock.mockReturnValue({
+      user: { uid: "viewer", displayName: "Viewer", email: "viewer@x" },
+    });
   });
 
   it("renders the empty state when there are no requests", async () => {
@@ -154,6 +162,31 @@ describe("RequestsInboxPage", () => {
     expect(screen.getByText(/Bob/)).toBeInTheDocument();
     // Target = Ada
     expect(screen.getByText(/Ada/)).toBeInTheDocument();
+  });
+
+  // Regression: a requester who is the signed-in viewer but has no linked employee
+  // record (e.g. the schedule creator) must show their name, never a raw auth uid.
+  it("resolves the signed-in viewer's own name instead of a raw uid", async () => {
+    useAuthMock.mockReturnValue({
+      user: { uid: "ucreator", displayName: "Demo Creator", email: "demo@x" },
+    });
+    getSchedule.mockResolvedValueOnce(baseSchedule()); // employees are u1/u2 only
+    getScheduleChangeRequestsForSchedule.mockResolvedValueOnce([
+      {
+        id: "r1",
+        DateTime: ts("2026-05-01T08:00:00Z"),
+        Reason: "Swap with Ada: x",
+        userId: "ucreator",
+        status: "sent",
+        scheduleId: "sid1",
+      },
+    ]);
+    render(<RequestsInboxPage />);
+    await waitFor(() =>
+      expect(screen.getByRole("list")).toBeInTheDocument(),
+    );
+    expect(screen.getByText(/Demo Creator/)).toBeInTheDocument();
+    expect(screen.queryByText("ucreator")).toBeNull();
   });
 
   it("each row is a link to the request detail page", async () => {
