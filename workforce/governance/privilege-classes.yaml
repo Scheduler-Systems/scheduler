@@ -1,0 +1,92 @@
+# =============================================================================
+# privilege-classes.yaml — the CLOSED SET of least-privilege identity templates.
+#
+# Constitution §3 (PER-AGENT ACCESS): "Every agent authenticates AS ITSELF — its own
+# SA / Vault AppRole / scoped k8s SA, least-privilege per its roster role. No shared
+# credentials. Provisioned at hire by the ops/security agent."
+#
+#   - Auto-allowed (ops/security agent, no founder): provisioning a per-agent identity
+#     WITHIN one of these EXISTING classes + reading its scoped secrets.
+#   - Escalate (queue → founder): granting a NEW privilege class, or WIDENING one
+#     (e.g. adding prod-write or live-billing to a role).
+#
+# This file is that "existing class" set, as data. `scripts/provision_identity.py` turns a
+# roster row + its `privilege_class` into the concrete per-agent Vault policy + AppRole +
+# k8s ServiceAccount. The registry is intentionally SMALL and append-reviewed: adding or
+# widening a class is a security-baseline change (founder gate), so it lives here in git,
+# not in code, and `provision_identity.py --check` fails closed on any class it doesn't know.
+#
+# Grounded in the real cluster (StratusCloudLabs/.../workloads/vault/VAULT-ACCESS.md):
+#   Vault = KV v2 at mount `secret`; ESO reads via role `eso-reader`; WRITES are root-only
+#   today. NO agent gets `gal-run-writer` or root — the agent-write boundary stays closed.
+#   Per-agent secrets live under `secret/data/gal-run/agents/<agent>/*`; shared read-only
+#   material (model API keys, LangFuse ingest creds) under `secret/data/gal-run/shared/*`.
+# =============================================================================
+
+meta:
+  vault_kv_mount: secret              # KV v2
+  agent_secret_root: secret/data/gal-run/agents   # per-agent subtree: .../<agent>/*
+  shared_secret_root: secret/data/gal-run/shared  # read-only shared material
+  k8s_namespace: gal-agents
+  # The default class for any rostered agent with NO explicit `privilege_class` — the most
+  # restrictive one. Default-deny: an unclassified hire gets the floor, never more.
+  default_class: read-only
+
+# -----------------------------------------------------------------------------
+# The classes, ordered least → most privilege. Every class is read-only on its OWN
+# scoped paths + the shared read-only material; `extra_vault_read` / `capabilities`
+# are the ONLY thing that varies. No class grants Vault WRITE — that boundary is closed.
+# -----------------------------------------------------------------------------
+classes:
+
+  read-only:
+    description: >-
+      Default-deny floor. Reads ONLY its own per-agent secret subtree + shared read-only
+      model keys and LangFuse ingest creds. No write anywhere, no provisioning. This is the
+      correct class for every report-only / probation worker (QA testers, analysts,
+      reporters) — they observe and draft, they do not hold write credentials.
+    extra_vault_read: []
+    capabilities: []                   # none beyond reading its own scoped secrets
+
+  repo-contributor:
+    description: >-
+      read-only + a GitHub App token scoped to DRAFT PRs/issues on tracked repos. For agents
+      that open draft PRs (git_maintainer, engineers, PM/issue agents). The token cannot
+      merge, deploy, or touch settings — merge stays with `pr-eval`, deploy is a founder gate.
+    extra_vault_read:
+      - secret/data/gal-run/shared/github-app-draft
+    capabilities:
+      - github:draft-pr               # open/update draft PRs + issues only
+
+  finance-reader:
+    description: >-
+      read-only + READ access to billing/spend dashboards (Stripe/RevenueCat read keys). For
+      the CFO agents to monitor spend against the §1 ceiling. Billing WRITE / pricing changes
+      are a SEPARATE privilege class (escalate) — monitoring is not authority (workspace rule).
+    extra_vault_read:
+      - secret/data/gal-run/shared/billing-readonly
+    capabilities:
+      - billing:read
+
+  governance-auditor:
+    description: >-
+      read-only + APPEND-ONLY write to the governance audit log. For board / governance / HR
+      agents that record decisions (flag flips, hires, policy approvals). Append-only — it can
+      add an audit record, never edit or delete one (tamper-evident trail).
+    extra_vault_read:
+      - secret/data/gal-run/shared/audit-sink
+    capabilities:
+      - audit:append
+
+  ops-provisioner:
+    description: >-
+      read-only + the right to RUN provisioning for OTHER agents WITHIN the existing classes
+      above (constitution §3 auto-allow). This is the recursion base: after the one human root
+      bootstrap, the ops/security agent holds THIS class and mints every other agent's identity
+      — so the founder grants once, not per-agent. It explicitly does NOT receive `gal-run-writer`
+      or root; minting a NEW or WIDER class than these is escalate→founder, enforced by
+      `provision_identity.py` (it refuses to emit a class not in this registry).
+    extra_vault_read:
+      - secret/data/gal-run/shared/approle-bootstrap   # the AppRole-create path, scoped
+    capabilities:
+      - identity:provision            # may provision the classes in THIS registry, nothing wider
