@@ -251,6 +251,33 @@ describe("buildSchedule", () => {
       expect(out.rows[0].stringList[0]).toBe("A");
     });
 
+    it("honors a later-shift priority over an earlier-shift fairness fill (same day)", () => {
+      // Two workers, 3 shifts/day, conflict-avoidance on. Jordan marked
+      // Fri|afternoon as a priority. A naive fairness fill would place Jordan in
+      // Fri|morning (least-assigned), then same-day avoidance would block his
+      // afternoon priority. The builder must hold Jordan back from morning so
+      // his explicit afternoon priority is honored.
+      const out = buildSchedule({
+        employees: [{ name: "Jordan" }, { name: "Alex" }],
+        enabledShifts: ["morning", "afternoon", "night"],
+        numDays: 7,
+        numStations: 1,
+        startDate: new Date("2026-06-28T00:00:00Z"), // Sunday -> Fri = day index 5
+        avoidSameDayConflicts: true,
+        priorities: {
+          jordan: new Set(["Mon|morning", "Wed|morning", "Fri|afternoon"]),
+        },
+      });
+      // Friday is day index 5; rows are day-major with 3 shifts/day.
+      const friMorning = out.rows[5 * 3 + 0].stringList[0];
+      const friAfternoon = out.rows[5 * 3 + 1].stringList[0];
+      expect(friAfternoon).toBe("Jordan");
+      expect(friMorning).not.toBe("Jordan");
+      // The three explicit priorities are all honored.
+      expect(out.rows[1 * 3 + 0].stringList[0]).toBe("Jordan"); // Mon|morning
+      expect(out.rows[3 * 3 + 0].stringList[0]).toBe("Jordan"); // Wed|morning
+    });
+
     it("handles trimmed whitespace in priority names", () => {
       const out = buildSchedule({
         employees: [{ name: "Alice" }, { name: "Bob" }],

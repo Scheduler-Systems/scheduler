@@ -8,19 +8,26 @@
 //
 // Array index formula: index = dayIndex * 3 + shiftIndex
 //   where dayIndex:  Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6
-//   and   shiftIndex: morning=0, noon=1, night=2
+//   and   shiftIndex: morning=0, afternoon=1, night=2
 //
-// "afternoon" is accepted on input as an alias for "noon" because the Flutter
-// `EnabledShiftsStruct` uses `afternoon` as its flag name while the user-facing
-// label in some locales is "noon".
+// The middle shift round-trips back to "afternoon" — the canonical label the
+// Next.js surface uses everywhere (`CANONICAL_SHIFTS` in shifts.ts, the
+// priorities grid cells, and the schedule builder's cell keys). Emitting "noon"
+// here previously broke selected-state restore and priority matching, because a
+// user's "Fri|afternoon" pick round-tripped through the bool array as
+// "Fri|noon" and no longer matched the grid/builder cell key. "noon" is still
+// ACCEPTED on input as an alias (see shiftIndex) for any legacy/Flutter writer
+// that uses it.
 
 export const PRIORITIES_ARRAY_LENGTH = 21;
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 type Weekday = (typeof WEEKDAYS)[number];
 
-// Canonical shift labels (used when converting index → key)
-const SHIFTS = ["morning", "noon", "night"] as const;
+// Canonical shift labels (used when converting index → key). The middle shift is
+// "afternoon" to match shifts.ts CANONICAL_SHIFTS, the priorities grid, and the
+// schedule builder. "noon" remains an accepted INPUT alias (see shiftIndex).
+const SHIFTS = ["morning", "afternoon", "night"] as const;
 type Shift = (typeof SHIFTS)[number];
 
 function dayIndex(d: string): number {

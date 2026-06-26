@@ -42,9 +42,12 @@ describe("priorities array ↔ cell-key mapping", () => {
     }
   });
 
-  it("returns 'morning'/'noon'/'night' (not afternoon) from index", () => {
+  it("returns 'morning'/'afternoon'/'night' from index (canonical grid labels)", () => {
+    // The middle shift round-trips to "afternoon" — the label the grid, the
+    // shifts.ts CANONICAL_SHIFTS, and the schedule builder all use — so a
+    // restored selection / priority match lines up with the rendered cell.
     expect(arrayIndexToCellKey(0)).toBe("Sun|morning");
-    expect(arrayIndexToCellKey(1)).toBe("Sun|noon");
+    expect(arrayIndexToCellKey(1)).toBe("Sun|afternoon");
     expect(arrayIndexToCellKey(2)).toBe("Sun|night");
   });
 
@@ -68,6 +71,19 @@ describe("priorities array ↔ cell-key mapping", () => {
     arr[0] = true; // Sun|morning
     arr[5] = true; // Mon|night
     expect(boolArrayToCellKeys(arr)).toEqual(["Sun|morning", "Mon|night"]);
+  });
+
+  it("round-trips an afternoon pick back to 'afternoon' (not 'noon') through the bool array", () => {
+    // Regression: a user's "Fri|afternoon" pick must survive the
+    // cellKeys → bools → cellKeys round-trip as "Fri|afternoon" so the grid's
+    // selected-state restore and the schedule builder's priority match (both
+    // keyed on "afternoon") line up. Previously this came back as "Fri|noon".
+    const bools = cellKeysToBoolArray(["Fri|afternoon"]);
+    expect(boolArrayToCellKeys(bools)).toEqual(["Fri|afternoon"]);
+    // The "noon" input alias also normalizes to the canonical "afternoon".
+    expect(boolArrayToCellKeys(cellKeysToBoolArray(["Fri|noon"]))).toEqual([
+      "Fri|afternoon",
+    ]);
   });
 
   it("boolArrayToCellKeys tolerates short or long arrays", () => {
