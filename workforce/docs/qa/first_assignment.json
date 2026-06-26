@@ -1,0 +1,34 @@
+{
+  "_comment": "QA engineers' first REAL assignment: close the zero-e2e gap on the unmerged schedule-creation branches (the work currently blocking these from shipping — see memory 'Schedule Dup QA'). QA is quality enablement (it unblocks shipping); it does not itself generate revenue. Mode is report-only/propose: study the branch, DRAFT the missing e2e, and (at activation, with QA_ASSIGNMENT_DISPATCH=1) dispatch the e2e CI workflow on the branch ref. Never merge — merges to prod repos are a human click. Branch refs verified locally 2026-06-05; the runner re-resolves the live open PR/branch at run time.",
+  "gap": "zero e2e coverage on schedule-creation",
+  "mode": "report_only",
+  "targets": [
+    {
+      "engineer": "web_automation_engineer",
+      "repo": "Scheduler-Systems/scheduler-web",
+      "branch": "fix/web-newschedule-i18n",
+      "e2e_workflow": "gate.yml",
+      "note": "origin/ci/e2e-gate also exists — prefer it if it carries the e2e job"
+    },
+    {
+      "engineer": "ios_automation_engineer",
+      "repo": "Scheduler-Systems/scheduler-ios",
+      "branch": "fix/ios-schedule-creation",
+      "e2e_workflow": null,
+      "note": "iOS app is ~13/31 screens — degrade gracefully"
+    },
+    {
+      "engineer": "android_automation_engineer",
+      "repo": "Scheduler-Systems/scheduler-android",
+      "branch": "fix/android-schedule-creation",
+      "e2e_workflow": null
+    },
+    {
+      "engineer": "qa_lead_aggregator",
+      "repo": "Scheduler-Systems/scheduler-api",
+      "branch": "fix/schedule-name-canonical-semantics",
+      "e2e_workflow": null,
+      "note": "scheduler-api has NO dedicated automation engineer — OPEN ROLE for hr_ops_manager to propose (api_automation_engineer: contract/e2e tests for schedule creation). qa_lead covers it in the interim."
+    }
+  ]
+}

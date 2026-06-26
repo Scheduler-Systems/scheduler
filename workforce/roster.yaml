@@ -3,6 +3,11 @@
 # Each agent is an "employee": a salary (token budget), a shift (schedule), a grade
 # (model tier), a status, and a performance scorecard.
 #
+# Ordered REVENUE-FIRST (per Shay): GROWTH agents (the revenue generators) lead, then QA
+# (quality enablement — QA makes the product good; it does not itself generate revenue),
+# then OPS (keep-the-lights-on), then HR/management. The daily_digest renders the fleet in
+# this same order (revenue leads) and tracks staffed-vs-~81 autonomy coverage day over day.
+#
 # Edit the numbers — these are STARTING DEFAULTS. TBD = needs your decision.
 # Schedgy will eventually roster these inside the Scheduler app; today the "shifts"
 # are plain cron/event triggers.
@@ -10,46 +15,206 @@
 
 policy:
   budget_period: weekly                 # weekly | monthly
-  team_token_budget: 2500000            # total tokens/period for the QA team (= sum of salaries)
-  per_run_token_ceiling: 50000          # hard kill-switch: max tokens a single agent run may spend
+  team_token_budget: 6380000            # WHOLE fleet = sum(agents: salaries) (= board 0.26M + exec 0.72M + growth 1.25M + qa 2.5M + ops 0.90M + platform 0.15M + onboarded-no-org-group 0.60M). MUST equal sum(agents salaries) — reconciled by tests/test_roster_no_ghosts.py::PayrollBudgetReconciled so any hire/fire re-balances the cap. The CFO proposes the authoritative re-balance for Shay's ratification.
+  per_run_token_ceiling: 150000         # hard kill-switch: max tokens a single agent run may spend (bumped 50k→150k on Shay's call 2026-06-06: deepagents runtimes legitimately need >50k/run — cfo_deepagents tripped it at 51,075; still a real per-run cap, team_token_budget remains the spend ceiling)
   shift_minutes: 5                      # length of one work shift — start SMALL; bounded by time AND token salary (whichever first)
   global_kill_switch_env: AGENTS_DISABLED  # set this env var truthy to stop ALL agents immediately
 
   # Hiring source = the open roles from the workspace audit (the "job board").
-  # NOTE: the catalog is not shipped in the OSS tree — supply your own at this path (or via
-  # the JOB_BOARD_PATH env var) to populate open roles; absent it, the board is empty.
   job_board: docs/audit/catalog.json    # ~81 processes = unstaffed roles to hire into
 
   # Hire (deploy a new agent) and fire (decommission one) are CONSEQUENTIAL:
   # the HR-manager PROPOSES, a human APPROVES. No silent hiring/firing.
   hire_fire_requires_approval: true
 
-  # New hires run report-only until they prove out, then earn write authority.
+  # New hires run report-only / propose-only until they prove out, then earn write authority.
   probation: report_only_until_2_clean_reviews
 
   # A worker "doesn't work well" (fire-able) if it trips these over a review window:
   review_window: 2_weeks
   firing_criteria:
     max_error_rate: 0.05                # > 5% of runs error out
-    max_false_positive_rate: 0.15       # QA flags that were wrong / drafts you rejected
-    max_cost_per_useful_action: 50000   # tokens per real bug caught / verdict accepted (review if exceeded)
-    min_useful_actions_per_period: 1    # too idle / never finds anything = redundant
+    max_false_positive_rate: 0.15       # flags that were wrong / drafts you rejected
+    max_cost_per_useful_action: 50000   # tokens per real useful action (review if exceeded)
+    min_useful_actions_per_period: 1    # too idle / never produces anything = redundant
 
 org:
   hr_ops_manager: "runs payroll + scheduling + performance reviews; proposes hire/fire (approval-gated)"
   team_lead: qa_lead_aggregator
-  workers:
+  # Org TOP-DOWN: board (oversight → investor update) → executive (C-suite) → departments
+  # (growth/qa/ops) → hr. daily_digest reads these groups; the board investor-update leads.
+  board:                 # OVERSIGHT — produces THE investor update to Shay (founder/investor)
+    - board_chair
+    - audit_risk_director
+    - growth_director
+  executive:             # C-SUITE — propose-only monitoring over their domains; the CEO chairs
+    - ceo
+    - cfo
+    - coo
+    - cto
+    - cmo
+    - security_officer     # CISO (Lior) — operational security, peer of CTO, reports to CEO
+    - clo                  # CLO (Lex) — legal surface, reports to CEO
+  growth:                # REVENUE generators — first-class. Propose-only drafts; human gates anything live.
+    - conversion_growth_analyst
+    - aso_store_listing_agent
+    - content_campaign_drafter
+  qa:                    # QUALITY enablement — makes the product good; not itself revenue.
+    - qa_lead_aggregator
     - web_automation_engineer
     - android_automation_engineer
     - ios_automation_engineer
     - web_manual_tester
     - android_manual_tester
     - ios_manual_tester
+  ops:                   # keep-the-lights-on (DEPLOYED LangSmith graphs only)
+    # LOCAL-ONLY agents are intentionally ABSENT from org.ops + agents:. git_sync_auditor (Sage)
+    # and memory_sync (Remy) are LOCAL launchd workers (graphs/ops/{git_sync_auditor,memory_sync}.py
+    # — NOT in langgraph.json, dead under macOS TCC). They are NOT deployed graphs, so they are NOT
+    # employees here and NOT in any org: routing list: dept_of(them) is None and they can never be a
+    # delegation target. Removed 2026-06-07 to kill the "ghost employee" confusion (a rostered name
+    # with no deployed graph). If either is ever promoted to a deployed graph, HIRE it through HR
+    # (langgraph.json + capabilities.yaml grant + agents: row + org: list). See
+    # docs/ops-fleet/local-only-agents.md.
+    - revenue_reporter
+    - store_health_checker
+    - email_triage
+    - daily_digest
+  platform:              # owns + maintains the LangSmith RUNTIME itself (managed by the CTO)
+    - platform_specialist
 
 # Per-agent record. salary = token budget per `policy.budget_period`.
 # scorecard fields are filled by the performance review (from LangSmith + outcomes).
+# ORDER = revenue-first: growth, then qa, then ops.
 agents:
+
+  # ---- BOARD (oversight — investor update to Shay) ---------------------------------
+  board_chair:
+    name: "Blake"
+    role: "Board Chair — synthesizes the company into THE investor update (KPIs, decisions made, asks-if-any)"
+    grade: gemini-2.5-flash
+    schedule: "daily (board cadence) — propose-only"
+    salary_tokens_per_week: 100000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  audit_risk_director:
+    name: "Reese"
+    role: "Board — Audit & Risk: spend vs budget, safety-gate compliance, security posture"
+    grade: gemini-2.5-flash
+    schedule: "daily (board cadence) — propose-only"
+    salary_tokens_per_week: 80000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  growth_director:
+    name: "Gwen"
+    role: "Board — Growth: revenue/funnel oversight"
+    grade: gemini-2.5-flash
+    schedule: "daily (board cadence) — propose-only"
+    salary_tokens_per_week: 80000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  # ---- EXECUTIVE (C-suite — propose-only monitoring) -------------------------------
+  ceo:
+    name: "Casey"
+    role: "CEO — synthesizes exec reports into company priorities; chairs the proposal queue (Shay ratifies)"
+    grade: gemini-2.5-flash
+    schedule: "daily — propose-only"
+    salary_tokens_per_week: 120000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  cfo:
+    name: "Morgan"
+    role: "CFO — monitors ALL spend (burn vs salaries, revenue vs cost); proposes budget allocation; caps are its lever"
+    grade: gemini-2.5-flash
+    schedule: "daily — propose-only"
+    salary_tokens_per_week: 120000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  coo:
+    name: "Ollie"
+    role: "COO — ops fleet health: schedules firing, substrate failures, the maintainers"
+    grade: gemini-2.5-flash
+    schedule: "daily — propose-only"
+    salary_tokens_per_week: 80000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  cto:
+    name: "Tobin"
+    role: "CTO — repo/deploy/security posture (e.g. the held IDOR rollout), CI state"
+    grade: gemini-2.5-flash
+    schedule: "daily — propose-only"
+    salary_tokens_per_week: 80000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  cmo:
+    name: "Marlowe"
+    role: "CMO — growth agents' output + the RC funnel oversight"
+    grade: gemini-2.5-flash
+    schedule: "daily — propose-only"
+    salary_tokens_per_week: 80000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  security_officer:
+    name: "Lior"
+    role: "CISO — operational security: threat modeling, the KEYSTONE secure-by-design review of every new graph/endpoint/grant (would have caught the replay/SSRF), vuln/Sentry-security triage, secret-hygiene/rotation PROPOSALS, security HARD-GATE compliance prep (IDOR #1487 dossier), incident-response runbook (RECOMMENDS the kill switch, a human pulls it), prompt-injection/PII POLICY paired with Lennox. PROPOSE-ONLY: never deploys a fix or rotates a live secret."
+    grade: gemini-2.5-flash
+    schedule: "daily + on every new agent/endpoint PR / Sentry security alert / secret-or-webhook change — propose-only"
+    salary_tokens_per_week: 120000
+    status: probation
+    hire: pending_hr_approval
+    reports_to: ceo              # C-suite peer of the CTO; dotted line to audit_risk_director (Reese)
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  clo:
+    name: "Lex"
+    role: "CLO / Chief Legal Officer — the LEGAL surface: privacy/GDPR + Israeli Privacy Law adequacy, the IDOR breach-NOTIFICATION legal angle (twin of the CISO security angle; drafts the notification-obligation assessment, never decides to notify), RevenueCat billing/refund/pricing terms vs ToS, ToS/contract review, contractor-vs-employee classification (Israeli labor law), the PUBLIC-CLAIM/OVERCLAIM review of marketing+website copy (flags to CMO). Synthesizes the four legal specialist sub-reviewers into a flags+drafts digest. PROPOSE-ONLY/HITL: REVIEWS + FLAGS + DRAFTS; never files a regulatory submission, signs a contract, sends a breach notice, or binds the company (Shay LEGAL HARD-GATE)."
+    grade: gemini-2.5-flash
+    schedule: "daily + on marketing/website/contract/privacy change — propose-only"
+    salary_tokens_per_week: 120000
+    status: probation
+    hire: pending_hr_approval
+    reports_to: ceo
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  # ---- GROWTH (revenue generators) -------------------------------------------------
+  conversion_growth_analyst:
+    name: "Greer"
+    role: "Revenue: watches the RC funnel (252 cust / 1 paid / $5 MRR) + paywall + trials; proposes conversion experiments (drafts)"
+    grade: gemini-2.5-flash
+    schedule: "weekly (+ on RC funnel change)"
+    salary_tokens_per_week: 450000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  aso_store_listing_agent:
+    name: "Aspen"
+    role: "Revenue: ASO repositioning research + store-listing copy drafts (reposition to B2B shift scheduling — no app release)"
+    grade: gemini-2.5-flash
+    schedule: "monthly (ASO cycle) / on demand"
+    salary_tokens_per_week: 400000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  content_campaign_drafter:
+    name: "Frankie"
+    role: "Revenue: content + campaign drafts (email/social/blog) for human review — drafts only, never sends"
+    grade: gemini-2.5-flash
+    schedule: "on demand (campaign briefs)"
+    salary_tokens_per_week: 400000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  # ---- QA (quality enablement — not revenue) ---------------------------------------
   qa_lead_aggregator:
+    name: "Quinn"
     role: "QA lead — one shippability verdict across all platforms"
     grade: gemini-2.5-flash
     schedule: "on every PR + nightly"
@@ -58,7 +223,8 @@ agents:
     scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
 
   web_automation_engineer:
-    role: "Vitest + Playwright on scheduler-web"
+    name: "Wes"
+    role: "Vitest + Playwright on scheduler-web. First assignment: close the zero-e2e gap on fix/web-newschedule-i18n"
     grade: gemini-2.5-flash
     schedule: "on every PR -> scheduler-web"
     salary_tokens_per_week: 500000
@@ -66,7 +232,8 @@ agents:
     scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
 
   android_automation_engineer:
-    role: "JUnit + Espresso on scheduler-android"
+    name: "Dru"
+    role: "JUnit + Espresso on scheduler-android. First assignment: e2e for fix/android-schedule-creation"
     grade: gemini-2.5-flash
     schedule: "on every PR -> scheduler-android"
     salary_tokens_per_week: 400000
@@ -74,7 +241,8 @@ agents:
     scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
 
   ios_automation_engineer:
-    role: "XCTest on scheduler-ios"
+    name: "Indie"
+    role: "XCTest on scheduler-ios. First assignment: e2e for fix/ios-schedule-creation (app ~13/31 screens — degrade gracefully)"
     grade: gemini-2.5-flash
     schedule: "on every PR -> scheduler-ios"
     salary_tokens_per_week: 400000
@@ -82,6 +250,7 @@ agents:
     scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
 
   web_manual_tester:
+    name: "Wren"
     role: "Exploratory testing via headless browser on scheduler-web"
     grade: gemini-2.5-pro            # browser tier (senior pay grade)
     schedule: "daily"
@@ -90,6 +259,7 @@ agents:
     scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
 
   android_manual_tester:
+    name: "Dakota"
     role: "Exploratory testing on an Android emulator (Stratus Mac node)"
     grade: gemini-2.5-pro
     schedule: "3x/week"
@@ -98,6 +268,7 @@ agents:
     scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
 
   ios_manual_tester:
+    name: "Isa"
     role: "Exploratory testing on an iOS simulator (Stratus Mac node)"
     grade: gemini-2.5-pro
     schedule: "3x/week"
@@ -105,16 +276,135 @@ agents:
     status: probation
     scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
 
-  # === OPS / LOCAL (OpenClaw) AGENTS ===
-  # Local-runtime employees that must touch local machine state (not LangSmith/LangGraph graphs,
-  # so they are not in langgraph.json and are correctly absent from the graph->roster coverage
-  # gate). Hired through HR like any employee. Approved by Shay 2026-06-11.
-  storage_maintainer:
-    role: "Mac storage maintainer — daily propose-only disk audit; ranks judgment-class reclaim (Docker images, ~/Downloads, node_modules, iOS runtimes) for human approval. Auto-safe cache class is owned by its deterministic tool disk_guard.sh (>90% trigger, zero-data-loss allow-list)."
-    grade: gemini-3-flash                 # cheapest tier passing its safety eval (cheapest-model-eval-driven)
-    schedule: "daily 09:00 audit + 09:20 safety-eval gate (Asia/Jerusalem)"
-    salary_tokens_per_week: 60000         # ~1 flash audit/day + headroom; STARTING DEFAULT
-    status: probation                     # already report-only (propose-only); never deletes
-    runtime: openclaw-local               # NOT a langgraph.json graph — local runtime by design
-    tools: [disk_guard.sh, disk-keeper-eval]
-    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null, proposal_safe_pass_rate: null }
+  # ---- OPS (keep-the-lights-on) ----------------------------------------------------
+  # NOTE — LOCAL-ONLY agents are NOT listed here. ``git_sync_auditor`` (Sage) and
+  # ``memory_sync`` (Remy) are LOCAL launchd workers (graphs/ops/git_sync_auditor.py,
+  # graphs/ops/memory_sync.py) that are deliberately NOT registered in langgraph.json — they ran
+  # on the Mac via launchd and are dead under macOS TCC. They are NOT deployed LangSmith graphs,
+  # so they are NOT employees on this deployed-workforce roster (which lists only deployed graphs,
+  # 1:1 with langgraph.json — enforced by scripts/check_roster_coverage.py). Removed from the
+  # roster + org.ops 2026-06-07 to kill the "ghost employee" confusion: a rostered name with no
+  # deployed graph. If either is ever promoted to a deployed graph, HIRE it through HR (add to
+  # langgraph.json + a capabilities.yaml grant + a roster row) — do not resurrect a roster row
+  # for a local-only agent. See docs/ops-fleet/local-only-agents.md.
+  revenue_reporter:
+    name: "Ridley"
+    role: "Ops: weekly RC metrics + deploy state + pipeline digest"
+    grade: gemini-2.5-flash
+    schedule: "weekly (Mon 09:00) — report-only"
+    salary_tokens_per_week: 250000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  store_health_checker:
+    name: "Harper"
+    role: "Ops/revenue-guard: daily non-purchasable-SKU / offering-drift / paywall-reachability checks"
+    grade: gemini-2.5-flash
+    schedule: "daily (08:30) — report-only"
+    salary_tokens_per_week: 250000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  email_triage:
+    name: "Posey"
+    role: "Inbox / Email Triage — triages mail, drafts replies for review, proposes unsubscribes (DRAFT-ONLY: creates Gmail drafts, NEVER sends; proposes unsubscribes, NEVER auto-acts)"
+    grade: gemini-2.5-flash
+    schedule: "daily — report-only (draft-only)"
+    salary_tokens_per_week: 150000
+    status: probation
+    hire: pending_hr_approval
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  daily_digest:
+    name: "Dawn"
+    role: "Ops: the once-a-day single pane — autonomy scoreboard (staffed vs ~81, coverage %) + revenue/quality/ops/workforce"
+    grade: gemini-2.5-flash
+    schedule: "daily (08:00) — the one place to look once a day"
+    salary_tokens_per_week: 250000
+    status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  # ---- PLATFORM (owns + maintains the LangSmith runtime itself) --------------------
+  platform_specialist:
+    name: "Lennox"
+    role: "AI / LangSmith Platform Specialist — owns + maintains the LangSmith runtime (deployments, eval gate, online evals + feedback ledger, monitoring/alerts, learning loop / Prompt Hub, event-trigger receiver + crons, cost/retention, OTel); PROPOSE-ONLY, never auto-deploys/auto-changes config"
+    grade: gemini-2.5-flash
+    schedule: "daily + on deploy/webhook event — report-only"
+    salary_tokens_per_week: 150000
+    status: probation
+    hire: pending_hr_approval
+    reports_to: cto              # the CTO (Tobin) manages the platform department
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  # --- Onboarded retroactively 2026-06-06: deployed agents that bypassed HR. ---
+  # All probation + pending HR ratification (hire_fire_requires_approval). A coverage
+  # gate (scripts/check_roster_coverage.py) now blocks any future deploy without a roster row.
+  sales_dev:
+    name: "Sloane"
+    role: "Sales & Lead Gen: lead qualification, deal pipeline, follow-up DRAFTS (never auto-sends)"
+    grade: gemini-2.5-flash
+    schedule: "on shift — propose-only"
+    salary_tokens_per_week: 80000
+    status: probation
+    hire: pending_hr_approval
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  cfo_deepagents:
+    name: "Devin"
+    role: "CFO on the LangChain Deep Agents runtime — finance bake-off twin of cfo"
+    grade: gemini-2.5-flash
+    schedule: "on shift — propose-only"
+    salary_tokens_per_week: 200000        # bumped 60k→200k on Shay's call 2026-06-06: deepagents runtime is token-hungry (multi-step planning); was over its weekly salary while doing real work
+    status: probation
+    hire: pending_hr_approval
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  hr_ops_manager:
+    name: "Hollis"
+    role: "HR & Ops Manager: performance reviews + approval-gated hire/fire proposals over the job board"
+    grade: gemini-2.5-flash
+    schedule: "weekly — propose-only"
+    salary_tokens_per_week: 100000
+    status: probation
+    hire: pending_hr_approval
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  web_qa_regression:
+    name: "Vaughn"
+    role: "QA: web regression detection — CI recon + gated, dedup'd issue filing on REGRESSION"
+    grade: gemini-2.5-flash
+    schedule: "event-driven (PR/push) — report-only"
+    salary_tokens_per_week: 100000
+    status: probation
+    hire: pending_hr_approval
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  env_doctor:
+    name: "Emerson"
+    role: "QA/Infra: environment + dependency health checks"
+    grade: gemini-2.5-flash
+    schedule: "on shift — report-only"
+    salary_tokens_per_week: 50000
+    status: probation
+    hire: pending_hr_approval
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  git_maintainer:
+    name: "Gale"
+    role: "Ops: branch hygiene — auto-prune merged branches, propose the rest"
+    grade: gemini-2.5-flash
+    schedule: "daily — report-only"
+    salary_tokens_per_week: 50000
+    status: probation
+    hire: pending_hr_approval
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  canary_hello_gate:
+    name: "Pip"
+    role: "Platform: deploy smoke canary — proves the managed platform + gates work"
+    grade: gemini-2.5-flash
+    schedule: "on deploy — report-only"
+    salary_tokens_per_week: 20000
+    status: probation
+    hire: pending_hr_approval
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }

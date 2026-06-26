@@ -19,6 +19,7 @@ this layer only meters and caps best-effort.
 """
 from __future__ import annotations
 
+import json
 import os
 from typing import Any, Optional
 
@@ -32,6 +33,90 @@ from .models import TIER_DEFAULT, get_model
 # roster.yaml -> policy.global_kill_switch_env). Kept as a constant so the gate is
 # self-contained even if the roster can't be read.
 KILL_SWITCH_ENV = "AGENTS_DISABLED"
+
+# --- Human override control plane (the kill switch) --------------------------
+# Shay (founder + investor) has full override at all times. The switch is FILE-based so it
+# survives across processes and is honored by unattended/scheduled runs (env vars don't reach
+# launchd/cron). Both files live in .payroll/ next to the ledger. Driven by
+# scripts/fleet_control.py; documented in docs/ops/safety-model.md.
+FLEET_DISABLED_FILE = payroll.LEDGER_DIR / "FLEET_DISABLED"   # fleet-wide kill (existence = off)
+BENCHED_FILE = payroll.LEDGER_DIR / "benched.json"           # per-agent kill (list of names)
+
+
+def fleet_disabled() -> bool:
+    """True if the fleet-wide kill switch is engaged: env ``AGENTS_DISABLED`` OR the
+    ``.payroll/FLEET_DISABLED`` file exists. Deliberately a plain existence check (no parsing) so
+    it cannot fail-open on a corrupt file."""
+    if os.environ.get(KILL_SWITCH_ENV):
+        return True
+    try:
+        return FLEET_DISABLED_FILE.exists()
+    except Exception:
+        return False
+
+
+def benched_agents() -> set:
+    """Set of benched agent names (per-agent kill switch): env ``AGENTS_BENCHED`` (comma-sep) +
+    the ``.payroll/benched.json`` list. FAIL-SAFE: a missing/corrupt file reads as empty (the
+    fleet switch + env remain the hard stops)."""
+    names: set = set()
+    for n in os.environ.get("AGENTS_BENCHED", "").split(","):
+        n = n.strip()
+        if n:
+            names.add(n)
+    try:
+        with open(BENCHED_FILE, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        items = data if isinstance(data, list) else (data.get("benched", []) if isinstance(data, dict) else [])
+        for it in items:
+            if isinstance(it, str):
+                names.add(it)
+            elif isinstance(it, dict) and it.get("agent"):
+                names.add(str(it["agent"]))
+    except Exception:
+        pass
+    return names
+
+
+def is_benched(agent: str) -> bool:
+    try:
+        return agent in benched_agents()
+    except Exception:
+        return False
+
+
+def disable_fleet(reason: str = "") -> None:
+    """Engage the fleet-wide kill switch (creates ``.payroll/FLEET_DISABLED``)."""
+    payroll.LEDGER_DIR.mkdir(parents=True, exist_ok=True)
+    FLEET_DISABLED_FILE.write_text(reason or "disabled", encoding="utf-8")
+
+
+def enable_fleet() -> None:
+    """Release the fleet-wide kill switch."""
+    try:
+        FLEET_DISABLED_FILE.unlink()
+    except FileNotFoundError:
+        pass
+
+
+def _write_benched(names: set) -> None:
+    payroll.LEDGER_DIR.mkdir(parents=True, exist_ok=True)
+    with open(BENCHED_FILE, "w", encoding="utf-8") as fh:
+        json.dump(sorted(n for n in names if n), fh, indent=2)
+
+
+def bench(agent: str, reason: str = "") -> None:
+    """Bench a single agent (it will refuse to clock in)."""
+    names = benched_agents()
+    names.add(agent)
+    _write_benched(names)
+
+
+def unbench(agent: str) -> None:
+    """Un-bench a single agent."""
+    names = benched_agents()
+    names.discard(agent)
+    _write_benched(names)
 
 
 def load_budget_policy() -> dict:
@@ -174,14 +259,17 @@ class BudgetCallback(BaseCallbackHandler):
 def check_clocked_in(agent: str) -> bool:
     """Return True if ``agent`` may work, False if it must STOP. FAIL-SAFE.
 
-    The agent must STOP (returns False) when EITHER:
-      - the global kill-switch env (AGENTS_DISABLED) is truthy, OR
+    The agent must STOP (returns False) when ANY of:
+      - the fleet-wide kill switch is engaged (env AGENTS_DISABLED OR .payroll/FLEET_DISABLED), OR
+      - the agent is benched (per-agent kill switch: AGENTS_BENCHED / .payroll/benched.json), OR
       - the agent is over budget per the payroll ledger.
 
-    Any error reading the ledger degrades to True (let the agent keep working) — the
-    kill-switch env is the always-available hard stop.
+    Any error reading the ledger degrades to True (let the agent keep working) — the kill switch
+    (env + file) is the always-available hard stop and is checked first.
     """
-    if os.environ.get(KILL_SWITCH_ENV):
+    if fleet_disabled():
+        return False
+    if is_benched(agent):
         return False
     try:
         if payroll.is_over_budget(agent):

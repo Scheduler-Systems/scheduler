@@ -1,0 +1,51 @@
+{
+  "_comment": "Declared, VERIFIED facts about Scheduler for the growth agents (conversion / ASO / content). Source of truth for drafts so agents never invent or over-claim. Drafts only — a human reviews before anything goes live. CRITICAL: do NOT claim features Scheduler does not ship (time tracking / AI scheduling) — a directory submission already over-claimed those.",
+  "as_of": "2026-06-05",
+  "product": {
+    "what_it_is": "B2B shift scheduling for small businesses (~10-100 employees)",
+    "ships": [
+      "per-user pricing",
+      "one-click deterministic roster / shift builder",
+      "team chat",
+      "CSV export"
+    ],
+    "does_not_ship": [
+      "time tracking / clock-in-out",
+      "offline mode",
+      "AI scheduling",
+      "flat-rate billing"
+    ],
+    "do_not_claim": ["time tracking", "AI scheduling", "clock-in/out", "offline"]
+  },
+  "positioning_problem": "The store listing markets a generic to-do / checklist app, but the product is monetized as B2B shift scheduling. Mispositioned. Reposition to shift scheduling for SMB teams (this is an ASO/listing change — no app release required).",
+  "revenue_levers": [
+    "Reposition the store listing to shift scheduling (ASO copy + screenshots; no app release)",
+    "Add an annual plan (none today)",
+    "Configure the free trial (not configured in RevenueCat today)",
+    "Revisit pricing vs competitors (currently underpriced)"
+  ],
+  "funnel_baseline": {
+    "as_of": "2026-06-05",
+    "customers": 252,
+    "paid_subscriptions": 1,
+    "mrr_usd": 5,
+    "active_trials": null,
+    "implied_paid_conversion": "~0.4%",
+    "note": "The core revenue problem: lots of installs/customers, almost no paid conversion. The conversion_growth_analyst proposes experiments to move this."
+  },
+  "pricing": {
+    "model": "per-user",
+    "price_points_usd_per_user": [2.99, 4.99],
+    "annual_plan_exists": false,
+    "trial_configured": false,
+    "_uncertain": "Confirm which point is monthly vs a higher tier; annual not offered today."
+  },
+  "aso": {
+    "in_flight_branches": [
+      "Scheduler-Systems/scheduler-ios:aso/shift-scheduling-listing",
+      "Scheduler-Systems/scheduler-android:aso/shift-scheduling-listing"
+    ],
+    "stores": ["App Store", "Google Play"]
+  },
+  "paywall_urls": ["https://scheduler-web-next.web.app/"]
+}

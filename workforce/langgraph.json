@@ -4,6 +4,8 @@
     "."
   ],
   "graphs": {
+    "cfo_deepagents": "./graphs/exec/cfo_deepagents.py:graph",
+    "sales_dev": "./graphs/sales/sales_dev.py:graph",
     "canary_hello_gate": "./graphs/qa/canary.py:graph",
     "qa_lead_aggregator": "./graphs/qa/qa_lead_aggregator.py:graph",
     "hr_ops_manager": "./graphs/qa/hr_ops_manager.py:graph",
@@ -15,7 +17,30 @@
     "ios_manual_tester": "./graphs/qa/ios_manual_tester.py:graph",
     "web_qa_regression": "./graphs/qa/web_qa_regression.py:graph",
     "env_doctor": "./graphs/qa/env_doctor.py:graph",
-    "git_maintainer": "./graphs/qa/git_maintainer.py:graph"
+    "git_maintainer": "./graphs/qa/git_maintainer.py:graph",
+
+    "conversion_growth_analyst": "./graphs/marketing/conversion_growth_analyst.py:graph",
+    "aso_store_listing_agent": "./graphs/marketing/aso_store_listing_agent.py:graph",
+    "content_campaign_drafter": "./graphs/marketing/content_campaign_drafter.py:graph",
+
+    "revenue_reporter": "./graphs/ops/revenue_reporter.py:graph",
+    "store_health_checker": "./graphs/ops/store_health_checker.py:graph",
+    "email_triage": "./graphs/ops/email_triage.py:graph",
+    "daily_digest": "./graphs/ops/daily_digest.py:graph",
+
+    "cfo": "./graphs/exec/cfo.py:graph",
+    "coo": "./graphs/exec/coo.py:graph",
+    "cto": "./graphs/exec/cto.py:graph",
+    "cmo": "./graphs/exec/cmo.py:graph",
+    "ceo": "./graphs/exec/ceo.py:graph",
+    "security_officer": "./graphs/exec/security_officer.py:graph",
+    "clo": "./graphs/exec/clo.py:graph",
+
+    "board_chair": "./graphs/board/board_chair.py:graph",
+    "audit_risk_director": "./graphs/board/audit_risk_director.py:graph",
+    "growth_director": "./graphs/board/growth_director.py:graph",
+
+    "platform_specialist": "./graphs/platform/platform_specialist.py:graph"
   },
   "env": ".env",
   "python_version": "3.12",

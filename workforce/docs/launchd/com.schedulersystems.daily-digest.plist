@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  daily_digest LaunchAgent — the once-a-day single pane (autonomy scoreboard + revenue/
+  quality/ops/workforce). Runs at 09:30 local, AFTER the daily store-health (08:30) and the
+  weekly revenue/conversion (Mon 09:00/09:15), so it stitches fresh digests. PROBATION =
+  report-only (OPS_REPORT_ONLY=1 + GITHUB_OPS_REPORT_ONLY=1): writes the local digest + traces;
+  the GitHub issue is NOT filed.
+
+  Install:
+    cp docs/launchd/com.schedulersystems.daily-digest.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.schedulersystems.daily-digest.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.schedulersystems.daily-digest</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd /Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/worktrees/ops-fleet &amp;&amp; ENVF=.env; [ -f "$ENVF" ] || ENVF=/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/.env; set -a &amp;&amp; . "$ENVF" &amp;&amp; set +a &amp;&amp; export WORKSPACE_ROOT=/Users/scheduler-systems/Documents/scheduler-systems-ltd LANGSMITH_TRACING=true LANGSMITH_PROJECT=scheduler-qa OPS_REPORT_ONLY=1 GITHUB_OPS_REPORT_ONLY=1 &amp;&amp; ./.venv/bin/python scripts/run_ops_graph.py daily_digest</string>
+  </array>
+
+  <!-- Daily: 09:30 local. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>9</integer>
+    <key>Minute</key><integer>30</integer>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/daily-digest/launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/daily-digest/launchd.log</string>
+</dict>
+</plist>

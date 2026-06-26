@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  memory_sync LaunchAgent — STAGED, do NOT load until sign-off.
+
+  Keeps local memory stores synced to a remote target via a pluggable backend. PROBATION =
+  DRY-RUN: it reports what WOULD sync and uploads NOTHING; credential files / secret-pattern
+  records are excluded. Designed to the remote-first "Pipeline C" (see
+  .tmp/remote-first-migration/INVENTORY-AND-PLAN.md). Arm a real backend only after that
+  pipeline's target is decided AND sign-off:
+    set MEMORY_SYNC_BACKEND=<langgraph_store|litestream|claude_memory_git> and MEMORY_SYNC_APPLY=1.
+
+  Install (after sign-off):
+    cp docs/launchd/com.schedulersystems.memory-sync.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.schedulersystems.memory-sync.plist
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.schedulersystems.memory-sync.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.schedulersystems.memory-sync</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/Scheduler-Systems/qa-agent-platform/worktrees/ops-fleet/scripts/run_memory_sync.sh</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>WORKSPACE_ROOT</key>
+    <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd</string>
+    <key>MEMORY_SYNC_BACKEND</key>
+    <string>dryrun</string>
+    <!-- MEMORY_SYNC_APPLY intentionally absent => dry-run, uploads nothing. -->
+  </dict>
+
+  <!-- Every 30 minutes (dry-run is cheap). -->
+  <key>StartInterval</key>
+  <integer>1800</integer>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/memory-sync/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/scheduler-systems/Documents/scheduler-systems-ltd/.tmp/memory-sync/launchd.err.log</string>
+</dict>
+</plist>

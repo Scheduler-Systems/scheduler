@@ -1,0 +1,6 @@
+{
+  "_comment": "Declared RevenueCat baseline for the store_health_checker drift check. Fill 'offerings' and 'products' with the REAL RevenueCat offering ids / product (SKU) store-identifiers you expect to be live and purchasable; list 'trials' for products that must carry an intro/free-trial. EMPTY arrays => drift detection is SKIPPED (the checker does live purchasability + paywall checks only, and never raises a false drift alarm). Override path via env RC_BASELINE_PATH.",
+  "offerings": [],
+  "products": [],
+  "trials": []
+}

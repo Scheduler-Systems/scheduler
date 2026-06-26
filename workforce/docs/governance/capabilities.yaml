@@ -1,0 +1,556 @@
+# =============================================================================
+# CAPABILITY MANIFEST — the enforced companion to the GAL-run Governance Charter.
+#
+# Charter backlog item #1, made real: every deployed agent declares exactly which
+# AGENT (never human) identities it authenticates as, the capabilities it is granted
+# (each with WHY + who granted it), and the ring-fenced funding it may spend from.
+#
+# This file is MACHINE-CHECKED by `gal capability validate` (the GAL CLI is the enforcing
+# authority; scripts/check_capability_coverage.py is the equivalent Python gate, kept in sync):
+#   * Rule #1 (never mix identities) — no grant may reference a human-tier identity.
+#   * Spend-only, never procure     — no identity/grant may set can_buy; verbs are allow-listed.
+#   * Coverage (default-deny)        — every graph in langgraph.json MUST have a grant.
+#   * Funding                        — an agent-spendable pool may not auto-recharge unless
+#                                      ring-fenced (bounds real-money blast radius).
+#
+# Booleans MUST be canonical `true`/`false` (never the YAML-1.1 `on`/`off`/`yes`/`no`, which
+# Python and Rust parsers disagree on). See gal-run-governance-charter.md + identity-mixing-audit.
+# =============================================================================
+apiVersion: gal/v1
+kind: CapabilityManifest
+version: 1
+
+# --- HUMANS (top tier — own/grant/pay/approve; NEVER given to an agent) -------------
+owners:
+  - id: shay
+    tier: human
+    role: founder / investor
+    note: top of the accountability tree; owns all billing + approval; issues + revokes
+          every agent identity below. This identity is never used by an agent or a tool.
+
+# --- AGENT IDENTITIES (NHI) — scoped machine credentials issued by a human ----------
+# Each is spend-only at most (can_buy: false everywhere). No agent identity carries
+# ownership, billing, payment, or approval authority.
+identities:
+  model_inference:
+    tier: agent
+    kind: inference_api_subkey
+    can_buy: false
+    issued_by: shay
+    spends_from: ring_fenced_pool
+    note: DeepSeek / Gemini inference keys. Spend-only — spends a balance, cannot top it up.
+  github_app:
+    tier: agent
+    kind: github_app_installation
+    can_buy: false
+    issued_by: shay
+    env: FLEET_APP_ID
+    note: permission-scoped GitHub App; no billing/admin. GitHub writes gated by OPS_REPORT_ONLY.
+  openclaw_slack_bot:
+    tier: agent
+    kind: slack_bot_token
+    can_buy: false
+    issued_by: shay
+    secret_ref: secret-store (REMEDIATION PENDING — currently plaintext ~/.openclaw/openclaw.json)
+    shared: true
+    note: one shared bot (posts as "OpenClaw"). FLAGGED — not per-agent isolated; see audit item 3.
+  revenuecat_api_key:
+    tier: agent
+    kind: rest_api_key
+    can_buy: false
+    issued_by: shay
+    note: read-mostly RevenueCat key (priority-118da Secret Manager). No plan/billing changes.
+  langsmith_api_key:
+    tier: agent
+    kind: rest_api_key
+    can_buy: false
+    issued_by: shay
+    note: >-
+      READ-ONLY LangSmith key for the AI/Platform Specialist (Lennox). Reads runs / feedback /
+      crons / deployment revisions ONLY — it NEVER deploys, never creates a cron, never mutates
+      config or project settings. The deploy/config levers stay human-gated (the same scoped key
+      the read paths use; the deploy-scoped key is a SEPARATE founder-held credential, never wired
+      into this agent). An ACTIVATION GATE injected at deploy time (LangSmith runtime secret) —
+      absent in CI, so Lennox runs honestly report-only with everything "unverifiable".
+  asc_api_key:
+    tier: agent
+    kind: app_store_connect_key
+    can_buy: false
+    issued_by: shay
+    note: App Store Connect ES256 key (key id D8U78K3S79). Reads store/sub state; writes GATED.
+  play_sa:
+    tier: agent
+    kind: google_service_account
+    can_buy: false
+    issued_by: shay
+    note: Google Play Developer SA. Reads store/sub state; writes GATED.
+  brevo_api_key:
+    tier: agent
+    kind: rest_api_key
+    can_buy: false
+    issued_by: shay
+    note: Brevo (email/CRM) read + DRAFT only — never sends on the agent's own authority.
+  gmail_oauth:
+    tier: agent
+    kind: gmail_oauth_token
+    can_buy: false
+    issued_by: shay
+    env: GMAIL_OAUTH_TOKEN
+    note: >-
+      Gmail read + DRAFT-compose only (no gmail.send scope ever requested). Powers the email-triage
+      agent (Posey). The token is an ACTIVATION GATE injected at deploy time (LangSmith runtime
+      secret) — absent in CI, so the agent runs honestly report-only. Cannot send mail.
+
+# --- FUNDING (the money end of spend-only) ------------------------------------------
+# An inference key is only "spend-only" if its funding cannot auto-procure. This is the
+# top open governance gap (founder action — see identity-mixing-audit table C).
+funding:
+  ring_fenced_pool:
+    purpose: the single capped pool every agent's model spend draws from
+    ring_fenced: pending          # FOUNDER ACTION — provision a prepaid/capped instrument
+    auto_recharge: false          # MUST stay false; the gate FAILS if this is ever turned on (canonical bool — never the YAML-1.1 `off`)
+    max_usd_exposure: null        # FOUNDER sets the hard cap (USD)
+    separate_from_main_card: required
+    note: HARD GATE. Until ring_fenced, exposure is bounded only by provider settings.
+
+# --- CAPABILITY GRANTS — one per deployed graph (default-deny) -----------------------
+# Each grant: identities it authenticates as, capabilities (capability/scope/why/granted_by),
+# can_buy (always false), funding. posture=report_only (probation): proposes, never executes.
+grants:
+
+  # ---- BOARD (oversight → investor update) ----------------------------------------
+  board_chair:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:fleet_state", scope: "fleet digests + roster", why: "synthesize the investor update", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate an investor-update synthesis item beyond its scope to the CEO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "deliver the investor update", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated: OPS_REPORT_ONLY)", why: "durable record of the update", granted_by: shay, revocable: true }
+
+  audit_risk_director:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:fleet_state", scope: "spend vs budget + safety-gate compliance", why: "audit & risk oversight", granted_by: shay, revocable: true }
+      - { capability: "read:financials", scope: "burn vs salary caps", why: "flag over-budget / gate breaches", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate an audit/risk flag beyond its scope to the CEO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "deliver the audit/risk note", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  growth_director:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, revenuecat_api_key]
+    capabilities:
+      - { capability: "read:revenuecat", scope: "funnel + revenue KPIs", why: "growth oversight", granted_by: shay, revocable: true }
+      - { capability: "read:fleet_state", scope: "growth agents' output", why: "growth oversight", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate a growth-oversight call beyond its scope to the CEO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "deliver the growth note", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  # ---- EXECUTIVE (C-suite — propose-only monitoring) ------------------------------
+  ceo:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:fleet_state", scope: "all exec reports", why: "synthesize company priorities", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "chair the proposal queue", granted_by: shay, revocable: true }
+      - { capability: "message:human", scope: "address the founder on board-level matters (HITL-gated)", why: "the CEO may speak to Shay; outward → human-in-loop", granted_by: shay, revocable: true }
+      - { capability: "message:cfo", scope: "pull the CFO into a finance/budget thread", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:cto", scope: "pull the CTO into a deploy/CI/security thread", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:cmo", scope: "pull the CMO into a growth/funnel thread", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:coo", scope: "pull the COO into an ops/fleet thread", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:qa_lead_aggregator", scope: "pull QA into a shippability thread", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:board_chair", scope: "delegate an investor-update synthesis item to the board chair", why: "org-chart delegation DOWN to a board report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:audit_risk_director", scope: "delegate an audit/risk item to the audit & risk director", why: "org-chart delegation DOWN to a board report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:growth_director", scope: "delegate a growth-oversight item to the growth director", why: "org-chart delegation DOWN to a board report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:security_officer", scope: "delegate an operational-security item to the CISO (its direct report)", why: "org-chart delegation DOWN to the security officer (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:clo", scope: "delegate a legal item to the CLO (its direct report)", why: "org-chart delegation DOWN to the CLO (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  cfo:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, revenuecat_api_key]
+    capabilities:
+      - { capability: "read:financials", scope: "payroll + qa-shift + burn", why: "monitor all spend", granted_by: shay, revocable: true }
+      - { capability: "read:revenuecat", scope: "revenue vs cost", why: "monitor MRR vs burn", granted_by: shay, revocable: true }
+      - { capability: "propose:budget_allocation", scope: "roster salaries (no money moved)", why: "propose the budget re-balance for Shay's ratification", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "deliver the CFO update", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate a budget/burn flag to the CEO", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  coo:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:fleet_state", scope: "ops fleet health + schedules", why: "ops oversight", granted_by: shay, revocable: true }
+      - { capability: "read:git", scope: "maintainer/substrate state", why: "ops oversight", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "deliver the COO note", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate an ops/fleet blocker to the CEO", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:revenue_reporter", scope: "delegate a weekly-revenue/pipeline digest item to the revenue reporter", why: "org-chart delegation DOWN to an ops report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:store_health_checker", scope: "delegate a store-health/SKU/offering-drift item to the store health checker", why: "org-chart delegation DOWN to an ops report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:email_triage", scope: "delegate an inbox/email-triage item to the email triage agent", why: "org-chart delegation DOWN to an ops report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:daily_digest", scope: "delegate a daily-digest/autonomy-scoreboard item to the daily digest", why: "org-chart delegation DOWN to an ops report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  cto:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "deploy/security posture (e.g. held IDOR rollout)", why: "engineering oversight", granted_by: shay, revocable: true }
+      - { capability: "read:ci", scope: "CI state", why: "engineering oversight", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#engineering", why: "deliver the CTO note", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate a deploy/security decision to the CEO", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:qa_lead_aggregator", scope: "pull QA into a deploy/regression thread", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:web_automation_engineer", scope: "delegate a web deploy/test/CI item to the web automation engineer", why: "org-chart delegation DOWN to an engineering report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:android_automation_engineer", scope: "delegate an android deploy/test item to the android automation engineer", why: "org-chart delegation DOWN to an engineering report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:ios_automation_engineer", scope: "delegate an iOS deploy/test item to the iOS automation engineer", why: "org-chart delegation DOWN to an engineering report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:platform_specialist", scope: "delegate a LangSmith-runtime/platform-health item to the platform specialist", why: "org-chart delegation DOWN to the platform report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  cmo:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, revenuecat_api_key]
+    capabilities:
+      - { capability: "read:revenuecat", scope: "RC funnel", why: "marketing oversight", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#marketing", why: "deliver the CMO note", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate a growth/funnel call to the CEO", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:conversion_growth_analyst", scope: "delegate a funnel/conversion/paywall item to the conversion growth analyst", why: "org-chart delegation DOWN to a growth report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:aso_store_listing_agent", scope: "delegate an ASO/store-listing item to the ASO store listing agent", why: "org-chart delegation DOWN to a growth report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:content_campaign_drafter", scope: "delegate a content/campaign drafting item to the content campaign drafter", why: "org-chart delegation DOWN to a growth report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  # ---- C-SUITE OFFICERS (security + legal — propose-only, report to CEO) -----------
+  security_officer:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    # NO secret-bearing identity: model_inference + the shared Slack bot + the read-only GitHub App.
+    # Lior reviews + proposes; it never authenticates as anything that could rotate/mutate a secret.
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "deployed graphs + grants + event/webhook seam (secure-by-design review)", why: "the keystone secure-by-design review of every new graph/endpoint/grant", granted_by: shay, revocable: true }
+      - { capability: "read:ci", scope: "CI state for security regressions", why: "vuln / security-regression triage", granted_by: shay, revocable: true }
+      - { capability: "read:fleet_state", scope: "fleet posture + capability manifest", why: "operational-security oversight", granted_by: shay, revocable: true }
+      - { capability: "read:git", scope: "branch/PR security recon", why: "review new-endpoint/grant changes", granted_by: shay, revocable: true }
+      - { capability: "propose:threat_model", scope: "threat models / replay+SSRF hardening proposals (draft only)", why: "propose secure-by-design hardening; never applies it", granted_by: shay, revocable: true }
+      - { capability: "propose:security_finding", scope: "vuln / Sentry-security findings (draft only)", why: "surface security findings for human triage; never fixes", granted_by: shay, revocable: true }
+      - { capability: "propose:secret_rotation", scope: "secret-hygiene / rotation PROPOSALS — NEVER rotates a live secret", why: "propose rotations for a human to execute; never rotates", granted_by: shay, revocable: true }
+      - { capability: "propose:incident_response", scope: "IR runbook — may RECOMMEND the kill switch; a HUMAN pulls it", why: "propose incident response incl. kill-switch recommendation; never disables the fleet", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#engineering", why: "deliver the CISO security posture", granted_by: shay, revocable: true }
+      - { capability: "message:cto", scope: "pull the CTO into a security/deploy thread (C-suite peer)", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate a security decision to the CEO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:audit_risk_director", scope: "dotted-line: share a security-posture/risk item with the audit & risk director", why: "dotted-line A2A to the board audit/risk director (internal, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:platform_specialist", scope: "pair prompt-injection/PII POLICY with the platform specialist (who owns the runtime evaluators)", why: "policy/evaluator pairing (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:human", scope: "raise a security HARD-GATE / incident decision to the founder (HITL-gated)", why: "outward security escalation → human-in-loop", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated: OPS_REPORT_ONLY)", why: "durable security-posture record", granted_by: shay, revocable: true }
+
+  clo:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "ToS / privacy-policy / marketing-claim / contract source", why: "ground the legal review", granted_by: shay, revocable: true }
+      - { capability: "read:fleet_state", scope: "the security item (IDOR) for the breach-notification legal angle + marketing claims", why: "legal oversight incl. the breach-notification twin of the CISO security item", granted_by: shay, revocable: true }
+      - { capability: "propose:legal_review", scope: "ToS / contract / billing-vs-ToS / classification DRAFTS — never signs/binds", why: "draft legal remediations for human review; never binds the company", granted_by: shay, revocable: true }
+      - { capability: "propose:legal_finding", scope: "legal flags incl. overclaim findings (draft only)", why: "flag legal/overclaim issues for human + CMO review; never executes", granted_by: shay, revocable: true }
+      - { capability: "propose:compliance", scope: "privacy/GDPR + breach-notification-obligation ASSESSMENTS — never decides to notify / never files", why: "draft compliance assessments; the decision to notify/file BINDS the company → human-gated", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "deliver the CLO legal posture", granted_by: shay, revocable: true }
+      - { capability: "message:cmo", scope: "flag a public-claim/OVERCLAIM in marketing+website copy to the CMO (peer in the marketing lane)", why: "route an overclaim flag to the CMO (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate a legal call to the CEO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:cto", scope: "coordinate a legal/security-overlap item (e.g. IDOR) with the CTO", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:audit_risk_director", scope: "share a legal-compliance/risk item with the audit & risk director", why: "legal↔audit coordination (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:human", scope: "raise a LEGAL HARD-GATE (file/sign/notify/bind) decision to the founder (HITL-gated)", why: "outward legal escalation → human-in-loop", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated: OPS_REPORT_ONLY)", why: "durable legal-posture record", granted_by: shay, revocable: true }
+
+  # ---- GROWTH (revenue generators — drafts only) ----------------------------------
+  conversion_growth_analyst:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, revenuecat_api_key, asc_api_key, play_sa]
+    capabilities:
+      - { capability: "read:revenuecat", scope: "funnel + paywall + trials", why: "spot conversion levers", granted_by: shay, revocable: true }
+      - { capability: "read:stores", scope: "ASC/Play subscription + trial state", why: "find no-trial products", granted_by: shay, revocable: true }
+      - { capability: "propose:conversion_experiment", scope: "draft experiments only", why: "propose conversion experiments (never applies them)", granted_by: shay, revocable: true }
+      - { capability: "message:cmo", scope: "escalate a funnel/conversion call beyond its scope to the CMO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#marketing", why: "deliver the conversion digest", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  aso_store_listing_agent:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, asc_api_key, play_sa]
+    capabilities:
+      - { capability: "read:stores", scope: "store listing metadata", why: "ASO repositioning research", granted_by: shay, revocable: true }
+      - { capability: "propose:listing_copy", scope: "draft ASO/listing copy only", why: "reposition to B2B shift scheduling (no app release)", granted_by: shay, revocable: true }
+      - { capability: "message:cmo", scope: "escalate an ASO/listing call beyond its scope to the CMO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#marketing", why: "deliver the ASO drafts", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  content_campaign_drafter:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, brevo_api_key]
+    capabilities:
+      - { capability: "read:brevo", scope: "audience/list metadata (read)", why: "ground campaign drafts", granted_by: shay, revocable: true }
+      - { capability: "propose:content_draft", scope: "email/social/blog drafts — NEVER sends", why: "draft campaigns for human review", granted_by: shay, revocable: true }
+      - { capability: "message:cmo", scope: "escalate a content/campaign call beyond its scope to the CMO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#marketing", why: "deliver the drafts", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  # ---- QA (quality enablement) ----------------------------------------------------
+  qa_lead_aggregator:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:ci", scope: "all-platform test results", why: "one shippability verdict", granted_by: shay, revocable: true }
+      - { capability: "read:repo", scope: "PR diffs", why: "shippability verdict", granted_by: shay, revocable: true }
+      - { capability: "message:ceo", scope: "escalate the shippability verdict", why: "QA lead escalates a release decision to the CEO (internal A2A)", granted_by: shay, revocable: true }
+      - { capability: "message:cto", scope: "pull the CTO into a deploy/regression thread", why: "visible Slack deliberation (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:web_automation_engineer", scope: "delegate a web test item to the web automation engineer", why: "org-chart delegation DOWN to a QA report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:android_automation_engineer", scope: "delegate an android test item to the android automation engineer", why: "org-chart delegation DOWN to a QA report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:ios_automation_engineer", scope: "delegate an iOS test item to the iOS automation engineer", why: "org-chart delegation DOWN to a QA report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:web_manual_tester", scope: "delegate web exploratory testing to the web manual tester", why: "org-chart delegation DOWN to a QA report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:android_manual_tester", scope: "delegate android exploratory testing to the android manual tester", why: "org-chart delegation DOWN to a QA report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "message:ios_manual_tester", scope: "delegate iOS exploratory testing to the iOS manual tester", why: "org-chart delegation DOWN to a QA report (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#qa-reports", why: "deliver the QA verdict", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  web_automation_engineer:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "scheduler-web", why: "author Vitest/Playwright tests", granted_by: shay, revocable: true }
+      - { capability: "read:ci", scope: "scheduler-web CI", why: "close the e2e gap", granted_by: shay, revocable: true }
+      - { capability: "propose:test_draft", scope: "test PRs (gated)", why: "propose e2e coverage", granted_by: shay, revocable: true }
+      - { capability: "message:qa_lead_aggregator", scope: "escalate a web test item beyond its scope to the QA lead (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#qa-reports", why: "deliver the QA digest", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  android_automation_engineer:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "scheduler-android", why: "author JUnit/Espresso tests", granted_by: shay, revocable: true }
+      - { capability: "read:ci", scope: "scheduler-android CI", why: "e2e coverage", granted_by: shay, revocable: true }
+      - { capability: "propose:test_draft", scope: "test PRs (gated)", why: "propose e2e coverage", granted_by: shay, revocable: true }
+      - { capability: "message:qa_lead_aggregator", scope: "escalate an android test item beyond its scope to the QA lead (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#qa-reports", why: "deliver the QA digest", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  ios_automation_engineer:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "scheduler-ios", why: "author XCTest tests", granted_by: shay, revocable: true }
+      - { capability: "read:ci", scope: "scheduler-ios CI", why: "e2e coverage (degrade gracefully)", granted_by: shay, revocable: true }
+      - { capability: "propose:test_draft", scope: "test PRs (gated)", why: "propose e2e coverage", granted_by: shay, revocable: true }
+      - { capability: "message:qa_lead_aggregator", scope: "escalate an iOS test item beyond its scope to the QA lead (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#qa-reports", why: "deliver the QA digest", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  web_manual_tester:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "scheduler-web (headless browser exploration)", why: "exploratory testing", granted_by: shay, revocable: true }
+      - { capability: "message:qa_lead_aggregator", scope: "escalate a web exploratory finding beyond its scope to the QA lead (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#qa-reports", why: "deliver findings", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  android_manual_tester:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "Android emulator exploration (Stratus Mac)", why: "exploratory testing", granted_by: shay, revocable: true }
+      - { capability: "message:qa_lead_aggregator", scope: "escalate an android exploratory finding beyond its scope to the QA lead (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#qa-reports", why: "deliver findings", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  ios_manual_tester:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "iOS simulator exploration (Stratus Mac)", why: "exploratory testing", granted_by: shay, revocable: true }
+      - { capability: "message:qa_lead_aggregator", scope: "escalate an iOS exploratory finding beyond its scope to the QA lead (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#qa-reports", why: "deliver findings", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  web_qa_regression:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:ci", scope: "scheduler-web CI recon", why: "detect web regressions", granted_by: shay, revocable: true }
+      - { capability: "read:repo", scope: "scheduler-web diffs", why: "dedup'd regression detection", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#qa-reports", why: "deliver regression alerts", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated, dedup'd)", why: "file on REGRESSION", granted_by: shay, revocable: true }
+
+  env_doctor:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "env + dependency manifests", why: "environment health checks", granted_by: shay, revocable: true }
+      - { capability: "read:ci", scope: "build/test env", why: "environment health checks", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#qa-reports", why: "deliver health findings", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  # ---- OPS (keep-the-lights-on) ---------------------------------------------------
+  revenue_reporter:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, revenuecat_api_key, asc_api_key, play_sa]
+    capabilities:
+      - { capability: "read:revenuecat", scope: "weekly RC metrics", why: "weekly revenue digest", granted_by: shay, revocable: true }
+      - { capability: "read:stores", scope: "deploy + pipeline state", why: "weekly revenue digest", granted_by: shay, revocable: true }
+      - { capability: "message:coo", scope: "escalate a revenue/pipeline item beyond its scope to the COO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#daily-ops", why: "deliver the weekly digest", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  store_health_checker:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, asc_api_key, play_sa, revenuecat_api_key]
+    capabilities:
+      - { capability: "read:stores", scope: "SKU purchasability + offering drift + paywall reachability", why: "daily revenue-guard checks", granted_by: shay, revocable: true }
+      - { capability: "read:revenuecat", scope: "current offering", why: "offering-drift detection", granted_by: shay, revocable: true }
+      - { capability: "message:coo", scope: "escalate a store-health/revenue-guard item beyond its scope to the COO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#daily-ops", why: "deliver health alerts", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  email_triage:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, gmail_oauth]
+    capabilities:
+      - { capability: "read:gmail", scope: "unread inbox message headers + snippets + attachment names (read-only)", why: "triage the inbox + detect invoices", granted_by: shay, revocable: true }
+      - { capability: "read:inbox", scope: "classify label/archive/needs-task/invoice per message", why: "inbox triage classification", granted_by: shay, revocable: true }
+      - { capability: "send:invoice_to_morning", scope: "auto-forward a DETECTED invoice to the ALLOWLIST of exactly two Morning config addresses ONLY (personal -> MORNING_PERSONAL_EMAIL, company -> MORNING_COMPANY_EMAIL); recipient comes from server config, NEVER the message From/Reply-To/body/headers, NEVER a free argument; the ONLY outward send Posey has", why: "Shay Option B: auto-forward invoices to Morning under a HARD recipient allowlist; structurally cannot reach any other address", granted_by: shay, revocable: true }
+      - { capability: "write:label_own_marketing", scope: "label/archive OBVIOUS marketing on the founder's OWN mailbox (reversible self-mailbox edit; never hides real/actionable mail; no message leaves the account)", why: "conservative inbox tidying — read-modify of own mailbox, NOT outward (no email-channel deliver token)", granted_by: shay, revocable: true }
+      - { capability: "propose:email_reply", scope: "create Gmail DRAFTS for review — NEVER sends", why: "draft replies for human Send; outward → draft-only", granted_by: shay, revocable: true }
+      - { capability: "propose:unsubscribe", scope: "surface promotional senders as unsubscribe PROPOSALS — NEVER executes", why: "propose unsubscribes for human approval; never auto-acts", granted_by: shay, revocable: true }
+      - { capability: "propose:task", scope: "create a task record for actionable mail (the task/digest seam)", why: "turn actionable mail into a task for human review", granted_by: shay, revocable: true }
+      - { capability: "message:coo", scope: "escalate an inbox/triage item beyond its scope to the COO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#daily-ops", why: "deliver the triage digest", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  daily_digest:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, revenuecat_api_key]
+    capabilities:
+      - { capability: "read:fleet_state", scope: "autonomy scoreboard (staffed vs ~81)", why: "the once-a-day single pane", granted_by: shay, revocable: true }
+      - { capability: "read:revenuecat", scope: "revenue line", why: "the daily digest", granted_by: shay, revocable: true }
+      - { capability: "message:coo", scope: "escalate a digest/scoreboard item beyond its scope to the COO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#daily-ops", why: "deliver the daily digest", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  git_maintainer:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:git", scope: "branch list + PR merge status", why: "branch hygiene", granted_by: shay, revocable: true }
+      - { capability: "git:prune_merged", scope: "MERGED branches only (recency/unpushed guarded)", why: "auto-prune merged branches; propose the rest", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#daily-ops", why: "deliver the hygiene digest", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  # ---- PLATFORM (owns + maintains the LangSmith runtime — PROPOSE-ONLY) -----------
+  platform_specialist:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, langsmith_api_key]
+    capabilities:
+      - { capability: "read:langsmith", scope: "runs / feedback ledger / crons / deployment revisions (READ-ONLY — never deploys, never creates a cron, never mutates config)", why: "own + monitor the LangSmith runtime: eval gate, online evals, revision/cron health", granted_by: shay, revocable: true }
+      - { capability: "read:financials", scope: "fleet burn vs team budget (platform cost angle)", why: "flag the PLATFORM cost lever (retention/sampling); the CFO owns the salary re-balance", granted_by: shay, revocable: true }
+      - { capability: "propose:platform_maintenance", scope: "rollback / block-prompt / cost / health PROPOSALS only — NEVER executes a deploy or config change", why: "propose platform-maintenance actions for human/CTO approval; never auto-applies", granted_by: shay, revocable: true }
+      - { capability: "message:cto", scope: "escalate a platform-health/runtime item beyond its scope to the CTO (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#engineering", why: "deliver the platform-health digest", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated: OPS_REPORT_ONLY)", why: "durable platform-health record", granted_by: shay, revocable: true }
+
+  # ---- HR / SALES / RUNTIME BAKE-OFF ----------------------------------------------
+  hr_ops_manager:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:fleet_state", scope: "roster + job board + scorecards", why: "performance reviews", granted_by: shay, revocable: true }
+      - { capability: "propose:hire_fire", scope: "approval-gated proposals over the job board — NEVER executes", why: "propose hires/fires for Shay's approval", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "deliver HR proposals", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  canary_hello_gate:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot]
+    capabilities:
+      - { capability: "post:slack", scope: "#daily-ops (or local digest)", why: "prove the managed platform + gates work end to end", granted_by: shay, revocable: true }
+
+  sales_dev:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app, brevo_api_key]
+    capabilities:
+      - { capability: "read:brevo", scope: "leads/pipeline (read)", why: "lead qualification", granted_by: shay, revocable: true }
+      - { capability: "propose:followup_draft", scope: "follow-up DRAFTS — never auto-sends", why: "deal pipeline + follow-up drafts for human review", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#marketing", why: "deliver qualified leads + drafts", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
+
+  cfo_deepagents:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    runtime: deepagents
+    identities: [model_inference, openclaw_slack_bot, github_app, revenuecat_api_key]
+    capabilities:
+      - { capability: "read:financials", scope: "payroll + qa-shift + burn", why: "finance bake-off twin of cfo", granted_by: shay, revocable: true }
+      - { capability: "read:revenuecat", scope: "revenue vs cost", why: "finance picture", granted_by: shay, revocable: true }
+      - { capability: "propose:budget_allocation", scope: "roster salaries (no money moved)", why: "propose-only budget allocation", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "deliver the CFO (deepagents) update", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
