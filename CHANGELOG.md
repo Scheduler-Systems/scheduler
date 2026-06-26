@@ -21,9 +21,19 @@ the first semver-tagged release.
 - This changelog.
 
 ### Security
-- Removed the agent-dispatch / LangSmith surface from the open core (SSRF +
-  key-exfiltration risk); that functionality belongs in the hosted control plane.
+- Removed the agent-dispatch HTTP route from the **product** engine
+  (`packages/core`) — it had an SSRF + key-exfiltration risk and belongs in the
+  hosted control plane. (Note: the `workforce/` directory is a separate,
+  **development/experimental** LangGraph fleet — not part of the self-hostable
+  product; it is not built, run, or supported by this release. See `workforce/README.md`.)
 - Cleared web dependency vulnerabilities (Dependabot alerts → 0).
+
+### Known limitations
+- The Firestore-backed Go API store (`SCHEDULER_STORE=firestore`, opt-in; the
+  default is in-memory) does not yet surface **runtime** write failures to
+  callers — only a boot readiness probe is enforced, so a Firestore outage
+  *after* startup can drop a write silently. Tracked fix: thread error returns
+  through the `Store` interface (services/api/internal/store).
 
 ## Project history
 

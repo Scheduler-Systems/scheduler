@@ -35,6 +35,13 @@ function shouldUseEmulators(): boolean {
   );
 }
 
+// Emulator host:port — configurable (defaults match firebase.json) so a dev with
+// a port conflict, or a containerized run, can point elsewhere without editing code.
+const AUTH_EMULATOR_HOST =
+  process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST ?? "127.0.0.1:9099";
+const FIRESTORE_EMULATOR_HOST =
+  process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST ?? "127.0.0.1:8088";
+
 export function getFirebaseApp(): FirebaseApp {
   if (!_app) _app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
   return _app;
@@ -44,7 +51,7 @@ export function getFirebaseAuth(): Auth {
   if (!_auth) {
     _auth = getAuth(getFirebaseApp());
     if (shouldUseEmulators()) {
-      connectAuthEmulator(_auth, "http://127.0.0.1:9099", {
+      connectAuthEmulator(_auth, `http://${AUTH_EMULATOR_HOST}`, {
         disableWarnings: true,
       });
     }
@@ -56,7 +63,8 @@ export function getFirebaseDb(): Firestore {
   if (!_db) {
     _db = getFirestore(getFirebaseApp());
     if (shouldUseEmulators()) {
-      connectFirestoreEmulator(_db, "127.0.0.1", 8088);
+      const [fsHost, fsPort] = FIRESTORE_EMULATOR_HOST.split(":");
+      connectFirestoreEmulator(_db, fsHost, Number(fsPort));
     }
   }
   return _db;

@@ -1,3 +1,10 @@
+> ⚠️ **Development / experimental — NOT part of the Scheduler product.**
+> This directory is an internal **LangGraph** agent fleet (an ML-boundary
+> component). It is **not** part of the self-hostable Scheduler product, is **not
+> built, run, or supported** by the released app, and is excluded from the
+> product CI. It lives here for development reference only. The shippable product
+> is `services/api`, `apps/web`, `apps/{ios,android}`, and `packages/core`.
+
 # agent-workforce
 
 Deployed **LangGraph** agents that automate Scheduler's **QA** (and, as a fast-follow, **Marketing**) processes. **One monorepo, many graphs, one shared toolkit** — not 60 copy-pasted repos.

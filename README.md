@@ -36,16 +36,31 @@ git clone https://github.com/Scheduler-Systems/scheduler && cd scheduler
 That's the whole loop: **clone → run → schedule created.** It runs
 `packages/core/src/server.mjs` — no `npm install`, no Firebase, no database.
 
-### Run the full stack (self-host)
+### Run the whole app locally — one command, no accounts
+
+Boot the **full stack** — Firebase emulators + Go API + Next.js web — wired to a
+local-only `demo-` project, so you can log in and use the real UI with **zero
+external accounts**:
 
 ```sh
-# Go API — tenant auth + schedules/employees. In-memory by default; set
-# SCHEDULER_STORE=firestore (+ FIREBASE_PROJECT_ID) to persist across restarts.
-cd services/api && make test && make dev            # :8080  (config: .env.example)
+git clone https://github.com/Scheduler-Systems/scheduler && cd scheduler
+make dev          # emulators + API + web; Ctrl+C stops everything
+```
 
-# Web — Next.js app (Firebase auth/Firestore)
-cd apps/web && cp .env.local.example .env.local     # set your Firebase config
-npm install && npm run dev                          # :3000
+Then open **http://localhost:3000** and sign in with the seeded test user
+**`owner@demo.test` / `password123`** → create a schedule → it persists in the
+Firestore emulator. (Requires Node 20+, Go 1.22+, a JDK 11+, and the Firebase
+CLI. If a port is busy: `FS_PORT=8097 AUTH_PORT=9097 make dev`.)
+
+Containers instead? `make dev-docker` (only Docker required — see
+[`docker-compose.yml`](docker-compose.yml)).
+
+### Run against your own Firebase (production self-host)
+
+```sh
+cd services/api && SCHEDULER_STORE=firestore FIREBASE_PROJECT_ID=your-project make dev   # :8080
+cd apps/web && cp .env.local.example .env.local   # set your real Firebase web config
+npm install && npm run dev                         # :3000
 ```
 
 Mobile: `apps/android` (`make run`) and `apps/ios` — see each app's README.
@@ -60,6 +75,8 @@ apps/web/          Next.js web app (Firebase auth/Firestore; billing STUBBED)
 apps/android/      Native Android client (Kotlin/Compose)
 apps/ios/          Native iOS client (Swift/SwiftUI)
 packages/core/     Billing-free scheduling engine (no-dependency Node)
+workforce/         Development/experimental LangGraph agent fleet — NOT part of
+                   the product (not built/run/supported by the release)
 ```
 
 - API — [`services/api/api-boundaries.md`](services/api/api-boundaries.md) · env: [`services/api/.env.example`](services/api/.env.example)
