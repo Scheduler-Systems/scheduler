@@ -85,7 +85,12 @@ def _gh_headers(event, raw, *, secret=_GH_SECRET, delivery="d-1", sign=True):
 
 class RoutingTable(unittest.TestCase):
     def test_pr_opened_routes_to_qa_chain(self):
-        self.assertEqual(event_routing.agents_for("github", "pr_opened"), ["qa_lead_aggregator"])
+        # A PR open fires the QA chain AND the board's PR-review agent (additive — the board
+        # "decide on PRs" step rides alongside QA; see agent_toolkit.pr_eval / board.pr_review).
+        self.assertEqual(event_routing.agents_for("github", "pr_opened"),
+                         ["qa_lead_aggregator", "board_pr_review"])
+        self.assertEqual(event_routing.agents_for("github", "pr_synchronize"),
+                         ["qa_lead_aggregator", "board_pr_review"])
 
     def test_pr_merged_routes_to_qa_chain_and_regression(self):
         self.assertEqual(event_routing.agents_for("github", "pr_merged"),
@@ -146,7 +151,9 @@ class GithubHappyPath(unittest.TestCase):
         raw = json.dumps(body).encode()
         status, out = r.handle("github", _gh_headers("pull_request", raw), raw)
         self.assertEqual(status, 202)
-        self.assertEqual([c[0] for c in rec.calls], ["qa_lead_aggregator"])
+        # A PR open fires the QA chain AND the board PR-review agent (both on the SAME per-PR
+        # deterministic thread). The QA lead is fired first; board_pr_review rides alongside.
+        self.assertEqual([c[0] for c in rec.calls], ["qa_lead_aggregator", "board_pr_review"])
         expected_thread = er.thread_id_for("github", "PR_xyz")
         self.assertEqual(rec.calls[0][1], expected_thread)
         self.assertEqual(out["thread_id"], expected_thread)
@@ -264,12 +271,13 @@ class ReplayDefense(unittest.TestCase):
         headers = _gh_headers("pull_request", raw, delivery="dup-1")
         s1, _ = r.handle("github", headers, raw)
         self.assertEqual(s1, 202)
-        self.assertEqual(len(rec.calls), 1)
+        # one PR-open delivery fans out to the QA chain + the board PR-review agent (2 fires)
+        self.assertEqual(len(rec.calls), 2)
         # exact same signed request again -> replay -> rejected, NO new fire
         s2, out2 = r.handle("github", headers, raw)
         self.assertEqual(s2, 401)
         self.assertEqual(out2["rejected"], "github-replay")
-        self.assertEqual(len(rec.calls), 1)
+        self.assertEqual(len(rec.calls), 2)
 
     def test_missing_delivery_id_still_dedups_on_signed_body(self):
         # The replay key is derived from SIGNED material (the body hash), NOT the unsigned
@@ -285,12 +293,13 @@ class ReplayDefense(unittest.TestCase):
                    "X-Hub-Signature-256": _sign_github(_GH_SECRET, raw)}  # no delivery id
         s1, _ = r.handle("github", headers, raw)
         self.assertEqual(s1, 202)
-        self.assertEqual(len(rec.calls), 1)
+        # one PR-open delivery fans out to the QA chain + the board PR-review agent (2 fires)
+        self.assertEqual(len(rec.calls), 2)
         # an identical signed body replayed (still no delivery id) is rejected on the body hash
         s2, out2 = r.handle("github", headers, raw)
         self.assertEqual(s2, 401)
         self.assertEqual(out2["rejected"], "github-replay")
-        self.assertEqual(len(rec.calls), 1)
+        self.assertEqual(len(rec.calls), 2)
 
 
 # ── Sentry path ───────────────────────────────────────────────────────────────────

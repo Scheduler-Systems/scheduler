@@ -39,10 +39,14 @@ SOURCE_SENTRY = "sentry"
 # Keyed by (source, canonical_event). Each value is the ordered list of graph ids to fire.
 # qa_lead_aggregator is the QA chain entry point (it dispatches the six platform workers).
 _ROUTES: dict[tuple[str, str], list[str]] = {
-    # A PR opened / reopened / got new commits -> run the QA chain on it.
-    (SOURCE_GITHUB, "pr_opened"):      ["qa_lead_aggregator"],
+    # A PR opened / got new commits -> run the QA chain AND the board's PR-review agent.
+    # board_pr_review is the "agents decide on PRs" step: it evaluates the PR (verdict +
+    # blast radius + HARD-GATE classification) and DRAFTS a report-only review — it never
+    # merges a gated PR (see graphs/board/pr_review.py + agent_toolkit/pr_eval.py). Added
+    # additively alongside qa_lead_aggregator (the QA chain entry point), not replacing it.
+    (SOURCE_GITHUB, "pr_opened"):      ["qa_lead_aggregator", "board_pr_review"],
     (SOURCE_GITHUB, "pr_reopened"):    ["qa_lead_aggregator"],
-    (SOURCE_GITHUB, "pr_synchronize"): ["qa_lead_aggregator"],
+    (SOURCE_GITHUB, "pr_synchronize"): ["qa_lead_aggregator", "board_pr_review"],
     # A PR merged -> run the QA chain AND kick the regression watcher on the target branch.
     (SOURCE_GITHUB, "pr_merged"):      ["qa_lead_aggregator", "web_qa_regression"],
     # A raw push to a branch (the `push` event) -> regression watcher (default-branch focus).

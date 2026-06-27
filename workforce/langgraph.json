@@ -39,6 +39,7 @@
     "board_chair": "./graphs/board/board_chair.py:graph",
     "audit_risk_director": "./graphs/board/audit_risk_director.py:graph",
     "growth_director": "./graphs/board/growth_director.py:graph",
+    "board_pr_review": "./graphs/board/pr_review.py:graph",
 
     "platform_specialist": "./graphs/platform/platform_specialist.py:graph"
   },

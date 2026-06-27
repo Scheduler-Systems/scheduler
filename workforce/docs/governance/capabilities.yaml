@@ -154,6 +154,19 @@ grants:
       - { capability: "post:slack", scope: "#executive-updates", why: "deliver the growth note", granted_by: shay, revocable: true }
       - { capability: "write:github_issue", scope: "ops digest repo (gated)", why: "durable record", granted_by: shay, revocable: true }
 
+  board_pr_review:
+    posture: report_only
+    can_buy: false
+    funding: ring_fenced_pool
+    identities: [model_inference, openclaw_slack_bot, github_app]
+    capabilities:
+      - { capability: "read:repo", scope: "the PR under review (metadata + diff via gh)", why: "evaluate the PR (verdict + blast radius + HARD-GATE classification)", granted_by: shay, revocable: true }
+      - { capability: "read:ci", scope: "the PR's CI checks", why: "a green-CI precondition for any safe-to-automerge call", granted_by: shay, revocable: true }
+      - { capability: "propose:pr_review", scope: "a report-only review verdict on the PR (never a HARD-GATE merge)", why: "the board 'decide on PRs' step — propose-only; HARD-GATE PRs are held for a human", granted_by: shay, revocable: true }
+      - { capability: "message:audit_risk_director", scope: "escalate a gate-relevant PR finding to the audit & risk director (its manager)", why: "org-chart escalation UP to its manager (internal A2A, report-only)", granted_by: shay, revocable: true }
+      - { capability: "post:slack", scope: "#executive-updates", why: "deliver the PR-review note", granted_by: shay, revocable: true }
+      - { capability: "write:github_issue", scope: "the PR review comment (gated: OPS_REPORT_ONLY) — a PR comment is an issue comment in GitHub", why: "durable record of the board's review on the PR", granted_by: shay, revocable: true }
+
   # ---- EXECUTIVE (C-suite — propose-only monitoring) ------------------------------
   ceo:
     posture: report_only

@@ -15,7 +15,7 @@
 
 policy:
   budget_period: weekly                 # weekly | monthly
-  team_token_budget: 6380000            # WHOLE fleet = sum(agents: salaries) (= board 0.26M + exec 0.72M + growth 1.25M + qa 2.5M + ops 0.90M + platform 0.15M + onboarded-no-org-group 0.60M). MUST equal sum(agents salaries) — reconciled by tests/test_roster_no_ghosts.py::PayrollBudgetReconciled so any hire/fire re-balances the cap. The CFO proposes the authoritative re-balance for Shay's ratification.
+  team_token_budget: 6460000            # WHOLE fleet = sum(agents: salaries) (= board 0.34M + exec 0.72M + growth 1.25M + qa 2.5M + ops 0.90M + platform 0.15M + onboarded-no-org-group 0.60M). MUST equal sum(agents salaries) — reconciled by tests/test_roster_no_ghosts.py::PayrollBudgetReconciled so any hire/fire re-balances the cap. The CFO proposes the authoritative re-balance for Shay's ratification. (board +0.08M: board_pr_review hire)
   per_run_token_ceiling: 150000         # hard kill-switch: max tokens a single agent run may spend (bumped 50k→150k on Shay's call 2026-06-06: deepagents runtimes legitimately need >50k/run — cfo_deepagents tripped it at 51,075; still a real per-run cap, team_token_budget remains the spend ceiling)
   shift_minutes: 5                      # length of one work shift — start SMALL; bounded by time AND token salary (whichever first)
   global_kill_switch_env: AGENTS_DISABLED  # set this env var truthy to stop ALL agents immediately
@@ -114,6 +114,17 @@ agents:
     schedule: "daily (board cadence) — propose-only"
     salary_tokens_per_week: 80000
     status: probation
+    scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
+
+  board_pr_review:
+    name: "Quinn"
+    role: "Board — PR review: deterministically evaluates each PR (review verdict + blast radius + HARD-GATE classification via agent_toolkit.pr_eval) and DRAFTS a report-only review. The 'agents decide on PRs' step. REPORT-ONLY/HITL: never merges a HARD-GATE PR (prod deploy / customer / billing / security baseline / irreversible) — those are always held for a human; off probation it would auto-merge ONLY the provably-safe low-blast non-prod class."
+    grade: gemini-2.5-flash
+    schedule: "event-driven (on PR opened / synchronize) — report-only"
+    salary_tokens_per_week: 80000
+    status: probation
+    hire: pending_hr_approval
+    reports_to: audit_risk_director
     scorecard: { error_rate: null, false_positive_rate: null, useful_actions: null, tokens_spent: null }
 
   # ---- EXECUTIVE (C-suite — propose-only monitoring) -------------------------------

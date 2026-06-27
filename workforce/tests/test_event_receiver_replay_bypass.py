@@ -63,8 +63,10 @@ def _sentry_body():
 class ReplayBypass(unittest.TestCase):
     def test_github_replay_with_mutated_delivery_header_is_rejected(self):
         """One captured signed PR-opened, replayed with fresh X-GitHub-Delivery ids,
-        must fire EXACTLY ONCE. The delivery header is not signed, so it must not be
-        usable to mint a fresh replay-key for an unchanged signed body."""
+        must be ACCEPTED EXACTLY ONCE. The delivery header is not signed, so it must not be
+        usable to mint a fresh replay-key for an unchanged signed body. A single accepted
+        PR-open fans out to the QA chain + the board PR-review agent (2 fires); the 4 replays
+        are rejected and add nothing, so the agents fire a total of 2x (not 5x2)."""
         rec = _Recorder()
         r = _make(rec)
         raw = json.dumps(_pr_body()).encode()
@@ -75,9 +77,12 @@ class ReplayBypass(unittest.TestCase):
                       "X-GitHub-Delivery": f"forged-{i}",   # attacker-chosen, UNSIGNED
                       "X-Hub-Signature-256": sig},
                      raw)
-        self.assertEqual(len(rec.calls), 1,
-                         f"replay bypass: 1 captured webhook re-fired the agent "
-                         f"{len(rec.calls)}x via mutated unsigned delivery header")
+        # 2 = the fan-out of the SINGLE accepted delivery (qa_lead_aggregator + board_pr_review);
+        # the 4 unsigned-header replays are all rejected, so the count never grows beyond it.
+        self.assertEqual([c[0] for c in rec.calls],
+                         ["qa_lead_aggregator", "board_pr_review"],
+                         f"replay bypass: 1 captured webhook re-fired via mutated unsigned "
+                         f"delivery header; got calls={[c[0] for c in rec.calls]}")
 
     def test_sentry_replay_with_mutated_resource_header_is_rejected(self):
         """One captured signed Sentry issue alert, replayed with fresh
