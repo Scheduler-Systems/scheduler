@@ -16,19 +16,17 @@ Build the cross-cutting seams ONCE here so each agent is just business logic:
 from .gcp_auth import ensure_gcp_credentials as _ensure_gcp_credentials
 _ensure_gcp_credentials()
 
-from .models import (
-    get_model,
-    TIER_DEFAULT,
-    TIER_COMPLEX,
-    TIER_BROWSER,
-    TIER_COMPUTER_USE,
-)
+# NB: ``models`` and ``budget`` pull in langchain/langgraph, which are only present in the
+# deployed (graph) environment. They are resolved LAZILY via ``__getattr__`` (PEP 562) below so
+# that the deterministic, report-only consumers of this toolkit (e.g. ``github_ops``,
+# ``pr_eval``) can ``import agent_toolkit`` with NO langchain/langgraph installed. Any graph
+# that actually uses these names triggers the real import on first attribute access — exactly
+# when it is running under langchain/langgraph anyway. The public API is unchanged.
 from .approval import request_approval, is_approved
 from .otel import span, get_tracer
 from .governance import capture as governance_capture
 from .dispatch import dispatch_github_workflow
 from .policy import assert_not_model_work, ModelWorkBlocked, MODEL_DEV_DENYLIST
-from .budget import budget_guard, check_clocked_in
 # Per-agent write-enable gate (graduate report-only → WRITE one agent at a time). Default-deny:
 # everyone report-only until named on AGENTS_WRITE_ENABLED (and never a never-list agent).
 from .write_gate import (
@@ -117,3 +115,27 @@ __all__ = [
 
 # Re-export for explicit callers
 from .gcp_auth import ensure_gcp_credentials  # noqa: E402 F401
+
+
+# --- Lazy (langchain/langgraph-backed) symbols ------------------------------------------
+# Resolved on first access so the package imports without those deps (see the note above the
+# ``approval`` import). Maps each public name to the (submodule, attr) that provides it.
+_LAZY_ATTRS = {
+    "get_model": ("models", "get_model"),
+    "TIER_DEFAULT": ("models", "TIER_DEFAULT"),
+    "TIER_COMPLEX": ("models", "TIER_COMPLEX"),
+    "TIER_BROWSER": ("models", "TIER_BROWSER"),
+    "TIER_COMPUTER_USE": ("models", "TIER_COMPUTER_USE"),
+    "budget_guard": ("budget", "budget_guard"),
+    "check_clocked_in": ("budget", "check_clocked_in"),
+}
+
+
+def __getattr__(name: str):  # PEP 562 module-level lazy attribute access
+    target = _LAZY_ATTRS.get(name)
+    if target is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    import importlib
+
+    mod = importlib.import_module(f".{target[0]}", __name__)
+    return getattr(mod, target[1])
