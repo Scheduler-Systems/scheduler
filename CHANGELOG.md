@@ -2,10 +2,16 @@
 
 All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project aims to
-follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). `v1.0.0` will be
-the first semver-tagged release.
+follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+_Nothing yet._
+
+## [1.0.0] - 2026-06-20
+
+First semver-tagged release. Self-host in under a minute
+(`./examples/create-a-schedule.sh`) — verified from a clean clone.
 
 ### Added
 - **Persistent storage for the Go API** — a Firestore-backed `Store` selectable via
